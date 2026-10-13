@@ -3,10 +3,9 @@ package space.neural.luna
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 
 object LunaLocation {
     fun get(activity: Activity, callback: (Double, Double) -> Unit) {
@@ -20,12 +19,9 @@ object LunaLocation {
             callback(0.0, 0.0)
             return
         }
-        val client: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity)
-        client.lastLocation.addOnSuccessListener { loc ->
-            if (loc != null) callback(loc.latitude, loc.longitude)
-            else callback(0.0, 0.0)
-        }.addOnFailureListener {
-            callback(0.0, 0.0)
-        }
+        val lm = activity.getSystemService(LocationManager::class.java)
+        val loc = lm?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            ?: lm?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        if (loc != null) callback(loc.latitude, loc.longitude) else callback(0.0, 0.0)
     }
 }

@@ -1,0 +1,12 @@
+# Luna - keep JS bridge
+-keep class space.neural.luna.LunaBridge { public <methods>; }
+-keep class space.neural.luna.LunaSpeech { public <methods>; }
+-keep class space.neural.luna.LunaTts { public <methods>; }
+-keep class space.neural.luna.LunaLocation { public <methods>; }
+-keep class space.neural.luna.LunaNotifier { public <methods>; }
+-keep class space.neural.luna.OverlayService { public <methods>; }
+-keep class space.neural.luna.HexOverlayView { public <methods>; }
+-keep class space.neural.luna.IntentRouter { public <methods>; }
+-keep class space.neural.luna.LunaRuntime { public <methods>; }
+-keep class space.neural.luna.LunaApplication { public <methods>; }
+-keep class space.neural.luna.MainActivity { public <methods>; }
