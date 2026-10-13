@@ -28,19 +28,15 @@ jobs:
           unzip -q cmdtools.zip
           rm -f cmdtools.zip
           mv cmdline-tools latest
-          printf 'yes\n' | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --licenses || true
-          printf 'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\n' | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" "platforms;android-34" "build-tools;34.0.0"
-          echo "sdk.dir=$SDK_ROOT" > "$SDK_ROOT/local.properties"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --licenses > /dev/null
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" "platforms;android-34" "build-tools;34.0.0"
+          echo "sdk.dir=$SDK_ROOT" > local.properties
+          echo "sdk.dir=$SDK_ROOT" > android/local.properties
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
-
-      - name: Write local.properties
-        run: |
-          echo "sdk.dir=$HOME/android-sdk" > local.properties
-          echo "sdk.dir=$HOME/android-sdk" > android/local.properties
 
       - name: Build release APK
         run: gradle :android:app:assembleRelease --no-daemon --stacktrace
