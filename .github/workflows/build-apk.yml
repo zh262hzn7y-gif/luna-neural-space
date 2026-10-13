@@ -2,7 +2,8 @@ name: Build APK
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -20,31 +21,35 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          SDK_ROOT=$HOME/android-sdk
-          mkdir -p $SDK_ROOT/cmdline-tools
-          cd $SDK_ROOT/cmdline-tools
-          curl -fsSL -o cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          cd "$SDK_ROOT/cmdline-tools"
+          curl -fsSL -o cmdtools.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
           unzip -q cmdtools.zip
-          rm cmdtools.zip
+          rm -f cmdtools.zip
           mv cmdline-tools latest
-          $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_ROOT --licenses <<EOF
-yes
-EOF
-          $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_ROOT "platforms;android-34" "build-tools;34.0.0"
-          echo "sdk.dir=$SDK_ROOT" > $SDK_ROOT/local.properties
+          printf 'yes\n' | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --licenses
+          printf 'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\n' | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" "platforms;android-34" "build-tools;34.0.0"
+          echo "sdk.dir=$SDK_ROOT" > "$SDK_ROOT/local.properties"
+          ls -la "$SDK_ROOT"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
 
-      - name: Build release APK
+      - name: Write local.properties
         run: |
           echo "sdk.dir=$HOME/android-sdk" > local.properties
           echo "sdk.dir=$HOME/android-sdk" > android/local.properties
-          gradle :android:app:assembleRelease --no-daemon
+          cat local.properties
+          cat android/local.properties
+
+      - name: Build release APK
+        run: gradle :android:app:assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: luna-apk
