@@ -1,0 +1,2 @@
+rootProject.name = "luna"
+include(":app")
