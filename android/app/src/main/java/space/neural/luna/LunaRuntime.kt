@@ -33,8 +33,8 @@ class LunaRuntime : ViewModel() {
                 }
             }
             webChromeClient = object : WebChromeClient() {
-                override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?): Boolean {
-                    return true
+                override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
+                    // console messages are ignored; return type is Unit
                 }
             }
             // registra a interface ANTES de carregar a pagina
