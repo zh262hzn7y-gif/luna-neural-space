@@ -27,7 +27,10 @@ jobs:
           unzip -q cmdtools.zip
           rm cmdtools.zip
           mv cmdline-tools latest
-          yes | $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_ROOT "platforms;android-34" "build-tools;34.0.0"
+          $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_ROOT --licenses <<EOF
+yes
+EOF
+          $SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_ROOT "platforms;android-34" "build-tools;34.0.0"
           echo "sdk.dir=$SDK_ROOT" > $SDK_ROOT/local.properties
 
       - name: Setup Gradle
