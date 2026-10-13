@@ -38,12 +38,22 @@ body::before{
 .badge{font-size:10px;color:var(--cyan);background:rgba(73,224,255,0.12);padding:3px 8px;border-radius:12px;border:1px solid var(--border)}
 .weather-mini{font-size:11px;color:var(--emerald);display:flex;align-items:center;gap:4px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;backdrop-filter:blur(8px)}
+.card{
+  background: linear-gradient(145deg, rgba(141,107,255,0.12), rgba(7,6,14,0.6));
+  border: 1px solid rgba(73,224,255,0.25);
+  border-radius: 16px;
+  padding: 14px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(141,107,255,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover{transform: translateY(-2px); box-shadow: 0 12px 40px rgba(141,107,255,0.25);}
 .card.full{grid-column:1/-1}
-.card h3{font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.6px}
+.card h3{font-size:11px;color:var(--cyan);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;text-shadow:0 0 8px rgba(73,224,255,0.4)}
 .val{font-size:22px;font-weight:700;line-height:1.1}
 .sub{font-size:11px;color:#aaa;margin-top:2px}
-.progress{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:6px;overflow:hidden}
+.progress{height:7px;background:rgba(255,255,255,0.06);border-radius:4px;margin-top:8px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.3)}
+.progress > div{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 8px var(--cyan)}
 .progress span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:3px;transition:width .4s}
 .apps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
 .app-pill{text-align:center;font-size:10px;padding:6px 2px;border-radius:8px;background:rgba(255,255,255,0.04)}
@@ -70,14 +80,23 @@ body::before{
 .nav button{background:none;border:none;color:#888;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px}
 .nav button.active{color:var(--cyan)}
 .bolha{
-  position:fixed;bottom:88px;right:14px;width:58px;height:58px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%, #fff, var(--violet) 40%, #1a0a3a);
-  box-shadow:0 0 20px rgba(141,107,255,0.6), inset 0 0 15px rgba(73,224,255,0.4);
+  position:fixed;bottom:96px;right:16px;width:72px;height:72px;border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, var(--violet) 35%, #2a0a4a 70%, #07060E 100%);
+  box-shadow: 0 0 28px rgba(141,107,255,0.7), 0 0 50px rgba(73,224,255,0.3), inset 0 0 20px rgba(73,224,255,0.5);
   display:flex;align-items:center;justify-content:center;z-index:100;
-  animation:pulse 3s ease-in-out infinite;
+  animation: orbPulse 2.5s ease-in-out infinite, orbGlow 4s ease-in-out infinite alternate;
   cursor:pointer;
+  border: 2px solid rgba(73,224,255,0.4);
 }
-.bolha .time{font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
+.bolha::before{
+  content:"";
+  position:absolute;inset:4px;border-radius:50%;
+  background: radial-gradient(circle at 40% 35%, rgba(255,255,255,0.3), transparent 60%);
+  pointer-events:none;
+}
+.bolha .time{font-size:10px;font-weight:800;color:#fff;text-shadow:0 0 6px #000, 0 0 12px var(--cyan);position:relative;z-index:1}
+@keyframes orbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes orbGlow{0%{box-shadow:0 0 20px rgba(141,107,255,0.5), 0 0 40px rgba(73,224,255,0.2)}100%{box-shadow:0 0 32px rgba(141,107,255,0.8), 0 0 60px rgba(73,224,255,0.4)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px}
 .modal.show{display:flex}
