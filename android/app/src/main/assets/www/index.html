@@ -219,8 +219,8 @@ body::before{
 </div>
 
 <div class="nav">
-  <button class="active">⌂<br>Home</button>
-  <button>$<br>Ganhos</button>
+  <button class="active" onclick="showHome()">⌂<br>Home</button>
+  <button onclick="showSettings()">⚙<br>Ajustes</button>
   <button>📅<br>Cal</button>
   <button>💬<br>Chat</button>
 </div>
@@ -239,11 +239,20 @@ body::before{
 
 <script>
 
-const GEMINI_KEY = "YOUR_GEMINI_KEY_HERE";
+function getGeminiKey() {
+  return localStorage.getItem('luna_gemini_key') || '';
+}
+
+function setGeminiKey(k) {
+  localStorage.setItem('luna_gemini_key', k.trim());
+  alert('Chave do Gemini salva!');
+}
 
 async function askGemini(prompt) {
+  const key = getGeminiKey();
+  if (!key) return 'Chave do Gemini não configurada. Vá em Configurações e coloque sua chave.';
   try {
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_KEY;
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + key;
     const body = {
       contents: [{ parts: [{ text: "Você é a Luna, copiloto financeiro e assistente do motorista de aplicativo em Governador Valadares. Responda de forma útil, clara e em português. " + prompt }] }]
     };
@@ -447,8 +456,37 @@ function updateBolha() {
   updateCron();
 }
 
+
+function showSettings() {
+  const m = document.getElementById('settingsModal');
+  m.style.display = 'flex';
+  document.getElementById('geminiKeyInput').value = getGeminiKey();
+}
+function closeSettings() {
+  document.getElementById('settingsModal').style.display = 'none';
+}
+function saveGeminiKey() {
+  const v = document.getElementById('geminiKeyInput').value;
+  setGeminiKey(v);
+  closeSettings();
+}
+function showHome() {
+  closeSettings();
+}
+
 window.onload = init;
 document.getElementById('dayModal').onclick = (e) => { if (e.target.id === 'dayModal') closeModal(); };
 </script>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
+    <h3>Configurações</h3>
+    <p style="font-size:12px;color:#aaa;margin:8px 0">Chave do Gemini (para pesquisas online):</p>
+    <input id="geminiKeyInput" type="password" placeholder="Cole sua chave do Gemini aqui" style="width:100%;padding:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--ice);margin-bottom:10px">
+    <button onclick="saveGeminiKey()" style="width:100%;padding:10px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-weight:700;margin-bottom:8px">Salvar Chave</button>
+    <button onclick="closeSettings()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--ice)">Fechar</button>
+  </div>
+</div>
+
 </body>
 </html>
