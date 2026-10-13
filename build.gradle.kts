@@ -1,6 +1,19 @@
-plugins {
-    id("com.android.application") version "8.7.0" apply false
-    id("org.kotlin.android") version "2.0.21" apply false
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
 }
 
 tasks.register<Delete>("clean") {
