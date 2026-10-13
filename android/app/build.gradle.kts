@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("luna.kotlin.android")
+    id("org. jetbrains.kotlin.android")
 }
 
 android {
@@ -11,8 +11,8 @@ android {
         applicationId = "space.neural.luna"
         minSdk = 24
         targetSdk = 34
-        versionCode = 56
-        versionName = "4.9.7"
+        versionCode = 57
+        versionName = "4.9.8"
     }
 
     buildTypes {
