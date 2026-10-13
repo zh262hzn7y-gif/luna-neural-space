@@ -5,36 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LUNA Neural Space</title>
 <style>
-:root{--bg:#07060E;--v:#8D6BFF;--c:#49E0FF;--e:#3EE0A0;--o:#FF8A4C;--p:#FF6B9D;--ice:#F3F0FF}
+:root{--bg:#07060E;--v:#8D6BFF;--c:#49E0FF;--e:#3EE0A0;--o:#FF8A4C;--ice:#F3F0FF}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="10" cy="20" r="1" fill="%23fff" opacity=".6"/><circle cx="80" cy="40" r="1.2" fill="%23fff" opacity=".4"/><circle cx="150" cy="15" r=".8" fill="%23fff" opacity=".5"/><circle cx="30" cy="90" r="1" fill="%23fff" opacity=".3"/><circle cx="120" cy="110" r="1.5" fill="%23fff" opacity=".7"/><circle cx="180" cy="80" r=".9" fill="%23fff" opacity=".4"/></svg>') repeat;color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:10px 8px 8px}
-.top{display:flex;align-items:center;justify-content:space-between;background:rgba(20,10,40,.85);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:12px 14px;margin-bottom:8px;flex-shrink:0;min-height:58px}
-.timer{font-size:26px;font-weight:800;letter-spacing:.5px}
+body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="10" cy="20" r="1" fill="%23fff" opacity=".6"/><circle cx="80" cy="40" r="1.2" fill="%23fff" opacity=".4"/><circle cx="150" cy="15" r=".8" fill="%23fff" opacity=".5"/><circle cx="30" cy="90" r="1" fill="%23fff" opacity=".3"/><circle cx="120" cy="110" r="1.5" fill="%23fff" opacity=".7"/></svg>') repeat;color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:18px 10px 10px}
+.top{display:flex;align-items:center;justify-content:space-between;background:rgba(20,10,40,.9);border:1px solid rgba(73,224,255,.35);border-radius:16px;padding:14px 16px;margin-bottom:10px;flex-shrink:0;min-height:64px}
+.timer{font-size:28px;font-weight:800}
 .timer span{color:var(--c)}
-.top-btns{display:flex;gap:6px}
-.top-btns button{background:var(--c);color:#000;border:none;border-radius:18px;padding:8px 16px;font-size:13px;font-weight:700}
-.grid{display:grid;grid-template-columns:1.05fr 1.45fr 1fr;gap:7px;flex:1;min-height:0}
-.col{display:flex;flex-direction:column;gap:7px;min-height:0;overflow:auto}
-.card{background:linear-gradient(160deg,rgba(30,15,60,.75),rgba(7,6,14,.85));border:1px solid rgba(73,224,255,.22);border-radius:12px;padding:8px;overflow:hidden}
+.top-btns{display:flex;gap:8px}
+.top-btns button{background:var(--c);color:#000;border:none;border-radius:20px;padding:10px 18px;font-size:14px;font-weight:700}
+.grid{display:grid;grid-template-columns:1.05fr 1.4fr 1fr;gap:8px;flex:1;min-height:0}
+.col{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto}
+.card{background:linear-gradient(160deg,rgba(30,15,60,.8),rgba(7,6,14,.9));border:1px solid rgba(73,224,255,.25);border-radius:12px;padding:9px;overflow:hidden}
 .card h4{font-size:9px;color:var(--c);letter-spacing:.8px;margin-bottom:4px;font-weight:700}
 .meta{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.mini{border-radius:9px;padding:7px;text-align:center;font-size:10px}
-.mini b{display:block;font-size:16px;margin:2px 0}
+.mini{border-radius:9px;padding:8px;text-align:center;font-size:10px}
+.mini b{display:block;font-size:17px;margin:2px 0}
 .m1{background:linear-gradient(135deg,#6B4BFF,#4B2BFF)}
 .m2{background:linear-gradient(135deg,#00C896,#00A87A);color:#000}
 .m3{background:linear-gradient(135deg,#8D6BFF,#6B4BFF)}
 .m4{background:linear-gradient(135deg,#00B4D8,#0096C7);color:#000}
 .luna{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0}
-.orb{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 30px rgba(141,107,255,.8);animation:pulse 2.4s ease-in-out infinite;margin:2px 0}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:70px}
+.orb{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 28px rgba(141,107,255,.8);animation:pulse 2.4s ease-in-out infinite;margin:2px 0}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:60px}
 .msg{background:rgba(73,224,255,.14);border-radius:10px;padding:6px 9px;margin:3px 0;max-width:92%;font-size:12px}
 .msg.user{background:rgba(141,107,255,.32);margin-left:auto}
 .inp{display:flex;gap:5px;margin-top:5px;width:100%}
-.inp input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(73,224,255,.3);border-radius:18px;padding:8px 12px;color:#fff;font-size:13px}
-.inp button{background:var(--c);color:#000;border:none;border-radius:18px;padding:0 12px;font-weight:700;font-size:12px}
-.acts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;width:100%;background:rgba(0,0,0,.35);border-radius:12px;padding:5px}
-.acts button{flex:1;min-width:62px;background:rgba(73,224,255,.2);border:1px solid rgba(73,224,255,.4);color:#fff;border-radius:9px;padding:9px 2px;font-size:11px;font-weight:700}
+.inp input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(73,224,255,.3);border-radius:18px;padding:9px 12px;color:#fff;font-size:13px}
+.inp button{background:var(--c);color:#000;border:none;border-radius:18px;padding:0 14px;font-weight:700;font-size:13px}
+.acts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;width:100%;background:rgba(0,0,0,.4);border-radius:12px;padding:6px}
+.acts button{flex:1;min-width:64px;background:rgba(73,224,255,.22);border:1px solid rgba(73,224,255,.4);color:#fff;border-radius:9px;padding:10px 2px;font-size:11px;font-weight:700}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:10px;text-align:center}
 .cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;background:rgba(255,255,255,.05);cursor:pointer}
 .cal .today{background:var(--v);font-weight:700}
@@ -44,11 +44,11 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 .cp{background:linear-gradient(135deg,#8D6BFF,#6B4BFF);color:#fff}
 .cg{background:linear-gradient(135deg,#3EE0A0,#00C896);color:#000}
 .cb{background:linear-gradient(135deg,#49E0FF,#00B4D8);color:#000}
-.report{height:110px;overflow:hidden;position:relative}
-.report-inner{animation:scrollUp 18s linear infinite;font-size:11px;line-height:1.4}
+.report{height:100px;overflow:hidden;position:relative}
+.report-inner{animation:scrollUp 16s linear infinite;font-size:11px;line-height:1.4}
 @keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
 .week-row{display:flex;justify-content:space-between;font-size:10px;margin:2px 0}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:400;align-items:center;justify-content:center}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;align-items:center;justify-content:center}
 .modal.show{display:flex}
 .mbox{width:92%;max-width:540px;max-height:90vh;overflow-y:auto;background:linear-gradient(160deg,#1a0a3a,#07060E);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:14px}
 .apps{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
@@ -60,6 +60,9 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 .week button.off{background:var(--o);color:#000;font-weight:700}
 .limit-row{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:12px}
 .limit-row input{flex:1}
+.type-toggle{display:flex;gap:6px;margin:6px 0}
+.type-toggle button{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(73,224,255,.3);background:rgba(255,255,255,.06);color:#fff;font-weight:700}
+.type-toggle button.on{background:var(--e);color:#000}
 </style>
 </head>
 <body>
@@ -137,6 +140,10 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
       <div class="card">GASTOS<br><b id="dGastos">R$ 0</b></div>
       <div class="card">LÍQUIDO<br><b id="dLiq">R$ 0</b></div>
     </div>
+    <div class="type-toggle">
+      <button id="btnGanho" class="on" onclick="setType('ganho')">Ganhos</button>
+      <button id="btnGasto" onclick="setType('gasto')">Gastos</button>
+    </div>
     <div class="apps" id="appBtns"></div>
     <input class="field" id="dValor" type="number" placeholder="Valor (R$)">
     <label style="font-size:11px;color:#aaa">Horas trabalhadas</label>
@@ -152,21 +159,20 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 <div class="modal" id="planModal">
   <div class="mbox">
     <h3>Planejamento</h3>
-    <p style="font-size:11px;color:#aaa;margin:4px 0">Contas fixas, limites, folgas e meta do mês.</p>
-    <label style="font-size:11px">Quanto você quer ter líquido no mês (R$)</label>
+    <label style="font-size:11px">Meta líquida no mês (R$)</label>
     <input class="field" id="pMeta" type="number" value="2000">
     <label style="font-size:11px">Ganho por hora (R$)</label>
     <input class="field" id="pHora" type="number" value="30">
     <h4 style="margin-top:8px">Contas Fixas</h4>
     <div id="fixas"></div>
-    <button onclick="addFixa()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar conta</button>
+    <button onclick="addFixa()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar</button>
     <h4 style="margin-top:8px">Limites de Gasto</h4>
     <div id="limites"></div>
-    <button onclick="addLimite()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar limite</button>
-    <h4 style="margin-top:8px">Folgas (clique para marcar)</h4>
+    <button onclick="addLimite()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar</button>
+    <h4 style="margin-top:8px">Folgas</h4>
     <div id="weeks"></div>
     <div id="planResult" style="margin:8px 0;font-size:12px;background:rgba(73,224,255,.1);padding:8px;border-radius:8px"></div>
-    <button onclick="savePlan()" style="width:100%;padding:10px;background:var(--e);border:none;border-radius:8px;color:#000;font-weight:700">Salvar Planejamento</button>
+    <button onclick="savePlan()" style="width:100%;padding:10px;background:var(--e);border:none;border-radius:8px;color:#000;font-weight:700">Salvar</button>
     <button onclick="closePlan()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid rgba(73,224,255,.3);border-radius:8px;color:#fff">Fechar</button>
   </div>
 </div>
@@ -175,9 +181,10 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
   <div class="mbox">
     <h3>Ajustes</h3>
     <label style="font-size:11px">Chave do Gemini</label>
-    <input class="field" id="gKey" type="password" placeholder="Cole sua chave AQ.Ab...">
+    <input class="field" id="gKey" type="password" placeholder="Cole sua chave">
     <p id="keyStatus" style="font-size:11px;color:#aaa;margin:4px 0"></p>
     <button onclick="saveKey()" style="width:100%;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar Chave</button>
+    <button onclick="testGemini()" style="width:100%;margin-top:6px;padding:8px;background:rgba(73,224,255,.2);border:none;border-radius:8px;color:#fff">Testar Chave</button>
     <button onclick="closeSet()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid rgba(73,224,255,.3);border-radius:8px;color:#fff">Fechar</button>
   </div>
 </div>
@@ -186,7 +193,7 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 const APPS=['Uber','99','InDrive','Particular','Gorjeta','Outros'];
 const APP_ICONS={Uber:'🚗',99:'9️⃣','InDrive':'🚙',Particular:'🚕',Gorjeta:'💰',Outros:'📦'};
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-let currentDay=null,selectedApp='Uber';
+let currentDay=null,selectedApp='Uber',entryType='ganho';
 let currentTurno=parseInt(localStorage.getItem('luna_current_turno')||'0');
 let timerStart=parseInt(localStorage.getItem('luna_timer_start')||'0');
 let timerRunning=localStorage.getItem('luna_timer_running')==='1';
@@ -204,46 +211,29 @@ function updateTimer(){
   requestAnimationFrame(updateTimer);
 }
 
-function showBubble(){
-  try{ if(window.LunaNative && LunaNative.showOverlay) LunaNative.showOverlay(); }catch(e){}
-}
-function hideBubble(){
-  try{ if(window.LunaNative && LunaNative.hideOverlay) LunaNative.hideOverlay(); }catch(e){}
-}
+function showBubble(){ try{ if(window.LunaNative&&LunaNative.showOverlay)LunaNative.showOverlay(); }catch(e){} }
+function hideBubble(){ try{ if(window.LunaNative&&LunaNative.hideOverlay)LunaNative.hideOverlay(); }catch(e){} }
 
 function turno(acao){
-  if(acao==='iniciar'){
-    if(currentTurno>=4){alert('Já está no 4º turno. Conclua o dia.');return}
-    timerRunning=true;
-    timerStart=Date.now();
-    localStorage.setItem('luna_timer_start',timerStart);
-    localStorage.setItem('luna_timer_running','1');
-    currentTurno++;
-    localStorage.setItem('luna_current_turno',currentTurno);
-    $('turnoLbl').textContent=currentTurno+'º TURNO';
-    updateTimer();
-    showBubble();
-  }
-  if(acao==='pausar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='PAUSADO'}
-  if(acao==='retomar'){if(timerStart){timerRunning=true;localStorage.setItem('luna_timer_running','1');updateTimer();$('turnoLbl').textContent=currentTurno+'º TURNO';showBubble()}}
-  if(acao==='fechar'){
-    if(currentTurno>0) openDay(13);
-    timerRunning=false;
-    localStorage.setItem('luna_timer_running','0');
-    $('turnoLbl').textContent='TURNO FECHADO';
-  }
-  if(acao==='concluir'){
-    currentTurno=0;timerRunning=false;
-    localStorage.setItem('luna_current_turno','0');
-    localStorage.setItem('luna_timer_running','0');
-    localStorage.removeItem('luna_timer_start');
-    $('cron').textContent='00:00:00';$('turnoLbl').textContent='DIA CONCLUÍDO';
-    hideBubble();
-  }
-  if(acao==='zerar'){
-    timerRunning=false;localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');
-    $('cron').textContent='00:00:00';$('turnoLbl').textContent='ZERADO';
-  }
+  try{
+    if(acao==='iniciar'){
+      if(currentTurno>=4){alert('Já no 4º turno. Conclua o dia.');return}
+      timerRunning=true;
+      timerStart=Date.now();
+      localStorage.setItem('luna_timer_start',timerStart);
+      localStorage.setItem('luna_timer_running','1');
+      currentTurno++;
+      localStorage.setItem('luna_current_turno',currentTurno);
+      $('turnoLbl').textContent=currentTurno+'º TURNO';
+      updateTimer();
+      showBubble();
+    }
+    if(acao==='pausar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='PAUSADO'}
+    if(acao==='retomar'){if(timerStart){timerRunning=true;localStorage.setItem('luna_timer_running','1');updateTimer();$('turnoLbl').textContent=currentTurno+'º TURNO';showBubble()}}
+    if(acao==='fechar'){if(currentTurno>0)openDay(13);timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='TURNO FECHADO'}
+    if(acao==='concluir'){currentTurno=0;timerRunning=false;localStorage.setItem('luna_current_turno','0');localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');$('cron').textContent='00:00:00';$('turnoLbl').textContent='DIA CONCLUÍDO';hideBubble()}
+    if(acao==='zerar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');$('cron').textContent='00:00:00';$('turnoLbl').textContent='ZERADO'}
+  }catch(e){console.error(e)}
 }
 
 if(timerRunning&&timerStart){$('turnoLbl').textContent=currentTurno+'º TURNO';updateTimer();showBubble()}
@@ -273,10 +263,19 @@ function openDay(day){
   $('dInicio').value=data.inicio||'08:00';
   $('dValor').value='';
   selectedApp='Uber';
+  entryType='ganho';
+  setType('ganho');
   renderAppBtns();
   $('dayModal').classList.add('show');
 }
 function closeDay(){$('dayModal').classList.remove('show')}
+
+function setType(t){
+  entryType=t;
+  $('btnGanho').classList.toggle('on',t==='ganho');
+  $('btnGasto').classList.toggle('on',t==='gasto');
+  $('appBtns').style.display=t==='ganho'?'flex':'none';
+}
 
 function renderAppBtns(){
   const el=$('appBtns');el.innerHTML='';
@@ -293,18 +292,13 @@ function saveDay(){
   if(!currentDay)return;
   const data=days[currentDay]||{ganhos:{},gastos:0,horas:0,km:0,inicio:'08:00'};
   const val=parseFloat($('dValor').value)||0;
-  if(val) data.ganhos[selectedApp]=(data.ganhos[selectedApp]||0)+val;
+  if(val){
+    if(entryType==='ganho') data.ganhos[selectedApp]=(data.ganhos[selectedApp]||0)+val;
+    else data.gastos=(data.gastos||0)+val;
+  }
   data.horas=parseFloat($('dHoras').value)||data.horas;
   data.km=parseFloat($('dKm').value)||data.km;
   data.inicio=$('dInicio').value;
-  if(data.inicio&&currentDay===13&&timerRunning){
-    const [hh,mm]=data.inicio.split(':').map(Number);
-    const now=new Date();
-    const start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh,mm,0).getTime();
-    timerStart=start;
-    localStorage.setItem('luna_timer_start',start);
-    updateTimer();
-  }
   days[currentDay]=data;
   localStorage.setItem('luna_days',JSON.stringify(days));
   closeDay();
@@ -330,41 +324,33 @@ function refresh(){
     ainda+=`<div style="display:flex;justify-content:space-between;margin:3px 0"><span>${ic} ${l.nome}</span><b>R$ ${rest}</b></div>`;
   });
   $('ainda').innerHTML=ainda||'Nenhum limite';
-  // Ritmo semanal
   let ritmo='';
   for(let s=1;s<=4;s++){
-    const start=(s-1)*7+1, end=s*7;
+    const start=(s-1)*7+1,end=s*7;
     let val=0;
     for(let d=start;d<=end;d++) if(days[d]) val+=Object.values(days[d].ganhos||{}).reduce((a,b)=>a+b,0);
     const pct=metaTotal>0?Math.min(100,Math.round(val/(metaTotal/4)*100)):0;
     ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>${pct}%</span><b>R$ ${val.toFixed(0)}</b></div>`;
   }
   $('ritmo').innerHTML=ritmo;
-  // Relatório
   let rel='';
   const sorted=Object.keys(days).sort((a,b)=>+a-+b);
   if(sorted.length===0) rel='Nenhum dia registrado ainda.';
   else sorted.forEach(d=>{
     const data=days[d];
     const g=Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0);
-    rel+=`<div>Dia ${d}: R$ ${g} ganhos • ${data.horas||0}h • ${data.km||0}km</div>`;
+    rel+=`<div>Dia ${d}: R$ ${g} ganhos • R$ ${data.gastos||0} gastos • ${data.horas||0}h</div>`;
   });
   $('relatorio').innerHTML=rel+rel;
 }
 
 function renderPlan(){
   const fix=$('fixas');fix.innerHTML='';
-  (plan.fixas||[]).forEach((f,i)=>{
-    fix.innerHTML+=`<div class="limit-row"><input class="field" value="${f.nome}" onchange="plan.fixas[${i}].nome=this.value"><input class="field" type="number" value="${f.valor}" onchange="plan.fixas[${i}].valor=+this.value" style="width:80px"><button onclick="plan.fixas.splice(${i},1);renderPlan()">X</button></div>`;
-  });
+  (plan.fixas||[]).forEach((f,i)=>{fix.innerHTML+=`<div class="limit-row"><input class="field" value="${f.nome}" onchange="plan.fixas[${i}].nome=this.value"><input class="field" type="number" value="${f.valor}" onchange="plan.fixas[${i}].valor=+this.value" style="width:80px"><button onclick="plan.fixas.splice(${i},1);renderPlan()">X</button></div>`});
   const lim=$('limites');lim.innerHTML='';
-  (plan.limites||[]).forEach((l,i)=>{
-    lim.innerHTML+=`<div class="limit-row"><input class="field" value="${l.nome}" onchange="plan.limites[${i}].nome=this.value"><input class="field" type="number" value="${l.limite}" onchange="plan.limites[${i}].limite=+this.value" style="width:70px"><button onclick="plan.limites.splice(${i},1);renderPlan()">X</button></div>`;
-  });
+  (plan.limites||[]).forEach((l,i)=>{lim.innerHTML+=`<div class="limit-row"><input class="field" value="${l.nome}" onchange="plan.limites[${i}].nome=this.value"><input class="field" type="number" value="${l.limite}" onchange="plan.limites[${i}].limite=+this.value" style="width:70px"><button onclick="plan.limites.splice(${i},1);renderPlan()">X</button></div>`});
   const w=$('weeks');w.innerHTML='';
-  for(let s=1;s<=4;s++){
-    w.innerHTML+=`<div style="font-size:11px;margin-top:4px">Semana ${s}</div><div class="week" id="w${s}"></div>`;
-  }
+  for(let s=1;s<=4;s++){w.innerHTML+=`<div style="font-size:11px;margin-top:4px">Semana ${s}</div><div class="week" id="w${s}"></div>`}
   for(let s=1;s<=4;s++){
     const el=$(`w${s}`);
     DIAS.forEach(d=>{
@@ -378,7 +364,7 @@ function renderPlan(){
   }
   calcPlan();
 }
-function addFixa(){plan.fixas=plan.fixas||[];plan.fixas.push({nome:'Nova conta',valor:0});renderPlan()}
+function addFixa(){plan.fixas=plan.fixas||[];plan.fixas.push({nome:'Nova',valor:0});renderPlan()}
 function addLimite(){plan.limites=plan.limites||[];plan.limites.push({nome:'Novo',limite:0,gasto:0});renderPlan()}
 function calcPlan(){
   const meta=parseFloat($('pMeta').value)||plan.meta||2000;
@@ -391,77 +377,59 @@ function calcPlan(){
   const diasTrab=Math.max(1,28-folgas);
   const porDia=total/diasTrab;
   const horasDia=porDia/hora;
-  $('planResult').innerHTML=`Contas fixas: R$ ${fixas}<br>Limites: R$ ${limites}<br>Meta líquida: R$ ${meta}<br><b>Total a fazer no mês: R$ ${total.toFixed(0)}</b><br>Dias de trabalho: ${diasTrab}<br>Por dia: R$ ${porDia.toFixed(0)}<br>Horas por dia: ${horasDia.toFixed(1)}h`;
+  $('planResult').innerHTML=`Fixas: R$ ${fixas}<br>Limites: R$ ${limites}<br>Meta líquida: R$ ${meta}<br><b>Total mês: R$ ${total.toFixed(0)}</b><br>Dias: ${diasTrab}<br>Por dia: R$ ${porDia.toFixed(0)}<br>Horas/dia: ${horasDia.toFixed(1)}h`;
 }
 function openPlan(){$('pMeta').value=plan.meta||2000;$('pHora').value=plan.hora||30;renderPlan();$('planModal').classList.add('show')}
 function closePlan(){$('planModal').classList.remove('show')}
-function savePlan(){
-  plan.meta=parseFloat($('pMeta').value)||2000;
-  plan.hora=parseFloat($('pHora').value)||30;
-  localStorage.setItem('luna_plan',JSON.stringify(plan));
-  closePlan();refresh();
-}
+function savePlan(){plan.meta=parseFloat($('pMeta').value)||2000;plan.hora=parseFloat($('pHora').value)||30;localStorage.setItem('luna_plan',JSON.stringify(plan));closePlan();refresh()}
 
-function openSettings(){
-  $('setModal').classList.add('show');
-  const k=localStorage.getItem('luna_gemini_key')||'';
-  $('gKey').value=k;
-  $('keyStatus').textContent=k?'Chave salva ('+k.substring(0,8)+'...)':'Nenhuma chave salva';
-}
+function openSettings(){$('setModal').classList.add('show');const k=localStorage.getItem('luna_gemini_key')||'';$('gKey').value=k;$('keyStatus').textContent=k?'Chave salva ('+k.substring(0,8)+'...)':'Nenhuma chave'}
 function closeSet(){$('setModal').classList.remove('show')}
-function saveKey(){
-  const k=$('gKey').value.trim();
-  localStorage.setItem('luna_gemini_key',k);
-  $('keyStatus').textContent=k?'Chave salva!':'Removida';
-  alert(k?'Chave salva.':'Removida');
-  closeSet();
-}
-
+function saveKey(){const k=$('gKey').value.trim();localStorage.setItem('luna_gemini_key',k);$('keyStatus').textContent=k?'Salva!':'Removida';alert(k?'Chave salva':'Removida');closeSet()}
 function getKey(){return localStorage.getItem('luna_gemini_key')||''}
+
+async function testGemini(){
+  const key=getKey();
+  if(!key){alert('Salve a chave primeiro');return}
+  $('keyStatus').textContent='Testando...';
+  const r=await askGemini('Diga apenas: OK');
+  $('keyStatus').textContent=r.substring(0,60);
+  alert(r);
+}
 
 async function askGemini(p){
   const key=getKey();
   if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes.';
-  const models=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-pro'];
+  const models=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-pro','gemini-pro'];
   for(const m of models){
     try{
-      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key),{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto financeiro do motorista de aplicativo em Governador Valadares. Responda em português, claro e útil. Contexto do app: meta, ganhos, turnos, planejamento. Se precisar de informação atual, responda com base no seu conhecimento. Pergunta: '+p}]}] })
-      });
-      if(r.status===404) continue;
-      if(!r.ok) return 'Erro Gemini '+r.status+'. Verifique a chave.';
+      const url='https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key);
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto do motorista. Responda em português. Pergunta: '+p}]}] })});
+      if(r.status===404||r.status===400) continue;
+      if(!r.ok) return 'Erro '+r.status;
       const d=await r.json();
       const text=d.candidates?.[0]?.content?.parts?.[0]?.text;
       if(text) return text;
-    }catch(e){ continue }
+    }catch(e){continue}
   }
-  return 'Não consegui conectar no Gemini. Verifique a chave e a internet.';
+  return 'Não consegui conectar. Verifique a chave e a internet.';
 }
 
 function handleVoiceCommand(text){
   const lower=text.toLowerCase();
   const numMatch=text.match(/\\d+/);
   const num=numMatch?parseFloat(numMatch[0]):0;
-  if((lower.includes('spotify')||lower.includes('youtube')||lower.includes('waze')) && (lower.includes('abrir')||lower.includes('tocar')||lower.includes('música')||lower.includes('musica')||lower.includes('ir')||lower.includes('navegar'))){
-    try{ if(window.LunaNative) LunaNative.notify('Luna','Comando de app detectado: '+text); }catch(e){}
-    return 'Vou abrir o app solicitado (funcionalidade nativa em desenvolvimento).';
-  }
-  if(num && (lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione')||lower.includes('atualização')||lower.includes('atualizacao'))){
+  if(num && (lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione'))){
     let app='Uber';
-    if(lower.includes('99')||lower.includes('nove')) app='99';
-    else if(lower.includes('indrive')||lower.includes('in drive')) app='InDrive';
+    if(lower.includes('99')) app='99';
+    else if(lower.includes('indrive')) app='InDrive';
     else if(lower.includes('particular')) app='Particular';
     const data=days[13]||{ganhos:{}};
-    if(lower.includes('mais')||lower.includes('adicione')){
-      data.ganhos[app]=(data.ganhos[app]||0)+num;
-      days[13]=data;
-      localStorage.setItem('luna_days',JSON.stringify(days));
-      refresh();
-      return 'Adicionei R$ '+num+' em '+app+'. Total agora: R$ '+data.ganhos[app];
-    }
-    return 'Quer definir o total de '+app+' como R$ '+num+' ou adicionar R$ '+num+' ao que já tem?';
+    data.ganhos[app]=(data.ganhos[app]||0)+num;
+    days[13]=data;
+    localStorage.setItem('luna_days',JSON.stringify(days));
+    refresh();
+    return 'Adicionei R$ '+num+' em '+app+'.';
   }
   return null;
 }
@@ -474,44 +442,20 @@ async function sendChat(fromVoice){
   inp.value='';
   box.scrollTop=box.scrollHeight;
   const cmd=handleVoiceCommand(t);
-  let resp;
-  if(cmd) resp=cmd;
-  else resp=await askGemini(t);
+  let resp=cmd||await askGemini(t);
   box.innerHTML+='<div class="msg">'+resp+'</div>';
   box.scrollTop=box.scrollHeight;
-  if(fromVoice && window.LunaNative && LunaNative.speak){
-    try{ LunaNative.speak(resp); }catch(e){}
-  }
+  if(fromVoice && window.LunaNative && LunaNative.speak){try{LunaNative.speak(resp)}catch(e){}}
 }
 
-window.onLunaSpeechResult=function(text){
-  if(!text) return;
-  $('chatInput').value=text;
-  sendChat(true);
-};
+window.onLunaSpeechResult=function(text){if(!text)return;$('chatInput').value=text;sendChat(true)};
 
 function startMic(){
   $('orb').style.boxShadow='0 0 40px #49E0FF';
   try{
-    if(window.LunaNative && LunaNative.startListening){
-      LunaNative.startListening();
-      return;
-    }
+    if(window.LunaNative && LunaNative.startListening){LunaNative.startListening();return}
   }catch(e){}
-  // fallback browser
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
-    alert('Microfone nativo não disponível neste ambiente.');
-    return;
-  }
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const recognition=new SR();
-  recognition.lang='pt-BR';
-  recognition.onresult=(e)=>{
-    const text=e.results[0][0].transcript;
-    $('chatInput').value=text;
-    sendChat(true);
-  };
-  recognition.start();
+  alert('Microfone nativo não disponível. Use o campo de texto.');
 }
 
 buildCal();
