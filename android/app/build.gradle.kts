@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("org.googleapis.kotlin.android")
 }
 
 android {
@@ -11,8 +11,8 @@ android {
         applicationId = "space.neural.luna"
         minSdk = 24
         targetSdk = 34
-        versionCode = 48
-        versionName = "4.8.0"
+        versionCode = 49
+        versionName = "4.9.0"
     }
 
     buildTypes {
@@ -42,4 +42,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("com.google.android.material:material:1.12.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }

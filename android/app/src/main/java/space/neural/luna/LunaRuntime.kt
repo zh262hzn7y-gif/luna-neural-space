@@ -18,6 +18,8 @@ class LunaRuntime : ViewModel() {
             settings.allowFileAccess = true
             settings.allowContentAccess = true
             settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            settings.databaseEnabled = true
+            settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
             webViewClient = object : WebViewClient() {
                 override fun onReceivedError(
                     view: WebView?,
@@ -25,10 +27,17 @@ class LunaRuntime : ViewModel() {
                     description: String?,
                     failingUrl: String?
                 ) {
-                    // ignore load errors for now
+                }
+                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                    return false
                 }
             }
-            webChromeClient = WebChromeClient()
+            webChromeClient = object : WebChromeClient() {
+                override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?): Boolean {
+                    return true
+                }
+            }
+            // registra a interface ANTES de carregar a pagina
             addJavascriptInterface(LunaBridge(activity, this), "LunaNative")
         }
         bridge = LunaBridge(activity, wv)
@@ -38,7 +47,11 @@ class LunaRuntime : ViewModel() {
     }
 
     fun detach() {
-        webView?.destroy()
+        try {
+            webView?.stopLoading()
+            webView?.destroy()
+        } catch (_: Exception) {
+        }
         webView = null
         bridge = null
     }
