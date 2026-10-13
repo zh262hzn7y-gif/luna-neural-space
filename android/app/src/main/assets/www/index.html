@@ -1,1 +1,454 @@
-PLACEHOLDER_CONTENT
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>LUNA Neural Space</title>
+<style>
+:root {
+  --obsidian: #07060E;
+  --violet: #8D6BFF;
+  --cyan: #49E0FF;
+  --emerald: #3EE0A0;
+  --ice: #F3F0FF;
+  --card: rgba(141,107,255,0.08);
+  --border: rgba(73,224,255,0.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--obsidian);color:var(--ice);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;overflow-x:hidden}
+body{
+  background: radial-gradient(ellipse at 20% 10%, rgba(141,107,255,0.15), transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(73,224,255,0.1), transparent 50%),
+              var(--obsidian);
+  min-height:100vh;
+  padding:12px 10px 90px;
+  position:relative;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image: radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
+                    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.3), transparent),
+                    radial-gradient(1.5px 1.5px at 70% 30%, rgba(73,224,255,0.5), transparent),
+                    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.3), transparent);
+  pointer-events:none;z-index:0;
+}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative;z-index:1}
+.logo{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{font-size:10px;color:var(--cyan);background:rgba(73,224,255,0.12);padding:3px 8px;border-radius:12px;border:1px solid var(--border)}
+.weather-mini{font-size:11px;color:var(--emerald);display:flex;align-items:center;gap:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;backdrop-filter:blur(8px)}
+.card.full{grid-column:1/-1}
+.card h3{font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.6px}
+.val{font-size:22px;font-weight:700;line-height:1.1}
+.sub{font-size:11px;color:#aaa;margin-top:2px}
+.progress{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:6px;overflow:hidden}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:3px;transition:width .4s}
+.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.app-pill{text-align:center;font-size:10px;padding:6px 2px;border-radius:8px;background:rgba(255,255,255,0.04)}
+.app-pill strong{display:block;font-size:13px;color:var(--emerald);font-weight:700}
+.turno-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.turno-btn{flex:1;min-width:70px;background:rgba(141,107,255,0.2);border:1px solid var(--border);color:var(--ice);border-radius:8px;padding:7px 4px;font-size:10px;font-weight:600;cursor:pointer}
+.turno-btn.active{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#000}
+.cron{font-size:18px;font-weight:700;color:var(--cyan);text-align:center;margin:4px 0}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px;font-size:11px}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,0.04);cursor:pointer}
+.cal-day.today{background:rgba(141,107,255,0.4);font-weight:700;box-shadow:0 0 8px var(--violet)}
+.cal-day.has{background:rgba(62,224,160,0.25);color:var(--emerald)}
+.news-item,.dica,.biblia,.report{font-size:12px;line-height:1.4;color:#ddd}
+.report{max-height:60px;overflow:hidden;position:relative}
+.report-inner{animation:scrollUp 12s linear infinite}
+@keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+.chat-box{max-height:100px;overflow-y:auto;font-size:12px;line-height:1.4;margin-top:4px}
+.chat-box .msg{margin-bottom:4px}
+.chat-box .msg.user{text-align:right;color:var(--cyan)}
+.input-row{display:flex;gap:6px;margin-top:6px}
+.input-row input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--ice);font-size:13px;outline:none}
+.input-row button{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#000;border:none;border-radius:8px;padding:0 12px;font-weight:700;font-size:12px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(7,6,14,0.96);backdrop-filter:blur(12px);display:flex;justify-content:space-around;padding:8px 0 16px;border-top:1px solid var(--border);z-index:50}
+.nav button{background:none;border:none;color:#888;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.nav button.active{color:var(--cyan)}
+.bolha{
+  position:fixed;bottom:88px;right:14px;width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #fff, var(--violet) 40%, #1a0a3a);
+  box-shadow:0 0 20px rgba(141,107,255,0.6), inset 0 0 15px rgba(73,224,255,0.4);
+  display:flex;align-items:center;justify-content:center;z-index:100;
+  animation:pulse 3s ease-in-out infinite;
+  cursor:pointer;
+}
+.bolha .time{font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:#111;border:1px solid var(--border);border-radius:16px;padding:16px;max-width:320px;width:100%;max-height:80vh;overflow:auto}
+.status{text-align:center;margin-top:12px;font-size:10px;color:#666;position:relative;z-index:1}
+@media (min-width:700px){
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .card.full{grid-column:span 2}
+}
+
+.card {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.card:active {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(141,107,255,0.25);
+}
+.bolha {
+  transform-style: preserve-3d;
+  animation: floatOrb 4s ease-in-out infinite, pulse 3s ease-in-out infinite;
+}
+@keyframes floatOrb {
+  0%, 100% { transform: translateY(0) rotateY(0deg); }
+  50% { transform: translateY(-8px) rotateY(180deg); }
+}
+.progress span {
+  box-shadow: 0 0 10px rgba(73,224,255,0.6);
+}
+.logo {
+  text-shadow: 0 0 20px rgba(73,224,255,0.4);
+}
+
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">LUNA</div>
+  <div class="weather-mini" id="weatherMini">🌙 22° Valadares</div>
+  <div class="badge" id="platform">android</div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Meta do Mês</h3>
+    <div class="val" id="metaVal">R$ 2.340</div>
+    <div class="sub" id="metaSub">29% • falta R$ 5.660</div>
+    <div class="progress"><span id="metaBar" style="width:29%"></span></div>
+  </div>
+  <div class="card">
+    <h3>Hoje</h3>
+    <div class="val" id="hojeVal">R$ 186</div>
+    <div class="sub" id="hojeSub">7 corridas • R$ 26/h</div>
+    <div class="sub" id="ainda">Ainda posso gastar: R$ 48</div>
+  </div>
+
+  <div class="card full">
+    <h3>Ganhos por App</h3>
+    <div class="apps">
+      <div class="app-pill"><strong id="g99">R$ 98</strong>99</div>
+      <div class="app-pill"><strong id="gUber">R$ 62</strong>Uber</div>
+      <div class="app-pill"><strong id="gIn">R$ 26</strong>InDrive</div>
+      <div class="app-pill"><strong id="gPart">R$ 0</strong>Particular</div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h3>Turno</h3>
+    <div class="cron" id="cron">00:00:00</div>
+    <div class="turno-row">
+      <button class="turno-btn" id="btnIniciar" onclick="turno('iniciar')">Iniciar</button>
+      <button class="turno-btn" onclick="turno('pausar')">Pausar</button>
+      <button class="turno-btn" onclick="turno('cafe')">Café</button>
+      <button class="turno-btn" onclick="turno('retomar')">Retomar</button>
+      <button class="turno-btn" onclick="turno('fechar')">Fechar</button>
+      <button class="turno-btn" onclick="turno('concluir')">Concluir</button>
+      <button class="turno-btn" onclick="turno('zerar')">Zerar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Clima</h3>
+    <div class="val" style="font-size:18px">22°C</div>
+    <div class="sub">Noite limpa • Valadares</div>
+    <div class="sub">Umidade 68% • Vento 8 km/h</div>
+  </div>
+  <div class="card">
+    <h3>BR-381</h3>
+    <div class="news-item">Tráfego normal no trecho Valadares. Sem interdições reportadas.</div>
+    <div class="sub" style="margin-top:4px">Atualizado agora</div>
+  </div>
+
+  <div class="card full">
+    <h3>Notícias Locais</h3>
+    <div class="news-item">• Diário do Rio Doce: Previsão de chuva isolada no fim de semana em Valadares.<br>• BR-381: Obras de manutenção em pontos específicos.<br>• Economia: Gasolina sobe, elétrico continua vantajoso.</div>
+  </div>
+
+  <div class="card">
+    <h3>Dica do Dia</h3>
+    <div class="dica">Evite horas de pico na BR-381 entre 7h-9h e 17h-19h. Melhor rendimento em corridas curtas no centro.</div>
+  </div>
+  <div class="card">
+    <h3>Mensagem Bíblica</h3>
+    <div class="biblia">“O Senhor é o meu pastor; nada me faltará.” — Salmo 23:1</div>
+  </div>
+
+  <div class="card full">
+    <h3>Relatório do Mês</h3>
+    <div class="report">
+      <div class="report-inner">
+        Semana 1: R$ 1.120 • 42 corridas • média R$ 26/h<br>
+        Semana 2: R$ 980 • 38 corridas • meta parcial 24%<br>
+        Hoje: forte em 99. Falta R$ 5.660 para a meta. Mantenha o ritmo de 8h/dia.<br>
+        Análise: melhor dia foi terça. Particular ainda zerado — opportunity.
+      </div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h3>Calendário • Outubro</h3>
+    <div class="calendar" id="cal"></div>
+  </div>
+
+  <div class="card full">
+    <h3>Chat Luna</h3>
+    <div class="chat-box" id="chat">
+      <div class="msg">Olá Marlon! Sou a Luna. Turno pronto, meta em 29%. O que precisa?</div>
+    </div>
+    <div class="input-row">
+      <input id="chatInput" placeholder="Fale com a Luna..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<div class="bolha" id="bolha" onclick="bolhaClick()">
+  <div class="time" id="bolhaTime">00:00</div>
+</div>
+
+<div class="nav">
+  <button class="active">⌂<br>Home</button>
+  <button>$<br>Ganhos</button>
+  <button>📅<br>Cal</button>
+  <button>💬<br>Chat</button>
+</div>
+
+<div class="status">
+  <span id="status">Plataforma: android ✓</span> • LUNA Neural Space Full
+</div>
+
+<div class="modal" id="dayModal">
+  <div class="modal-box">
+    <h3 id="modalTitle">Dia</h3>
+    <div id="modalBody"></div>
+    <button onclick="closeModal()" style="margin-top:12px;width:100%;padding:10px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-weight:700">Fechar</button>
+  </div>
+</div>
+
+<script>
+
+const GEMINI_KEY = "YOUR_GEMINI_KEY_HERE";
+
+async function askGemini(prompt) {
+  try {
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_KEY;
+    const body = {
+      contents: [{ parts: [{ text: "Você é a Luna, copiloto financeiro e assistente do motorista de aplicativo em Governador Valadares. Responda de forma útil, clara e em português. " + prompt }] }]
+    };
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Não consegui consultar agora.";
+  } catch(e) {
+    return "Sem conexão para pesquisa online.";
+  }
+}
+
+const META = 8000;
+const FEITO = 2340;
+const HOJE = 186;
+const CORRIDAS = 7;
+const HORAS_HOJE = 7.1;
+
+let turnoStart = null;
+let turnoElapsed = 0;
+let turnoRunning = false;
+let cafeMode = false;
+let timerInterval = null;
+
+function init() {
+  updateMeta();
+  updateHoje();
+  buildCal();
+  updateBolha();
+  if (window.LunaNative) {
+    try {
+      const p = LunaNative.getPlatform();
+      document.getElementById('platform').textContent = p;
+      document.getElementById('status').textContent = 'Plataforma: ' + p + ' ✓';
+    } catch(e) {}
+  }
+  loadTurno();
+  startTicker();
+}
+
+function updateMeta() {
+  document.getElementById('metaVal').textContent = 'R$ ' + FEITO.toLocaleString('pt-BR');
+  const pct = Math.round(FEITO / META * 100);
+  document.getElementById('metaSub').textContent = pct + '% • falta R$ ' + (META - FEITO).toLocaleString('pt-BR');
+  document.getElementById('metaBar').style.width = pct + '%';
+}
+
+function updateHoje() {
+  document.getElementById('hojeVal').textContent = 'R$ ' + HOJE;
+  const porHora = Math.round(HOJE / HORAS_HOJE);
+  document.getElementById('hojeSub').textContent = CORRIDAS + ' corridas • R$ ' + porHora + '/h';
+  document.getElementById('ainda').textContent = 'Ainda posso gastar: R$ 48';
+}
+
+function buildCal() {
+  const el = document.getElementById('cal');
+  const today = 13;
+  const hasData = [2,5,8,11,12];
+  for (let i = 1; i <= 31; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day';
+    d.textContent = i;
+    if (i === today) d.classList.add('today');
+    if (hasData.includes(i)) d.classList.add('has');
+    d.onclick = () => openDay(i);
+    el.appendChild(d);
+  }
+}
+
+function openDay(day) {
+  const modal = document.getElementById('dayModal');
+  document.getElementById('modalTitle').textContent = 'Dia ' + day + ' de Outubro';
+  const body = document.getElementById('modalBody');
+  if ([2,5,8,11,12].includes(day)) {
+    body.innerHTML = `
+      <div class="sub">Ganhos: R$ ${Math.floor(Math.random()*200+80)}</div>
+      <div class="sub">Gastos: R$ ${Math.floor(Math.random()*40+10)}</div>
+      <div class="sub">Horas: ${Math.floor(Math.random()*4+6)}h</div>
+      <div class="sub">Corridas: ${Math.floor(Math.random()*5+4)}</div>
+      <button onclick="alert('Edição salva (demo)')" style="margin-top:8px;padding:6px 12px;background:var(--emerald);border:none;border-radius:6px;color:#000;font-weight:700">Corrigir</button>
+    `;
+  } else {
+    body.innerHTML = '<div class="sub">Sem dados neste dia. Toque para lançar.</div>';
+  }
+  modal.classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('dayModal').classList.remove('show');
+}
+
+function turno(acao) {
+  const btnIniciar = document.getElementById('btnIniciar');
+  if (acao === 'iniciar' || acao === 'retomar') {
+    turnoRunning = true;
+    cafeMode = false;
+    if (!turnoStart) turnoStart = Date.now() - turnoElapsed;
+    else turnoStart = Date.now() - turnoElapsed;
+    btnIniciar.classList.add('active');
+    btnIniciar.textContent = 'Em andamento';
+  } else if (acao === 'pausar' || acao === 'cafe') {
+    turnoRunning = false;
+    if (turnoStart) turnoElapsed = Date.now() - turnoStart;
+    cafeMode = (acao === 'cafe');
+    btnIniciar.classList.remove('active');
+    btnIniciar.textContent = cafeMode ? 'Café' : 'Pausado';
+  } else if (acao === 'fechar' || acao === 'concluir') {
+    turnoRunning = false;
+    turnoElapsed = 0;
+    turnoStart = null;
+    btnIniciar.classList.remove('active');
+    btnIniciar.textContent = 'Iniciar';
+    alert(acao === 'fechar' ? 'Turno fechado' : 'Dia concluído');
+  } else if (acao === 'zerar') {
+    turnoElapsed = 0;
+    turnoStart = null;
+    turnoRunning = false;
+    btnIniciar.classList.remove('active');
+    btnIniciar.textContent = 'Iniciar';
+  }
+  saveTurno();
+  updateCron();
+}
+
+function updateCron() {
+  let ms = turnoElapsed;
+  if (turnoRunning && turnoStart) ms = Date.now() - turnoStart;
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const str = [h,m,s].map(n => String(n).padStart(2,'0')).join(':');
+  document.getElementById('cron').textContent = str;
+  document.getElementById('bolhaTime').textContent = h > 0 ? h + ':' + String(m).padStart(2,'0') : String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function startTicker() {
+  setInterval(() => {
+    if (turnoRunning) updateCron();
+  }, 1000);
+}
+
+function saveTurno() {
+  localStorage.setItem('luna_turno', JSON.stringify({elapsed: turnoElapsed, running: turnoRunning}));
+}
+function loadTurno() {
+  try {
+    const t = JSON.parse(localStorage.getItem('luna_turno') || '{}');
+    turnoElapsed = t.elapsed || 0;
+    updateCron();
+  } catch(e) {}
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chatInput');
+  const t = inp.value.trim();
+  if (!t) return;
+  const box = document.getElementById('chat');
+  box.innerHTML += '<div class="msg user">' + t + '</div>';
+  box.scrollTop = box.scrollHeight;
+  inp.value = '';
+  let resp = 'Anotado. Continue focado. Meta em 29%.';
+  const lower = t.toLowerCase();
+  if (lower.includes('meta') || lower.includes('quanto') || lower.includes('falta')) {
+    resp = 'Faltam R$ 5.660 para a meta. No ritmo atual, cerca de 18 dias úteis.';
+  } else if (lower.includes('clima') || lower.includes('tempo')) {
+    resp = 'Agora 22°C, noite limpa em Valadares. Sem chuva prevista.';
+  } else if (lower.includes('br') || lower.includes('381') || lower.includes('tráfego')) {
+    resp = 'BR-381 com tráfego normal. Sem incidentes reportados.';
+  } else if (lower.includes('notícia') || lower.includes('noticia') || lower.includes('pesquisa') || lower.includes('quem') || lower.includes('o que') || lower.includes('como')) {
+    box.innerHTML += '<div class="msg">Consultando...</div>';
+    resp = await askGemini(t);
+  }
+  // Remove "Consultando" if added
+  const msgs = box.querySelectorAll('.msg');
+  if (msgs.length > 1 && msgs[msgs.length-1].textContent === 'Consultando...') msgs[msgs.length-1].remove();
+  box.innerHTML += '<div class="msg">' + resp + '</div>';
+  box.scrollTop = box.scrollHeight;
+  if (window.LunaNative && window.LunaNative.speak) {
+    try { LunaNative.speak(resp.substring(0, 200)); } catch(e) {}
+  }
+}
+
+function bolhaClick() {
+  if (window.LunaNative && window.LunaNative.showOverlay) {
+    try { LunaNative.showOverlay(); } catch(e) {}
+  }
+  speak('Bolha ativa. Turno ' + document.getElementById('cron').textContent);
+}
+
+function speak(t) {
+  if (window.LunaNative && window.LunaNative.speak) {
+    try { LunaNative.speak(t); } catch(e) {}
+  }
+}
+
+function updateBolha() {
+  updateCron();
+}
+
+window.onload = init;
+document.getElementById('dayModal').onclick = (e) => { if (e.target.id === 'dayModal') closeModal(); };
+</script>
+</body>
+</html>
