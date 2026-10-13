@@ -1,5 +1,7 @@
-apply plugin: 'com.android.application'
-apply plugin: 'org.gradle.kotlin.android'
+plugins {
+    id 'com.android.application'
+    id 'org.gradle.kotlin.android' version '2.0.21'
+}
 
 android {
     namespace 'space.neural.luna'
@@ -9,8 +11,8 @@ android {
         applicationId "space.neural.luna"
         minSdk 24
         targetSdk 34
-        versionCode 63
-        versionName "5.3.0"
+        versionCode 70
+        versionName "5.4.0"
     }
 
     buildTypes {
