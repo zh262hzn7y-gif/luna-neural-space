@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ACCEPT_ANDROID_SDK_LICENSES: yes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
