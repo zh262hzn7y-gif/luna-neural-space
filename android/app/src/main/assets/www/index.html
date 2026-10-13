@@ -25,7 +25,8 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 .m3{background:linear-gradient(135deg,#8D6BFF,#6B4BFF)}
 .m4{background:linear-gradient(135deg,#00B4D8,#0096C7);color:#000}
 .luna{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0}
-.orb{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 28px rgba(141,107,255,.8);animation:pulse 2.4s ease-in-out infinite;margin:2px 0}
+.orb{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff 0%,#c4b5ff 20%,#8D6BFF 50%,#3a1a8a 100%);box-shadow:0 0 40px rgba(141,107,255,.9),inset 0 0 20px rgba(255,255,255,.3);animation:pulse 2.2s ease-in-out infinite;margin:2px 0;position:relative}
+.orb::after{content:'';position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.6),transparent 60%)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:60px}
 .msg{background:rgba(73,224,255,.14);border-radius:10px;padding:6px 9px;margin:3px 0;max-width:92%;font-size:12px}
@@ -415,6 +416,23 @@ async function askGemini(p){
   return 'Não consegui conectar. Verifique a chave e a internet.';
 }
 
+
+function offlineAnswer(text){
+  const l=text.toLowerCase();
+  const meta=parseFloat(plan.meta)||2000;
+  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(+f.valor||0),0);
+  const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
+  const metaTotal=meta+fixas+limites;
+  let feito=0;
+  Object.values(days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
+  const falta=Math.max(0,metaTotal-feito);
+  const hoje=days[13]?Object.values(days[13].ganhos||{}).reduce((a,b)=>a+b,0):0;
+  if(l.includes('meta')||l.includes('quanto falta')||l.includes('falta')) return 'Meta do mês: R$ '+metaTotal.toFixed(0)+'. Feito: R$ '+feito.toFixed(0)+'. Falta: R$ '+falta.toFixed(0)+'.';
+  if(l.includes('hoje')||l.includes('ganhei hoje')) return 'Hoje você fez R$ '+hoje.toFixed(0)+'.';
+  if(l.includes('turno')||l.includes('tempo')) return 'Turno atual: '+currentTurno+'. Tempo: '+$('cron').textContent+'.';
+  if(l.includes('resumo')||l.includes('resultado')) return 'Resumo: Meta R$ '+metaTotal.toFixed(0)+', Feito R$ '+feito.toFixed(0)+', Falta R$ '+falta.toFixed(0)+', Hoje R$ '+hoje.toFixed(0)+'.';
+  return null;
+}
 function handleVoiceCommand(text){
   const lower=text.toLowerCase();
   const numMatch=text.match(/\\d+/);
@@ -442,7 +460,9 @@ async function sendChat(fromVoice){
   inp.value='';
   box.scrollTop=box.scrollHeight;
   const cmd=handleVoiceCommand(t);
-  let resp=cmd||await askGemini(t);
+  let resp=cmd;
+  if(!resp) resp=offlineAnswer(t);
+  if(!resp) resp=await askGemini(t);
   box.innerHTML+='<div class="msg">'+resp+'</div>';
   box.scrollTop=box.scrollHeight;
   if(fromVoice && window.LunaNative && LunaNative.speak){try{LunaNative.speak(resp)}catch(e){}}
@@ -451,11 +471,16 @@ async function sendChat(fromVoice){
 window.onLunaSpeechResult=function(text){if(!text)return;$('chatInput').value=text;sendChat(true)};
 
 function startMic(){
-  $('orb').style.boxShadow='0 0 40px #49E0FF';
-  try{
-    if(window.LunaNative && LunaNative.startListening){LunaNative.startListening();return}
-  }catch(e){}
-  alert('Microfone nativo não disponível. Use o campo de texto.');
+  $('orb').style.boxShadow='0 0 50px #49E0FF';
+  setTimeout(()=>{
+    try{
+      if(typeof LunaNative !== 'undefined' && LunaNative.startListening){
+        LunaNative.startListening();
+        return;
+      }
+    }catch(e){}
+    alert('Microfone não disponível neste momento. Use o campo de texto.');
+  }, 100);
 }
 
 buildCal();
