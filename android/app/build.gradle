@@ -11,8 +11,8 @@ android {
         applicationId "space.neural.luna"
         minSdk 24
         targetSdk 34
-        versionCode 70
-        versionName "5.4.0"
+        versionCode 71
+        versionName "5.5.0"
     }
 
     buildTypes {
