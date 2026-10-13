@@ -1,7 +1,5 @@
-plugins {
-    id("com.android.application")
-    id("org.kotlin.android")
-}
+apply(plugin = "com.android.application")
+apply(plugin = "org.jetbrains.kotlin.android")
 
 android {
     namespace = "space.neural.luna"
