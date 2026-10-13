@@ -16,7 +16,18 @@ class LunaRuntime : ViewModel() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
-            webViewClient = WebViewClient()
+            settings.allowContentAccess = true
+            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            webViewClient = object : WebViewClient() {
+                override fun onReceivedError(
+                    view: WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    // ignore load errors for now
+                }
+            }
             webChromeClient = WebChromeClient()
             addJavascriptInterface(LunaBridge(activity, this), "LunaNative")
         }
