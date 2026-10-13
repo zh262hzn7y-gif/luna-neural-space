@@ -9,7 +9,7 @@ import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.LinearInterpolato
+import android.view.animation.LinearInterpolatoR
 
 class HexOverlayView @JvmOverloads constructor(
     context: Context,
@@ -21,7 +21,7 @@ class HexOverlayView @JvmOverloads constructor(
     private val animator = ValueAnimator.ofFloat(0f, 1f).apply {
         duration = 3000
         repeatCount = ValueAnimator.INFINITE
-        interpolator = LinearInterpolato()
+        interpolator = LinearInterpolatoR()
         addUpdateListener {
             pulse = (Math.sin(it.animatedFraction * Math.PI * 2) * 0.5 + 0.5).toFloat()
             rotation = it.animatedFraction * 360f
