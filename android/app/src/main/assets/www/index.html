@@ -7,55 +7,60 @@
 <style>
 :root{--bg:#07060E;--v:#8D6BFF;--c:#49E0FF;--e:#3EE0A0;--o:#FF8A4C;--p:#FF6B9D;--ice:#F3F0FF}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;padding:6px}
-.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.timer{font-size:26px;font-weight:800}
+body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:6px}
+.top{display:flex;align-items:center;justify-content:space-between;background:rgba(141,107,255,.12);border:1px solid rgba(73,224,255,.25);border-radius:12px;padding:8px 12px;margin-bottom:6px;flex-shrink:0}
+.timer{font-size:28px;font-weight:800;letter-spacing:.5px}
 .timer span{color:var(--c)}
-.top button{background:rgba(73,224,255,.15);border:1px solid rgba(73,224,255,.3);color:#fff;border-radius:16px;padding:5px 10px;margin-left:4px;font-size:11px;font-weight:600}
-.grid{display:grid;grid-template-columns:1.05fr 1.45fr 1fr;gap:6px;height:calc(100vh - 42px)}
-.col{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden}
-.card{background:linear-gradient(160deg,rgba(141,107,255,.13),rgba(7,6,14,.75));border:1px solid rgba(73,224,255,.22);border-radius:11px;padding:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.top-btns button{background:var(--c);color:#000;border:none;border-radius:16px;padding:7px 14px;margin-left:6px;font-size:12px;font-weight:700}
+.grid{display:grid;grid-template-columns:1.05fr 1.4fr 1fr;gap:6px;flex:1;min-height:0}
+.col{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:auto}
+.card{background:linear-gradient(160deg,rgba(141,107,255,.12),rgba(7,6,14,.7));border:1px solid rgba(73,224,255,.2);border-radius:11px;padding:8px;overflow:hidden}
 .card h4{font-size:9px;color:var(--c);letter-spacing:.8px;margin-bottom:4px;font-weight:700}
 .meta{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .mini{border-radius:8px;padding:6px;text-align:center;font-size:10px}
-.mini b{display:block;font-size:14px;margin:1px 0}
+.mini b{display:block;font-size:15px;margin:1px 0}
 .m1{background:linear-gradient(135deg,#6B4BFF,#4B2BFF)}
 .m2{background:linear-gradient(135deg,#00C896,#00A87A);color:#000}
 .m3{background:linear-gradient(135deg,#8D6BFF,#6B4BFF)}
 .m4{background:linear-gradient(135deg,#00B4D8,#0096C7);color:#000}
-.luna{display:flex;flex-direction:column;align-items:center;flex:1}
-.orb{width:78px;height:78px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 30px rgba(141,107,255,.8),0 0 60px rgba(73,224,255,.3);animation:pulse 2.4s ease-in-out infinite;margin:4px 0}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px}
+.luna{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0}
+.orb{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 28px rgba(141,107,255,.8);animation:pulse 2.4s ease-in-out infinite;margin:2px 0}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:60px}
 .msg{background:rgba(73,224,255,.12);border-radius:10px;padding:5px 8px;margin:3px 0;max-width:92%;font-size:11.5px}
 .msg.user{background:rgba(141,107,255,.28);margin-left:auto}
 .inp{display:flex;gap:4px;margin-top:4px;width:100%}
 .inp input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);border-radius:16px;padding:7px 10px;color:#fff;font-size:12px}
 .inp button{background:var(--c);color:#000;border:none;border-radius:16px;padding:0 10px;font-weight:700;font-size:11px}
-.acts{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;width:100%}
-.acts button{flex:1;min-width:52px;background:rgba(73,224,255,.14);border:1px solid rgba(73,224,255,.28);color:#fff;border-radius:7px;padding:6px 2px;font-size:9.5px;font-weight:600}
+.acts{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;width:100%;background:rgba(0,0,0,.3);border-radius:10px;padding:4px}
+.acts button{flex:1;min-width:58px;background:rgba(73,224,255,.18);border:1px solid rgba(73,224,255,.35);color:#fff;border-radius:8px;padding:8px 2px;font-size:10px;font-weight:700}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:9px;text-align:center}
 .cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;background:rgba(255,255,255,.04);cursor:pointer}
 .cal .today{background:var(--v);font-weight:700}
-.cal .has{background:rgba(62,224,160,.35);color:#000}
+.cal .has{background:rgba(62,224,160,.4);color:#000}
 .cc{font-size:10.5px;line-height:1.25;padding:7px}
 .co{background:linear-gradient(135deg,#FF8A4C,#FF6B35);color:#fff}
 .cp{background:linear-gradient(135deg,#8D6BFF,#6B4BFF);color:#fff}
 .cg{background:linear-gradient(135deg,#3EE0A0,#00C896);color:#000}
 .cb{background:linear-gradient(135deg,#49E0FF,#00B4D8);color:#000}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:center;justify-content:center}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;align-items:center;justify-content:center}
 .modal.show{display:flex}
-.mbox{width:88%;max-width:420px;max-height:88vh;overflow-y:auto;background:linear-gradient(160deg,#1a0a3a,#07060E);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:12px}
+.mbox{width:90%;max-width:520px;max-height:90vh;overflow-y:auto;background:linear-gradient(160deg,#1a0a3a,#07060E);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:12px}
 .apps{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
 .apps button{background:rgba(255,255,255,.08);border:1px solid rgba(73,224,255,.3);color:#fff;border-radius:14px;padding:5px 10px;font-size:11px}
 .apps button.on{background:var(--c);color:#000}
 .field{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);border-radius:8px;padding:8px;color:#fff;margin:4px 0;font-size:13px}
+.week{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.week button{background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);color:#fff;border-radius:8px;padding:6px 8px;font-size:10px;min-width:36px}
+.week button.off{background:var(--o);color:#000;font-weight:700}
+.limit-row{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:12px}
+.limit-row input{flex:1}
 </style>
 </head>
 <body>
 <div class="top">
-  <div class="timer">LUNA <span id="cron">00:00:00</span> <small id="turnoLbl" style="font-size:12px;color:#888">PARADO</small></div>
-  <div>
+  <div class="timer">LUNA <span id="cron">00:00:00</span> <small id="turnoLbl" style="font-size:13px;color:#aaa;margin-left:6px">PARADO</small></div>
+  <div class="top-btns">
     <button onclick="openPlan()">Plano</button>
     <button onclick="openSettings()">Ajustes</button>
   </div>
@@ -75,7 +80,7 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
   <div class="col">
     <div class="card luna">
       <div class="orb" id="orb"></div>
-      <div style="font-size:10px;color:var(--c);margin-bottom:2px">LUNA • PRONTA</div>
+      <div style="font-size:10px;color:var(--c)">LUNA • PRONTA</div>
       <div class="chat" id="chat"><div class="msg">Oi, Marlon. Como posso ajudar?</div></div>
       <div class="inp">
         <input id="chatInput" placeholder="Fale com a Luna..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -108,7 +113,6 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
   </div>
 </div>
 
-<!-- Day Register Modal -->
 <div class="modal" id="dayModal">
   <div class="mbox">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -126,56 +130,64 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
     <input class="field" id="dHoras" type="number" step="0.1" placeholder="Ex: 6.5">
     <label style="font-size:11px;color:#aaa">Quilômetros</label>
     <input class="field" id="dKm" type="number" placeholder="Km">
-    <label style="font-size:11px;color:#aaa">Horário de início do trabalho (corrige o cronômetro)</label>
+    <label style="font-size:11px;color:#aaa">Horário de início</label>
     <input class="field" id="dInicio" type="time" value="08:00">
     <button onclick="saveDay()" style="width:100%;margin-top:8px;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar</button>
   </div>
 </div>
 
-<!-- Plan Modal -->
 <div class="modal" id="planModal">
   <div class="mbox">
     <h3>Planejamento</h3>
-    <p style="font-size:11px;color:#aaa;margin:6px 0">Despesas recorrentes, limites e meta do mês.</p>
-    <label style="font-size:11px">Quanto você quer ganhar por mês (líquido)</label>
+    <p style="font-size:11px;color:#aaa;margin:4px 0">Contas fixas, limites de gasto, folgas e meta.</p>
+    <label style="font-size:11px">Quanto você quer ter líquido no mês (R$)</label>
     <input class="field" id="pMeta" type="number" value="2000">
     <label style="font-size:11px">Ganho por hora (R$)</label>
     <input class="field" id="pHora" type="number" value="30">
-    <div id="planResult" style="margin:8px 0;font-size:12px"></div>
+    <h4 style="margin-top:8px">Contas Fixas</h4>
+    <div id="fixas"></div>
+    <button onclick="addFixa()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar conta</button>
+    <h4 style="margin-top:8px">Limites de Gasto (Ainda posso gastar)</h4>
+    <div id="limites"></div>
+    <button onclick="addLimite()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar limite</button>
+    <h4 style="margin-top:8px">Folgas (clique para marcar folga)</h4>
+    <div id="weeks"></div>
+    <div id="planResult" style="margin:8px 0;font-size:12px;background:rgba(73,224,255,.1);padding:8px;border-radius:8px"></div>
     <button onclick="savePlan()" style="width:100%;padding:10px;background:var(--e);border:none;border-radius:8px;color:#000;font-weight:700">Salvar Planejamento</button>
     <button onclick="closePlan()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid rgba(73,224,255,.3);border-radius:8px;color:#fff">Fechar</button>
   </div>
 </div>
 
-<!-- Settings -->
 <div class="modal" id="setModal">
   <div class="mbox">
     <h3>Ajustes</h3>
     <label style="font-size:11px">Chave do Gemini</label>
-    <input class="field" id="gKey" type="password" placeholder="Cole sua chave">
+    <input class="field" id="gKey" type="password" placeholder="Cole sua chave AQ.Ab...">
+    <p id="keyStatus" style="font-size:11px;color:#aaa;margin:4px 0"></p>
     <button onclick="saveKey()" style="width:100%;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar Chave</button>
     <button onclick="closeSet()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid rgba(73,224,255,.3);border-radius:8px;color:#fff">Fechar</button>
   </div>
 </div>
 
 <script>
-const APPS = ['Uber','99','InDrive','Particular','Gorjeta','Outros'];
-let currentDay = null, selectedApp = 'Uber';
-let turnos = JSON.parse(localStorage.getItem('luna_turnos')||'[]');
-let currentTurno = parseInt(localStorage.getItem('luna_current_turno')||'0');
-let timerStart = parseInt(localStorage.getItem('luna_timer_start')||'0');
-let timerRunning = localStorage.getItem('luna_timer_running')==='1';
-let plan = JSON.parse(localStorage.getItem('luna_plan')||'{"meta":2000,"hora":30}');
-let days = JSON.parse(localStorage.getItem('luna_days')||'{}');
+const APPS=['Uber','99','InDrive','Particular','Gorjeta','Outros'];
+const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+let currentDay=null,selectedApp='Uber';
+let turnos=JSON.parse(localStorage.getItem('luna_turnos')||'[]');
+let currentTurno=parseInt(localStorage.getItem('luna_current_turno')||'0');
+let timerStart=parseInt(localStorage.getItem('luna_timer_start')||'0');
+let timerRunning=localStorage.getItem('luna_timer_running')==='1';
+let plan=JSON.parse(localStorage.getItem('luna_plan')||'{"meta":2000,"hora":30,"fixas":[],"limites":[{"nome":"Mercado","limite":800,"gasto":0},{"nome":"Lanche","limite":200,"gasto":0}],"folgas":{}}');
+let days=JSON.parse(localStorage.getItem('luna_days')||'{}');
 
 function $(id){return document.getElementById(id)}
 
 function updateTimer(){
-  if(!timerRunning || !timerStart) return;
-  const elapsed = Date.now() - timerStart;
-  const s = Math.floor(elapsed/1000);
-  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
-  $('cron').textContent = [h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
+  if(!timerRunning||!timerStart)return;
+  const elapsed=Date.now()-timerStart;
+  const s=Math.floor(elapsed/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  $('cron').textContent=[h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
   requestAnimationFrame(updateTimer);
 }
 
@@ -188,58 +200,37 @@ function turno(acao){
     localStorage.setItem('luna_timer_running','1');
     currentTurno++;
     localStorage.setItem('luna_current_turno',currentTurno);
-    $('turnoLbl').textContent = currentTurno+'º TURNO';
+    $('turnoLbl').textContent=currentTurno+'º TURNO';
     updateTimer();
   }
-  if(acao==='pausar'){
-    timerRunning=false;
-    localStorage.setItem('luna_timer_running','0');
-    $('turnoLbl').textContent='PAUSADO';
-  }
-  if(acao==='retomar'){
-    if(timerStart){
-      timerRunning=true;
-      localStorage.setItem('luna_timer_running','1');
-      updateTimer();
-      $('turnoLbl').textContent=currentTurno+'º TURNO';
-    }
-  }
+  if(acao==='pausar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='PAUSADO'}
+  if(acao==='retomar'){if(timerStart){timerRunning=true;localStorage.setItem('luna_timer_running','1');updateTimer();$('turnoLbl').textContent=currentTurno+'º TURNO'}}
   if(acao==='fechar'){
-    if(currentTurno>0 && currentTurno<=4){
-      const end=Date.now();
-      turnos.push({n:currentTurno,start:timerStart,end});
-      localStorage.setItem('luna_turnos',JSON.stringify(turnos));
+    if(currentTurno>0){
+      openDay(13);
+      alert('Feche o '+currentTurno+'º turno: coloque os ganhos deste turno.');
     }
     timerRunning=false;
     localStorage.setItem('luna_timer_running','0');
     $('turnoLbl').textContent='TURNO FECHADO';
   }
   if(acao==='concluir'){
-    currentTurno=0;
-    timerRunning=false;
+    currentTurno=0;timerRunning=false;
     localStorage.setItem('luna_current_turno','0');
     localStorage.setItem('luna_timer_running','0');
     localStorage.removeItem('luna_timer_start');
-    $('cron').textContent='00:00:00';
-    $('turnoLbl').textContent='DIA CONCLUÍDO';
+    $('cron').textContent='00:00:00';$('turnoLbl').textContent='DIA CONCLUÍDO';
   }
   if(acao==='zerar'){
-    timerRunning=false;
-    localStorage.setItem('luna_timer_running','0');
-    localStorage.removeItem('luna_timer_start');
-    $('cron').textContent='00:00:00';
-    $('turnoLbl').textContent='ZERADO';
+    timerRunning=false;localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');
+    $('cron').textContent='00:00:00';$('turnoLbl').textContent='ZERADO';
   }
 }
 
-// Resume timer on load
-if(timerRunning && timerStart){
-  $('turnoLbl').textContent=currentTurno+'º TURNO';
-  updateTimer();
-}
+if(timerRunning&&timerStart){$('turnoLbl').textContent=currentTurno+'º TURNO';updateTimer()}
 
 function buildCal(){
-  const el=$('cal'); el.innerHTML='';
+  const el=$('cal');el.innerHTML='';
   for(let i=1;i<=31;i++){
     const d=document.createElement('div');
     d.textContent=i;
@@ -254,9 +245,10 @@ function openDay(day){
   currentDay=day;
   $('dayTitle').textContent='Registro • '+day+'/10/2026';
   const data=days[day]||{ganhos:{},gastos:0,horas:0,km:0,inicio:'08:00'};
-  $('dGanhos').textContent='R$ '+(Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0)||0);
+  const g=Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0);
+  $('dGanhos').textContent='R$ '+g;
   $('dGastos').textContent='R$ '+(data.gastos||0);
-  $('dLiq').textContent='R$ '+((Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0)||0)-(data.gastos||0));
+  $('dLiq').textContent='R$ '+(g-(data.gastos||0));
   $('dHoras').value=data.horas||'';
   $('dKm').value=data.km||'';
   $('dInicio').value=data.inicio||'08:00';
@@ -268,7 +260,7 @@ function openDay(day){
 function closeDay(){$('dayModal').classList.remove('show')}
 
 function renderAppBtns(){
-  const el=$('appBtns'); el.innerHTML='';
+  const el=$('appBtns');el.innerHTML='';
   APPS.forEach(a=>{
     const b=document.createElement('button');
     b.textContent=a;
@@ -286,8 +278,7 @@ function saveDay(){
   data.horas=parseFloat($('dHoras').value)||data.horas;
   data.km=parseFloat($('dKm').value)||data.km;
   data.inicio=$('dInicio').value;
-  // Correct timer start based on selected time today
-  if(data.inicio && currentDay===13){
+  if(data.inicio&&currentDay===13){
     const [hh,mm]=data.inicio.split(':').map(Number);
     const now=new Date();
     const start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh,mm,0).getTime();
@@ -298,79 +289,145 @@ function saveDay(){
   days[currentDay]=data;
   localStorage.setItem('luna_days',JSON.stringify(days));
   closeDay();
-  buildCal();
-  refresh();
+  buildCal();refresh();
 }
 
 function refresh(){
-  // Meta
   const meta=plan.meta||2000;
   let feito=0;
   Object.values(days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
   const falta=Math.max(0,meta-feito);
   const hoje=days[13]?Object.values(days[13].ganhos||{}).reduce((a,b)=>a+b,0):0;
-  $('metaBox').innerHTML=`
-    <div class="mini m1">META<br><b>R$ ${meta}</b></div>
-    <div class="mini m2">FEITO<br><b>R$ ${feito}</b></div>
-    <div class="mini m3">FALTA<br><b>R$ ${falta}</b></div>
-    <div class="mini m4">HOJE<br><b>R$ ${hoje}</b></div>`;
-  // Ganhos hoje
+  $('metaBox').innerHTML=`<div class="mini m1">META<br><b>R$ ${meta}</b></div><div class="mini m2">FEITO<br><b>R$ ${feito}</b></div><div class="mini m3">FALTA<br><b>R$ ${falta}</b></div><div class="mini m4">HOJE<br><b>R$ ${hoje}</b></div>`;
   const g=days[13]?.ganhos||{};
   $('ganhosHoje').innerHTML=APPS.slice(0,4).map(a=>`<div style="display:flex;justify-content:space-between;margin:2px 0"><span>${a}</span><b>R$ ${g[a]||0}</b></div>`).join('');
-  $('ainda').innerHTML='Mercado <b>R$ 100</b><br>Lanche <b>R$ 200</b>';
+  let ainda='';
+  (plan.limites||[]).forEach(l=>{
+    const rest=Math.max(0,(l.limite||0)-(l.gasto||0));
+    ainda+=`<div style="display:flex;justify-content:space-between;margin:2px 0"><span>${l.nome}</span><b>R$ ${rest}</b></div>`;
+  });
+  $('ainda').innerHTML=ainda||'Nenhum limite configurado';
 }
 
-function openPlan(){
-  $('pMeta').value=plan.meta||2000;
-  $('pHora').value=plan.hora||30;
-  const m=plan.meta||2000, h=plan.hora||30;
-  const horas=Math.ceil(m/h);
-  $('planResult').innerHTML=`Meta: R$ ${m}<br>Horas necessárias: ~${horas}h<br>Por dia (22 dias): ~R$ ${(m/22).toFixed(0)}`;
-  $('planModal').classList.add('show');
+function renderPlan(){
+  const fix=$('fixas');fix.innerHTML='';
+  (plan.fixas||[]).forEach((f,i)=>{
+    fix.innerHTML+=`<div class="limit-row"><input class="field" value="${f.nome}" onchange="plan.fixas[${i}].nome=this.value"><input class="field" type="number" value="${f.valor}" onchange="plan.fixas[${i}].valor=+this.value" style="width:80px"><button onclick="plan.fixas.splice(${i},1);renderPlan()">X</button></div>`;
+  });
+  const lim=$('limites');lim.innerHTML='';
+  (plan.limites||[]).forEach((l,i)=>{
+    lim.innerHTML+=`<div class="limit-row"><input class="field" value="${l.nome}" onchange="plan.limites[${i}].nome=this.value"><input class="field" type="number" value="${l.limite}" onchange="plan.limites[${i}].limite=+this.value" style="width:70px"><span style="font-size:10px">gasto ${l.gasto||0}</span><button onclick="plan.limites.splice(${i},1);renderPlan()">X</button></div>`;
+  });
+  const w=$('weeks');w.innerHTML='';
+  for(let s=1;s<=4;s++){
+    w.innerHTML+=`<div style="font-size:11px;margin-top:4px">Semana ${s}</div><div class="week" id="w${s}"></div>`;
+  }
+  for(let s=1;s<=4;s++){
+    const el=$(`w${s}`);
+    DIAS.forEach(d=>{
+      const b=document.createElement('button');
+      b.textContent=d;
+      const key=s+'-'+d;
+      if((plan.folgas||{})[key])b.classList.add('off');
+      b.onclick=()=>{plan.folgas=plan.folgas||{};plan.folgas[key]=!plan.folgas[key];renderPlan();calcPlan()};
+      el.appendChild(b);
+    });
+  }
+  calcPlan();
 }
+function addFixa(){plan.fixas=plan.fixas||[];plan.fixas.push({nome:'Nova conta',valor:0});renderPlan()}
+function addLimite(){plan.limites=plan.limites||[];plan.limites.push({nome:'Novo',limite:0,gasto:0});renderPlan()}
+function calcPlan(){
+  const meta=parseFloat($('pMeta').value)||plan.meta||2000;
+  const hora=parseFloat($('pHora').value)||plan.hora||30;
+  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(f.valor||0),0);
+  const limites=(plan.limites||[]).reduce((a,l)=>a+(l.limite||0),0);
+  const total=meta+fixas+limites;
+  let folgas=0;
+  for(let s=1;s<=4;s++) DIAS.forEach(d=>{if((plan.folgas||{})[s+'-'+d])folgas++});
+  const diasTrab=Math.max(1,28-folgas);
+  const porDia=total/diasTrab;
+  const horasDia=porDia/hora;
+  $('planResult').innerHTML=`Contas fixas: R$ ${fixas}<br>Limites: R$ ${limites}<br>Meta líquida: R$ ${meta}<br><b>Total a fazer no mês: R$ ${total.toFixed(0)}</b><br>Dias de trabalho: ${diasTrab}<br>Por dia: R$ ${porDia.toFixed(0)}<br>Horas por dia: ${horasDia.toFixed(1)}h`;
+}
+function openPlan(){$('pMeta').value=plan.meta||2000;$('pHora').value=plan.hora||30;renderPlan();$('planModal').classList.add('show')}
 function closePlan(){$('planModal').classList.remove('show')}
 function savePlan(){
-  plan={meta:parseFloat($('pMeta').value)||2000,hora:parseFloat($('pHora').value)||30};
+  plan.meta=parseFloat($('pMeta').value)||2000;
+  plan.hora=parseFloat($('pHora').value)||30;
   localStorage.setItem('luna_plan',JSON.stringify(plan));
-  closePlan(); refresh();
+  closePlan();refresh();
 }
 
-function openSettings(){$('setModal').classList.add('show');$('gKey').value=localStorage.getItem('luna_gemini_key')||''}
+function openSettings(){
+  $('setModal').classList.add('show');
+  const k=localStorage.getItem('luna_gemini_key')||'';
+  $('gKey').value=k;
+  $('keyStatus').textContent=k?'Chave salva ('+k.substring(0,8)+'...)':'Nenhuma chave salva';
+}
 function closeSet(){$('setModal').classList.remove('show')}
-function saveKey(){localStorage.setItem('luna_gemini_key',$('gKey').value.trim());alert('Chave salva');closeSet()}
+function saveKey(){
+  const k=$('gKey').value.trim();
+  localStorage.setItem('luna_gemini_key',k);
+  $('keyStatus').textContent=k?'Chave salva!':'Removida';
+  alert(k?'Chave do Gemini salva. A Luna agora pode pesquisar online.':'Chave removida');
+  closeSet();
+}
 
 function getKey(){return localStorage.getItem('luna_gemini_key')||''}
 
 async function askGemini(p){
   const key=getKey();
-  if(!key) return 'Configure a chave do Gemini em Ajustes.';
+  if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes (botão no topo).';
   try{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto financeiro do motorista de app. Responda em português, claro e útil. '+p}]}]})
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(key),{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto financeiro do motorista de aplicativo em Governador Valadares. Responda em português, de forma clara e útil. Se a pergunta for sobre o app (meta, ganhos, turno), use o contexto. Caso contrário, pesquise e responda. Pergunta: '+p}]}] })
     });
+    if(!r.ok) return 'Erro na API Gemini ('+r.status+'). Verifique a chave.';
     const d=await r.json();
-    return d.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta.';
-  }catch(e){return 'Erro ao consultar a internet.'}
+    return d.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta do Gemini.';
+  }catch(e){return 'Erro de conexão. Verifique internet e chave.'}
 }
 
 async function sendChat(){
   const inp=$('chatInput');
-  const t=inp.value.trim(); if(!t) return;
+  const t=inp.value.trim();if(!t)return;
   const box=$('chat');
   box.innerHTML+='<div class="msg user">'+t+'</div>';
   inp.value='';
   box.scrollTop=box.scrollHeight;
+  // Simple command parsing for earnings
+  const lower=t.toLowerCase();
+  if((lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione')||lower.includes('atualização')||lower.includes('atualizacao')) && /\\d+/.test(t)){
+    const num=parseFloat(t.match(/\\d+/)[0]);
+    if(lower.includes('99')||lower.includes('nove')) selectedApp='99';
+    else if(lower.includes('uber')) selectedApp='Uber';
+    else if(lower.includes('indrive')||lower.includes('in drive')) selectedApp='InDrive';
+    else if(lower.includes('particular')) selectedApp='Particular';
+    if(lower.includes('mais')||lower.includes('adicione')){
+      const data=days[13]||{ganhos:{}};
+      data.ganhos[selectedApp]=(data.ganhos[selectedApp]||0)+num;
+      days[13]=data;
+      localStorage.setItem('luna_days',JSON.stringify(days));
+      box.innerHTML+='<div class="msg">Adicionei R$ '+num+' em '+selectedApp+'. Total agora: R$ '+(data.ganhos[selectedApp])+'</div>';
+    }else{
+      box.innerHTML+='<div class="msg">Você quer que eu defina o total de '+selectedApp+' como R$ '+num+' ou adicione R$ '+num+' ao que já tem?</div>';
+    }
+    refresh();
+    box.scrollTop=box.scrollHeight;
+    return;
+  }
   const resp=await askGemini(t);
   box.innerHTML+='<div class="msg">'+resp+'</div>';
   box.scrollTop=box.scrollHeight;
 }
 
-// 5-second silence rule simulation (Web Speech API when available)
-let recognition, silenceTimer;
+let recognition,silenceTimer;
 function startMic(){
-  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
-    alert('Microfone nativo não disponível neste ambiente. Use o botão Falar no APK Android.');
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    alert('Reconhecimento de voz do navegador não disponível. No APK Android use o microfone nativo.');
     return;
   }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -378,20 +435,15 @@ function startMic(){
   recognition.lang='pt-BR';
   recognition.continuous=true;
   recognition.interimResults=true;
-  let lastSpeech=Date.now();
   recognition.onresult=(e)=>{
-    lastSpeech=Date.now();
     const text=Array.from(e.results).map(r=>r[0].transcript).join('');
     $('chatInput').value=text;
     clearTimeout(silenceTimer);
-    silenceTimer=setTimeout(()=>{
-      recognition.stop();
-      if($('chatInput').value.trim()) sendChat();
-    },5000);
+    silenceTimer=setTimeout(()=>{recognition.stop();if($('chatInput').value.trim())sendChat()},5000);
   };
-  recognition.onend=()=>{clearTimeout(silenceTimer)};
+  recognition.onend=()=>clearTimeout(silenceTimer);
   recognition.start();
-  $('orb').style.boxShadow='0 0 40px #49E0FF, 0 0 80px #8D6BFF';
+  $('orb').style.boxShadow='0 0 40px #49E0FF';
 }
 
 buildCal();
