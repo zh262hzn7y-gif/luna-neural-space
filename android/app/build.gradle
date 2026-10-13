@@ -11,8 +11,8 @@ android {
         applicationId "space.neural.luna"
         minSdk 24
         targetSdk 34
-        versionCode 74
-        versionName "5.6.0"
+        versionCode 75
+        versionName "5.6.1"
     }
 
     buildTypes {
@@ -28,7 +28,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget '17'
+        jvmTarget = '17'
     }
 }
 
