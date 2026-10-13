@@ -7,47 +7,52 @@
 <style>
 :root{--bg:#07060E;--v:#8D6BFF;--c:#49E0FF;--e:#3EE0A0;--o:#FF8A4C;--p:#FF6B9D;--ice:#F3F0FF}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:6px}
-.top{display:flex;align-items:center;justify-content:space-between;background:rgba(141,107,255,.12);border:1px solid rgba(73,224,255,.25);border-radius:12px;padding:8px 12px;margin-bottom:6px;flex-shrink:0}
-.timer{font-size:28px;font-weight:800;letter-spacing:.5px}
+body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="10" cy="20" r="1" fill="%23fff" opacity=".6"/><circle cx="80" cy="40" r="1.2" fill="%23fff" opacity=".4"/><circle cx="150" cy="15" r=".8" fill="%23fff" opacity=".5"/><circle cx="30" cy="90" r="1" fill="%23fff" opacity=".3"/><circle cx="120" cy="110" r="1.5" fill="%23fff" opacity=".7"/><circle cx="180" cy="80" r=".9" fill="%23fff" opacity=".4"/></svg>') repeat;color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:10px 8px 8px}
+.top{display:flex;align-items:center;justify-content:space-between;background:rgba(20,10,40,.85);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:12px 14px;margin-bottom:8px;flex-shrink:0;min-height:58px}
+.timer{font-size:26px;font-weight:800;letter-spacing:.5px}
 .timer span{color:var(--c)}
-.top-btns button{background:var(--c);color:#000;border:none;border-radius:16px;padding:7px 14px;margin-left:6px;font-size:12px;font-weight:700}
-.grid{display:grid;grid-template-columns:1.05fr 1.4fr 1fr;gap:6px;flex:1;min-height:0}
-.col{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:auto}
-.card{background:linear-gradient(160deg,rgba(141,107,255,.12),rgba(7,6,14,.7));border:1px solid rgba(73,224,255,.2);border-radius:11px;padding:8px;overflow:hidden}
+.top-btns{display:flex;gap:6px}
+.top-btns button{background:var(--c);color:#000;border:none;border-radius:18px;padding:8px 16px;font-size:13px;font-weight:700}
+.grid{display:grid;grid-template-columns:1.05fr 1.45fr 1fr;gap:7px;flex:1;min-height:0}
+.col{display:flex;flex-direction:column;gap:7px;min-height:0;overflow:auto}
+.card{background:linear-gradient(160deg,rgba(30,15,60,.75),rgba(7,6,14,.85));border:1px solid rgba(73,224,255,.22);border-radius:12px;padding:8px;overflow:hidden}
 .card h4{font-size:9px;color:var(--c);letter-spacing:.8px;margin-bottom:4px;font-weight:700}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.mini{border-radius:8px;padding:6px;text-align:center;font-size:10px}
-.mini b{display:block;font-size:15px;margin:1px 0}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.mini{border-radius:9px;padding:7px;text-align:center;font-size:10px}
+.mini b{display:block;font-size:16px;margin:2px 0}
 .m1{background:linear-gradient(135deg,#6B4BFF,#4B2BFF)}
 .m2{background:linear-gradient(135deg,#00C896,#00A87A);color:#000}
 .m3{background:linear-gradient(135deg,#8D6BFF,#6B4BFF)}
 .m4{background:linear-gradient(135deg,#00B4D8,#0096C7);color:#000}
 .luna{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0}
-.orb{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 28px rgba(141,107,255,.8);animation:pulse 2.4s ease-in-out infinite;margin:2px 0}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:60px}
-.msg{background:rgba(73,224,255,.12);border-radius:10px;padding:5px 8px;margin:3px 0;max-width:92%;font-size:11.5px}
-.msg.user{background:rgba(141,107,255,.28);margin-left:auto}
-.inp{display:flex;gap:4px;margin-top:4px;width:100%}
-.inp input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);border-radius:16px;padding:7px 10px;color:#fff;font-size:12px}
-.inp button{background:var(--c);color:#000;border:none;border-radius:16px;padding:0 10px;font-weight:700;font-size:11px}
-.acts{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;width:100%;background:rgba(0,0,0,.3);border-radius:10px;padding:4px}
-.acts button{flex:1;min-width:58px;background:rgba(73,224,255,.18);border:1px solid rgba(73,224,255,.35);color:#fff;border-radius:8px;padding:8px 2px;font-size:10px;font-weight:700}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:9px;text-align:center}
-.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;background:rgba(255,255,255,.04);cursor:pointer}
+.orb{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#8D6BFF 45%,#1a0a3a);box-shadow:0 0 30px rgba(141,107,255,.8);animation:pulse 2.4s ease-in-out infinite;margin:2px 0}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:70px}
+.msg{background:rgba(73,224,255,.14);border-radius:10px;padding:6px 9px;margin:3px 0;max-width:92%;font-size:12px}
+.msg.user{background:rgba(141,107,255,.32);margin-left:auto}
+.inp{display:flex;gap:5px;margin-top:5px;width:100%}
+.inp input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(73,224,255,.3);border-radius:18px;padding:8px 12px;color:#fff;font-size:13px}
+.inp button{background:var(--c);color:#000;border:none;border-radius:18px;padding:0 12px;font-weight:700;font-size:12px}
+.acts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;width:100%;background:rgba(0,0,0,.35);border-radius:12px;padding:5px}
+.acts button{flex:1;min-width:62px;background:rgba(73,224,255,.2);border:1px solid rgba(73,224,255,.4);color:#fff;border-radius:9px;padding:9px 2px;font-size:11px;font-weight:700}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:10px;text-align:center}
+.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;background:rgba(255,255,255,.05);cursor:pointer}
 .cal .today{background:var(--v);font-weight:700}
-.cal .has{background:rgba(62,224,160,.4);color:#000}
-.cc{font-size:10.5px;line-height:1.25;padding:7px}
+.cal .has{background:rgba(62,224,160,.45);color:#000}
+.cc{font-size:11px;line-height:1.3;padding:8px}
 .co{background:linear-gradient(135deg,#FF8A4C,#FF6B35);color:#fff}
 .cp{background:linear-gradient(135deg,#8D6BFF,#6B4BFF);color:#fff}
 .cg{background:linear-gradient(135deg,#3EE0A0,#00C896);color:#000}
 .cb{background:linear-gradient(135deg,#49E0FF,#00B4D8);color:#000}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;align-items:center;justify-content:center}
+.report{height:110px;overflow:hidden;position:relative}
+.report-inner{animation:scrollUp 18s linear infinite;font-size:11px;line-height:1.4}
+@keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+.week-row{display:flex;justify-content:space-between;font-size:10px;margin:2px 0}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:400;align-items:center;justify-content:center}
 .modal.show{display:flex}
-.mbox{width:90%;max-width:520px;max-height:90vh;overflow-y:auto;background:linear-gradient(160deg,#1a0a3a,#07060E);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:12px}
+.mbox{width:92%;max-width:540px;max-height:90vh;overflow-y:auto;background:linear-gradient(160deg,#1a0a3a,#07060E);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:14px}
 .apps{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
-.apps button{background:rgba(255,255,255,.08);border:1px solid rgba(73,224,255,.3);color:#fff;border-radius:14px;padding:5px 10px;font-size:11px}
+.apps button{background:rgba(255,255,255,.08);border:1px solid rgba(73,224,255,.3);color:#fff;border-radius:14px;padding:6px 10px;font-size:11px}
 .apps button.on{background:var(--c);color:#000}
 .field{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);border-radius:8px;padding:8px;color:#fff;margin:4px 0;font-size:13px}
 .week{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
@@ -59,10 +64,10 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
 </head>
 <body>
 <div class="top">
-  <div class="timer">LUNA <span id="cron">00:00:00</span> <small id="turnoLbl" style="font-size:13px;color:#aaa;margin-left:6px">PARADO</small></div>
+  <div class="timer">⏱ <span id="cron">00:00:00</span> <small id="turnoLbl" style="font-size:13px;color:#aaa;margin-left:8px">PARADO</small></div>
   <div class="top-btns">
-    <button onclick="openPlan()">Plano</button>
-    <button onclick="openSettings()">Ajustes</button>
+    <button onclick="openPlan()">📋 Plano</button>
+    <button onclick="openSettings()">⚙ Ajustes</button>
   </div>
 </div>
 <div class="grid">
@@ -72,10 +77,14 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
       <div class="meta" id="metaBox"></div>
     </div>
     <div class="card">
+      <h4>RITMO SEMANAL</h4>
+      <div id="ritmo"></div>
+    </div>
+    <div class="card">
       <h4>CALENDÁRIO</h4>
       <div class="cal" id="cal"></div>
     </div>
-    <div class="card cc cb"><h4 style="color:#000">CLIMA</h4>22°C • Noite limpa<br>Valadares • 68%</div>
+    <div class="card cc cb"><h4 style="color:#000">🌤 CLIMA</h4>22°C • Noite limpa<br>Valadares • 68%</div>
   </div>
   <div class="col">
     <div class="card luna">
@@ -84,7 +93,7 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
       <div class="chat" id="chat"><div class="msg">Oi, Marlon. Como posso ajudar?</div></div>
       <div class="inp">
         <input id="chatInput" placeholder="Fale com a Luna..." onkeydown="if(event.key==='Enter')sendChat()">
-        <button onclick="startMic()">Falar</button>
+        <button onclick="startMic()">🎤 Falar</button>
         <button onclick="sendChat()">Enviar</button>
       </div>
       <div class="acts">
@@ -100,16 +109,20 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
   </div>
   <div class="col">
     <div class="card">
-      <h4>GANHOS DE HOJE</h4>
-      <div id="ganhosHoje" style="font-size:11.5px"></div>
+      <h4>🚗 GANHOS DE HOJE</h4>
+      <div id="ganhosHoje" style="font-size:12px"></div>
     </div>
     <div class="card">
-      <h4>AINDA POSSO GASTAR</h4>
-      <div id="ainda" style="font-size:11.5px"></div>
+      <h4>🛒 AINDA POSSO GASTAR</h4>
+      <div id="ainda" style="font-size:12px"></div>
     </div>
-    <div class="card cc co"><h4 style="color:#fff">BR-381</h4>Tráfego normal no trecho Valadares.</div>
-    <div class="card cc cp"><h4 style="color:#fff">NOTÍCIA</h4>Diário do Rio Doce: previsão de chuva isolada.</div>
-    <div class="card cc cg"><h4 style="color:#000">DICA</h4>Evite horas de pico na BR-381.</div>
+    <div class="card">
+      <h4>📊 RELATÓRIO DO MÊS</h4>
+      <div class="report"><div class="report-inner" id="relatorio"></div></div>
+    </div>
+    <div class="card cc co"><h4 style="color:#fff">🛣️ BR-381</h4>Tráfego normal no trecho Valadares.</div>
+    <div class="card cc cp"><h4 style="color:#fff">📰 NOTÍCIA</h4>Diário do Rio Doce: previsão de chuva isolada.</div>
+    <div class="card cc cg"><h4 style="color:#000">💡 DICA</h4>Evite horas de pico na BR-381.</div>
   </div>
 </div>
 
@@ -139,7 +152,7 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
 <div class="modal" id="planModal">
   <div class="mbox">
     <h3>Planejamento</h3>
-    <p style="font-size:11px;color:#aaa;margin:4px 0">Contas fixas, limites de gasto, folgas e meta.</p>
+    <p style="font-size:11px;color:#aaa;margin:4px 0">Contas fixas, limites, folgas e meta do mês.</p>
     <label style="font-size:11px">Quanto você quer ter líquido no mês (R$)</label>
     <input class="field" id="pMeta" type="number" value="2000">
     <label style="font-size:11px">Ganho por hora (R$)</label>
@@ -147,10 +160,10 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
     <h4 style="margin-top:8px">Contas Fixas</h4>
     <div id="fixas"></div>
     <button onclick="addFixa()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar conta</button>
-    <h4 style="margin-top:8px">Limites de Gasto (Ainda posso gastar)</h4>
+    <h4 style="margin-top:8px">Limites de Gasto</h4>
     <div id="limites"></div>
     <button onclick="addLimite()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar limite</button>
-    <h4 style="margin-top:8px">Folgas (clique para marcar folga)</h4>
+    <h4 style="margin-top:8px">Folgas (clique para marcar)</h4>
     <div id="weeks"></div>
     <div id="planResult" style="margin:8px 0;font-size:12px;background:rgba(73,224,255,.1);padding:8px;border-radius:8px"></div>
     <button onclick="savePlan()" style="width:100%;padding:10px;background:var(--e);border:none;border-radius:8px;color:#000;font-weight:700">Salvar Planejamento</button>
@@ -171,9 +184,9 @@ body{background:var(--bg);color:var(--ice);font-family:system-ui,-apple-system,s
 
 <script>
 const APPS=['Uber','99','InDrive','Particular','Gorjeta','Outros'];
+const APP_ICONS={Uber:'🚗',99:'9️⃣','InDrive':'🚙',Particular:'🚕',Gorjeta:'💰',Outros:'📦'};
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
 let currentDay=null,selectedApp='Uber';
-let turnos=JSON.parse(localStorage.getItem('luna_turnos')||'[]');
 let currentTurno=parseInt(localStorage.getItem('luna_current_turno')||'0');
 let timerStart=parseInt(localStorage.getItem('luna_timer_start')||'0');
 let timerRunning=localStorage.getItem('luna_timer_running')==='1';
@@ -191,6 +204,13 @@ function updateTimer(){
   requestAnimationFrame(updateTimer);
 }
 
+function showBubble(){
+  try{ if(window.LunaNative && LunaNative.showOverlay) LunaNative.showOverlay(); }catch(e){}
+}
+function hideBubble(){
+  try{ if(window.LunaNative && LunaNative.hideOverlay) LunaNative.hideOverlay(); }catch(e){}
+}
+
 function turno(acao){
   if(acao==='iniciar'){
     if(currentTurno>=4){alert('Já está no 4º turno. Conclua o dia.');return}
@@ -202,14 +222,12 @@ function turno(acao){
     localStorage.setItem('luna_current_turno',currentTurno);
     $('turnoLbl').textContent=currentTurno+'º TURNO';
     updateTimer();
+    showBubble();
   }
   if(acao==='pausar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='PAUSADO'}
-  if(acao==='retomar'){if(timerStart){timerRunning=true;localStorage.setItem('luna_timer_running','1');updateTimer();$('turnoLbl').textContent=currentTurno+'º TURNO'}}
+  if(acao==='retomar'){if(timerStart){timerRunning=true;localStorage.setItem('luna_timer_running','1');updateTimer();$('turnoLbl').textContent=currentTurno+'º TURNO';showBubble()}}
   if(acao==='fechar'){
-    if(currentTurno>0){
-      openDay(13);
-      alert('Feche o '+currentTurno+'º turno: coloque os ganhos deste turno.');
-    }
+    if(currentTurno>0) openDay(13);
     timerRunning=false;
     localStorage.setItem('luna_timer_running','0');
     $('turnoLbl').textContent='TURNO FECHADO';
@@ -220,6 +238,7 @@ function turno(acao){
     localStorage.setItem('luna_timer_running','0');
     localStorage.removeItem('luna_timer_start');
     $('cron').textContent='00:00:00';$('turnoLbl').textContent='DIA CONCLUÍDO';
+    hideBubble();
   }
   if(acao==='zerar'){
     timerRunning=false;localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');
@@ -227,7 +246,7 @@ function turno(acao){
   }
 }
 
-if(timerRunning&&timerStart){$('turnoLbl').textContent=currentTurno+'º TURNO';updateTimer()}
+if(timerRunning&&timerStart){$('turnoLbl').textContent=currentTurno+'º TURNO';updateTimer();showBubble()}
 
 function buildCal(){
   const el=$('cal');el.innerHTML='';
@@ -263,7 +282,7 @@ function renderAppBtns(){
   const el=$('appBtns');el.innerHTML='';
   APPS.forEach(a=>{
     const b=document.createElement('button');
-    b.textContent=a;
+    b.textContent=(APP_ICONS[a]||'')+' '+a;
     if(a===selectedApp)b.classList.add('on');
     b.onclick=()=>{selectedApp=a;renderAppBtns()};
     el.appendChild(b);
@@ -278,13 +297,13 @@ function saveDay(){
   data.horas=parseFloat($('dHoras').value)||data.horas;
   data.km=parseFloat($('dKm').value)||data.km;
   data.inicio=$('dInicio').value;
-  if(data.inicio&&currentDay===13){
+  if(data.inicio&&currentDay===13&&timerRunning){
     const [hh,mm]=data.inicio.split(':').map(Number);
     const now=new Date();
     const start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh,mm,0).getTime();
     timerStart=start;
     localStorage.setItem('luna_timer_start',start);
-    if(timerRunning) updateTimer();
+    updateTimer();
   }
   days[currentDay]=data;
   localStorage.setItem('luna_days',JSON.stringify(days));
@@ -293,20 +312,44 @@ function saveDay(){
 }
 
 function refresh(){
-  const meta=plan.meta||2000;
+  const meta=parseFloat(plan.meta)||2000;
+  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(+f.valor||0),0);
+  const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
+  const metaTotal=meta+fixas+limites;
   let feito=0;
   Object.values(days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
-  const falta=Math.max(0,meta-feito);
+  const falta=Math.max(0,metaTotal-feito);
   const hoje=days[13]?Object.values(days[13].ganhos||{}).reduce((a,b)=>a+b,0):0;
-  $('metaBox').innerHTML=`<div class="mini m1">META<br><b>R$ ${meta}</b></div><div class="mini m2">FEITO<br><b>R$ ${feito}</b></div><div class="mini m3">FALTA<br><b>R$ ${falta}</b></div><div class="mini m4">HOJE<br><b>R$ ${hoje}</b></div>`;
+  $('metaBox').innerHTML=`<div class="mini m1">META<br><b>R$ ${metaTotal.toFixed(0)}</b></div><div class="mini m2">FEITO<br><b>R$ ${feito.toFixed(0)}</b></div><div class="mini m3">FALTA<br><b>R$ ${falta.toFixed(0)}</b></div><div class="mini m4">HOJE<br><b>R$ ${hoje.toFixed(0)}</b></div>`;
   const g=days[13]?.ganhos||{};
-  $('ganhosHoje').innerHTML=APPS.slice(0,4).map(a=>`<div style="display:flex;justify-content:space-between;margin:2px 0"><span>${a}</span><b>R$ ${g[a]||0}</b></div>`).join('');
+  $('ganhosHoje').innerHTML=APPS.slice(0,4).map(a=>`<div style="display:flex;justify-content:space-between;margin:3px 0"><span>${APP_ICONS[a]||''} ${a}</span><b>R$ ${g[a]||0}</b></div>`).join('');
   let ainda='';
   (plan.limites||[]).forEach(l=>{
-    const rest=Math.max(0,(l.limite||0)-(l.gasto||0));
-    ainda+=`<div style="display:flex;justify-content:space-between;margin:2px 0"><span>${l.nome}</span><b>R$ ${rest}</b></div>`;
+    const rest=Math.max(0,(+l.limite||0)-(+l.gasto||0));
+    const ic=l.nome.toLowerCase().includes('merc')?'🛒':l.nome.toLowerCase().includes('lanch')?'🍔':'💳';
+    ainda+=`<div style="display:flex;justify-content:space-between;margin:3px 0"><span>${ic} ${l.nome}</span><b>R$ ${rest}</b></div>`;
   });
-  $('ainda').innerHTML=ainda||'Nenhum limite configurado';
+  $('ainda').innerHTML=ainda||'Nenhum limite';
+  // Ritmo semanal
+  let ritmo='';
+  for(let s=1;s<=4;s++){
+    const start=(s-1)*7+1, end=s*7;
+    let val=0;
+    for(let d=start;d<=end;d++) if(days[d]) val+=Object.values(days[d].ganhos||{}).reduce((a,b)=>a+b,0);
+    const pct=metaTotal>0?Math.min(100,Math.round(val/(metaTotal/4)*100)):0;
+    ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>${pct}%</span><b>R$ ${val.toFixed(0)}</b></div>`;
+  }
+  $('ritmo').innerHTML=ritmo;
+  // Relatório
+  let rel='';
+  const sorted=Object.keys(days).sort((a,b)=>+a-+b);
+  if(sorted.length===0) rel='Nenhum dia registrado ainda.';
+  else sorted.forEach(d=>{
+    const data=days[d];
+    const g=Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0);
+    rel+=`<div>Dia ${d}: R$ ${g} ganhos • ${data.horas||0}h • ${data.km||0}km</div>`;
+  });
+  $('relatorio').innerHTML=rel+rel;
 }
 
 function renderPlan(){
@@ -316,7 +359,7 @@ function renderPlan(){
   });
   const lim=$('limites');lim.innerHTML='';
   (plan.limites||[]).forEach((l,i)=>{
-    lim.innerHTML+=`<div class="limit-row"><input class="field" value="${l.nome}" onchange="plan.limites[${i}].nome=this.value"><input class="field" type="number" value="${l.limite}" onchange="plan.limites[${i}].limite=+this.value" style="width:70px"><span style="font-size:10px">gasto ${l.gasto||0}</span><button onclick="plan.limites.splice(${i},1);renderPlan()">X</button></div>`;
+    lim.innerHTML+=`<div class="limit-row"><input class="field" value="${l.nome}" onchange="plan.limites[${i}].nome=this.value"><input class="field" type="number" value="${l.limite}" onchange="plan.limites[${i}].limite=+this.value" style="width:70px"><button onclick="plan.limites.splice(${i},1);renderPlan()">X</button></div>`;
   });
   const w=$('weeks');w.innerHTML='';
   for(let s=1;s<=4;s++){
@@ -340,8 +383,8 @@ function addLimite(){plan.limites=plan.limites||[];plan.limites.push({nome:'Novo
 function calcPlan(){
   const meta=parseFloat($('pMeta').value)||plan.meta||2000;
   const hora=parseFloat($('pHora').value)||plan.hora||30;
-  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(f.valor||0),0);
-  const limites=(plan.limites||[]).reduce((a,l)=>a+(l.limite||0),0);
+  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(+f.valor||0),0);
+  const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
   const total=meta+fixas+limites;
   let folgas=0;
   for(let s=1;s<=4;s++) DIAS.forEach(d=>{if((plan.folgas||{})[s+'-'+d])folgas++});
@@ -370,7 +413,7 @@ function saveKey(){
   const k=$('gKey').value.trim();
   localStorage.setItem('luna_gemini_key',k);
   $('keyStatus').textContent=k?'Chave salva!':'Removida';
-  alert(k?'Chave do Gemini salva. A Luna agora pode pesquisar online.':'Chave removida');
+  alert(k?'Chave salva.':'Removida');
   closeSet();
 }
 
@@ -378,72 +421,97 @@ function getKey(){return localStorage.getItem('luna_gemini_key')||''}
 
 async function askGemini(p){
   const key=getKey();
-  if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes (botão no topo).';
-  try{
-    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(key),{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto financeiro do motorista de aplicativo em Governador Valadares. Responda em português, de forma clara e útil. Se a pergunta for sobre o app (meta, ganhos, turno), use o contexto. Caso contrário, pesquise e responda. Pergunta: '+p}]}] })
-    });
-    if(!r.ok) return 'Erro na API Gemini ('+r.status+'). Verifique a chave.';
-    const d=await r.json();
-    return d.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta do Gemini.';
-  }catch(e){return 'Erro de conexão. Verifique internet e chave.'}
+  if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes.';
+  const models=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-pro'];
+  for(const m of models){
+    try{
+      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key),{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto financeiro do motorista de aplicativo em Governador Valadares. Responda em português, claro e útil. Contexto do app: meta, ganhos, turnos, planejamento. Se precisar de informação atual, responda com base no seu conhecimento. Pergunta: '+p}]}] })
+      });
+      if(r.status===404) continue;
+      if(!r.ok) return 'Erro Gemini '+r.status+'. Verifique a chave.';
+      const d=await r.json();
+      const text=d.candidates?.[0]?.content?.parts?.[0]?.text;
+      if(text) return text;
+    }catch(e){ continue }
+  }
+  return 'Não consegui conectar no Gemini. Verifique a chave e a internet.';
 }
 
-async function sendChat(){
+function handleVoiceCommand(text){
+  const lower=text.toLowerCase();
+  const numMatch=text.match(/\\d+/);
+  const num=numMatch?parseFloat(numMatch[0]):0;
+  if((lower.includes('spotify')||lower.includes('youtube')||lower.includes('waze')) && (lower.includes('abrir')||lower.includes('tocar')||lower.includes('música')||lower.includes('musica')||lower.includes('ir')||lower.includes('navegar'))){
+    try{ if(window.LunaNative) LunaNative.notify('Luna','Comando de app detectado: '+text); }catch(e){}
+    return 'Vou abrir o app solicitado (funcionalidade nativa em desenvolvimento).';
+  }
+  if(num && (lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione')||lower.includes('atualização')||lower.includes('atualizacao'))){
+    let app='Uber';
+    if(lower.includes('99')||lower.includes('nove')) app='99';
+    else if(lower.includes('indrive')||lower.includes('in drive')) app='InDrive';
+    else if(lower.includes('particular')) app='Particular';
+    const data=days[13]||{ganhos:{}};
+    if(lower.includes('mais')||lower.includes('adicione')){
+      data.ganhos[app]=(data.ganhos[app]||0)+num;
+      days[13]=data;
+      localStorage.setItem('luna_days',JSON.stringify(days));
+      refresh();
+      return 'Adicionei R$ '+num+' em '+app+'. Total agora: R$ '+data.ganhos[app];
+    }
+    return 'Quer definir o total de '+app+' como R$ '+num+' ou adicionar R$ '+num+' ao que já tem?';
+  }
+  return null;
+}
+
+async function sendChat(fromVoice){
   const inp=$('chatInput');
   const t=inp.value.trim();if(!t)return;
   const box=$('chat');
   box.innerHTML+='<div class="msg user">'+t+'</div>';
   inp.value='';
   box.scrollTop=box.scrollHeight;
-  // Simple command parsing for earnings
-  const lower=t.toLowerCase();
-  if((lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione')||lower.includes('atualização')||lower.includes('atualizacao')) && /\\d+/.test(t)){
-    const num=parseFloat(t.match(/\\d+/)[0]);
-    if(lower.includes('99')||lower.includes('nove')) selectedApp='99';
-    else if(lower.includes('uber')) selectedApp='Uber';
-    else if(lower.includes('indrive')||lower.includes('in drive')) selectedApp='InDrive';
-    else if(lower.includes('particular')) selectedApp='Particular';
-    if(lower.includes('mais')||lower.includes('adicione')){
-      const data=days[13]||{ganhos:{}};
-      data.ganhos[selectedApp]=(data.ganhos[selectedApp]||0)+num;
-      days[13]=data;
-      localStorage.setItem('luna_days',JSON.stringify(days));
-      box.innerHTML+='<div class="msg">Adicionei R$ '+num+' em '+selectedApp+'. Total agora: R$ '+(data.ganhos[selectedApp])+'</div>';
-    }else{
-      box.innerHTML+='<div class="msg">Você quer que eu defina o total de '+selectedApp+' como R$ '+num+' ou adicione R$ '+num+' ao que já tem?</div>';
-    }
-    refresh();
-    box.scrollTop=box.scrollHeight;
-    return;
-  }
-  const resp=await askGemini(t);
+  const cmd=handleVoiceCommand(t);
+  let resp;
+  if(cmd) resp=cmd;
+  else resp=await askGemini(t);
   box.innerHTML+='<div class="msg">'+resp+'</div>';
   box.scrollTop=box.scrollHeight;
+  if(fromVoice && window.LunaNative && LunaNative.speak){
+    try{ LunaNative.speak(resp); }catch(e){}
+  }
 }
 
-let recognition,silenceTimer;
+window.onLunaSpeechResult=function(text){
+  if(!text) return;
+  $('chatInput').value=text;
+  sendChat(true);
+};
+
 function startMic(){
+  $('orb').style.boxShadow='0 0 40px #49E0FF';
+  try{
+    if(window.LunaNative && LunaNative.startListening){
+      LunaNative.startListening();
+      return;
+    }
+  }catch(e){}
+  // fallback browser
   if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
-    alert('Reconhecimento de voz do navegador não disponível. No APK Android use o microfone nativo.');
+    alert('Microfone nativo não disponível neste ambiente.');
     return;
   }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SR();
+  const recognition=new SR();
   recognition.lang='pt-BR';
-  recognition.continuous=true;
-  recognition.interimResults=true;
   recognition.onresult=(e)=>{
-    const text=Array.from(e.results).map(r=>r[0].transcript).join('');
+    const text=e.results[0][0].transcript;
     $('chatInput').value=text;
-    clearTimeout(silenceTimer);
-    silenceTimer=setTimeout(()=>{recognition.stop();if($('chatInput').value.trim())sendChat()},5000);
+    sendChat(true);
   };
-  recognition.onend=()=>clearTimeout(silenceTimer);
   recognition.start();
-  $('orb').style.boxShadow='0 0 40px #49E0FF';
 }
 
 buildCal();
