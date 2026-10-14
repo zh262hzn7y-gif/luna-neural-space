@@ -25,7 +25,7 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 .m3{background:linear-gradient(135deg,#8D6BFF,#6B4BFF)}
 .m4{background:linear-gradient(135deg,#00B4D8,#0096C7);color:#000}
 .luna{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0}
-.orb{width:100px;height:100px;margin:4px 0;position:relative;animation:pulse 2.4s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(141,107,255,.7))}
+.orb{width:130px;height:130px;margin:4px 0;position:relative;animation:pulse 2.4s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(141,107,255,.7))}
 .orb svg{width:100%;height:100%}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 .chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:60px}
@@ -433,7 +433,7 @@ function savePlan(){plan.meta=parseFloat($('pMeta').value)||2000;plan.hora=parse
 
 function openSettings(){$('setModal').classList.add('show');const k=localStorage.getItem('luna_gemini_key')||'';$('gKey').value=k;$('keyStatus').textContent=k?'Chave salva ('+k.substring(0,8)+'...)':'Nenhuma chave'}
 function closeSet(){$('setModal').classList.remove('show')}
-function saveKey(){const k=$('gKey').value.trim();localStorage.setItem('luna_gemini_key',k);$('keyStatus').textContent=k?'Salva!':'Removida';alert(k?'Chave salva':'Removida');closeSet()}
+function saveKey(){const k=$('gKey').value.trim();localStorage.setItem('luna_gemini_key',k);try{if(window.LunaNative&&LunaNative.saveKey)LunaNative.saveKey(k)}catch(e){}$('keyStatus').textContent=k?'Salva!':'Removida';alert(k?'Chave salva':'Removida');closeSet()}
 function getKey(){return localStorage.getItem('luna_gemini_key')||''}
 
 async function testGemini(){
@@ -447,20 +447,31 @@ async function testGemini(){
 
 async function askGemini(p){
   const key=getKey();
+  // Prefer native bridge (OkHttp) — works from file:// without CORS
+  try{
+    if(window.LunaNative && typeof LunaNative.geminiQuery === 'function'){
+      // save key to native prefs if present
+      if(key && LunaNative.saveKey) LunaNative.saveKey(key);
+      const r = LunaNative.geminiQuery(p);
+      if(r && r !== '__NO_KEY__' && r !== '__API_ERROR__') return r;
+      if(r === '__NO_KEY__') return 'Configure a chave do Gemini em Ajustes (ícone ⚙).';
+    }
+  }catch(e){ console.error('native gemini', e); }
+  // fallback JS fetch
   if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes.';
   const models=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-pro','gemini-pro'];
   for(const m of models){
     try{
       const url='https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key);
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto do motorista. Responda em português. Pergunta: '+p}]}] })});
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto do motorista de aplicativo. Responda em português, de forma útil e direta. Pergunta: '+p}]}] })});
       if(r.status===404||r.status===400) continue;
-      if(!r.ok) return 'Erro '+r.status;
+      if(!r.ok) continue;
       const d=await r.json();
       const text=d.candidates?.[0]?.content?.parts?.[0]?.text;
       if(text) return text;
     }catch(e){continue}
   }
-  return 'Não consegui conectar. Verifique a chave e a internet.';
+  return 'Não consegui conectar à internet. Verifique a chave do Gemini e sua conexão.';
 }
 
 
