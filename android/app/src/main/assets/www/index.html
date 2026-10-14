@@ -245,18 +245,45 @@ let currentDay=null,selectedApp='Uber',entryType='ganho';
 let currentTurno=parseInt(localStorage.getItem('luna_current_turno')||'0');
 let timerStart=parseInt(localStorage.getItem('luna_timer_start')||'0');
 let timerRunning=localStorage.getItem('luna_timer_running')==='1';
+let accumulatedMs=parseInt(localStorage.getItem('luna_accumulated')||'0');
 let plan=JSON.parse(localStorage.getItem('luna_plan')||'{"meta":2000,"hora":30,"fixas":[],"limites":[{"nome":"Mercado","limite":800,"gasto":0},{"nome":"Lanche","limite":200,"gasto":0}],"folgas":{}}');
 let days=JSON.parse(localStorage.getItem('luna_days')||'{}');
 
 function $(id){return document.getElementById(id)}
 
+function formatTime(ms){
+  const s=Math.floor(ms/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  return [h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
+}
 function updateTimer(){
   if(!timerRunning||!timerStart)return;
-  const elapsed=Date.now()-timerStart;
-  const s=Math.floor(elapsed/1000);
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
-  $('cron').textContent=[h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
+  const elapsed=accumulatedMs + (Date.now()-timerStart);
+  const text=formatTime(elapsed);
+  $('cron').textContent=text;
+  // sync to native prefs for bubble
+  try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(text); }catch(e){}
   requestAnimationFrame(updateTimer);
+}
+function saveAccumulated(){
+  localStorage.setItem('luna_accumulated', accumulatedMs);
+}
+function pauseTimer(){
+  if(timerRunning && timerStart){
+    accumulatedMs += (Date.now()-timerStart);
+    saveAccumulated();
+  }
+  timerRunning=false;
+  localStorage.setItem('luna_timer_running','0');
+  try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(formatTime(accumulatedMs)); }catch(e){}
+}
+function resumeTimer(){
+  timerStart=Date.now();
+  timerRunning=true;
+  localStorage.setItem('luna_timer_start',timerStart);
+  localStorage.setItem('luna_timer_running','1');
+  updateTimer();
+  showBubble();
 }
 
 function showBubble(){ try{ if(window.LunaNative&&LunaNative.showOverlay)LunaNative.showOverlay(); }catch(e){} }
@@ -266,21 +293,42 @@ function turno(acao){
   try{
     if(acao==='iniciar'){
       if(currentTurno>=4){alert('Já no 4º turno. Conclua o dia.');return}
-      timerRunning=true;
-      timerStart=Date.now();
-      localStorage.setItem('luna_timer_start',timerStart);
-      localStorage.setItem('luna_timer_running','1');
       currentTurno++;
       localStorage.setItem('luna_current_turno',currentTurno);
       $('turnoLbl').textContent=currentTurno+'º TURNO';
-      updateTimer();
-      showBubble();
+      resumeTimer();
     }
-    if(acao==='pausar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='PAUSADO'}
-    if(acao==='retomar'){if(timerStart){timerRunning=true;localStorage.setItem('luna_timer_running','1');updateTimer();$('turnoLbl').textContent=currentTurno+'º TURNO';showBubble()}}
-    if(acao==='fechar'){if(currentTurno>0)openDay(13);timerRunning=false;localStorage.setItem('luna_timer_running','0');$('turnoLbl').textContent='TURNO FECHADO'}
-    if(acao==='concluir'){currentTurno=0;timerRunning=false;localStorage.setItem('luna_current_turno','0');localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');$('cron').textContent='00:00:00';$('turnoLbl').textContent='DIA CONCLUÍDO';hideBubble()}
-    if(acao==='zerar'){timerRunning=false;localStorage.setItem('luna_timer_running','0');localStorage.removeItem('luna_timer_start');$('cron').textContent='00:00:00';$('turnoLbl').textContent='ZERADO'}
+    if(acao==='pausar' || acao==='cafe'){
+      pauseTimer();
+      $('turnoLbl').textContent=acao==='cafe'?'CAFÉ':'PAUSADO';
+    }
+    if(acao==='retomar'){
+      if(currentTurno>0){
+        $('turnoLbl').textContent=currentTurno+'º TURNO';
+        resumeTimer();
+      }
+    }
+    if(acao==='fechar'){
+      pauseTimer();
+      if(currentTurno>0)openDay(13);
+      $('turnoLbl').textContent='TURNO FECHADO';
+    }
+    if(acao==='concluir'){
+      pauseTimer();
+      $('turnoLbl').textContent='DIA CONCLUÍDO';
+      // keep accumulated so next iniciar continues; only zerar resets
+    }
+    if(acao==='zerar'){
+      timerRunning=false;
+      accumulatedMs=0;
+      timerStart=0;
+      localStorage.setItem('luna_timer_running','0');
+      localStorage.setItem('luna_accumulated','0');
+      localStorage.removeItem('luna_timer_start');
+      $('cron').textContent='00:00:00';
+      $('turnoLbl').textContent='ZERADO';
+      try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay('00:00:00'); }catch(e){}
+    }
   }catch(e){console.error(e)}
 }
 
@@ -336,7 +384,24 @@ function renderAppBtns(){
   });
 }
 
+function applyCustomStart(){
+  const t=$('dInicio').value;
+  if(!t)return;
+  const [hh,mm]=t.split(':').map(Number);
+  const now=new Date();
+  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh,mm,0);
+  const elapsed=Math.max(0, now-start);
+  accumulatedMs=elapsed;
+  saveAccumulated();
+  if(timerRunning){
+    timerStart=Date.now();
+    localStorage.setItem('luna_timer_start',timerStart);
+  }
+  $('cron').textContent=formatTime(accumulatedMs);
+  try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(formatTime(accumulatedMs)); }catch(e){}
+}
 function saveDay(){
+  applyCustomStart();
   if(!currentDay)return;
   const data=days[currentDay]||{ganhos:{},gastos:0,horas:0,km:0,inicio:'08:00'};
   const val=parseFloat($('dValor').value)||0;
@@ -544,6 +609,20 @@ function startMic(){
 
 buildCal();
 refresh();
+
+// Poll for actions from floating bubble
+setInterval(()=>{
+  try{
+    if(window.LunaNative&&LunaNative.getPendingAction){
+      const a=LunaNative.getPendingAction();
+      if(a&&a!=='null'&&a!==''){
+        turno(a);
+        LunaNative.clearPendingAction();
+      }
+    }
+  }catch(e){}
+},500);
+
 </script>
 </body>
 </html>
