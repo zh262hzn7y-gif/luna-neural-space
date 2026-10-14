@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
@@ -22,31 +23,42 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         try {
+            // Se nao tem permissao de overlay, abre as configuracoes e para
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                } catch (_: Exception) {}
                 stopSelf()
                 return
             }
+
             windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
             createNotificationChannel()
-            startForeground(
-                1,
-                NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setContentTitle("Luna")
-                    .setContentText("Overlay ativo")
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
-                    .build()
-            )
+
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Luna")
+                .setContentText("Bolha de turno ativa")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setOngoing(true)
+                .build()
+
+            startForeground(1, notification)
+
             overlayView = HexOverlayView(this)
+            val size = (120 * resources.displayMetrics.density).toInt()
             val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
+                size,
+                size,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 else
                     @Suppress("DEPRECATION")
                     WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT
             ).apply {
                 gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
@@ -66,8 +78,7 @@ class OverlayService : Service() {
     override fun onDestroy() {
         try {
             overlayView?.let { windowManager?.removeView(it) }
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
         overlayView = null
         super.onDestroy()
     }
@@ -81,22 +92,24 @@ class OverlayService : Service() {
 
     companion object {
         private const val CHANNEL_ID = "luna_overlay"
+
         fun start(context: Context) {
             try {
+                val intent = Intent(context, OverlayService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(Intent(context, OverlayService::class.java))
+                    context.startForegroundService(intent)
                 } else {
-                    context.startService(Intent(context, OverlayService::class.java))
+                    context.startService(intent)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+
         fun stop(context: Context) {
             try {
                 context.stopService(Intent(context, OverlayService::class.java))
-            } catch (_: Exception) {
-            }
+            } catch (_: Exception) {}
         }
     }
 }
