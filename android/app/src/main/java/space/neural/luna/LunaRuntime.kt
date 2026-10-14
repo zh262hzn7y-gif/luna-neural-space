@@ -3,6 +3,7 @@ package space.neural.luna
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.os.Build
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -16,14 +17,19 @@ class LunaRuntime : ViewModel() {
 
     @SuppressLint("SetJavaScriptEnabled")
     fun attach(activity: MainActivity) {
-        // pede permissao de microfone se ainda nao tiver
+        // Pede permissoes necessarias
+        val perms = mutableListOf<String>()
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.RECORD_AUDIO),
-                2001
-            )
+            perms.add(Manifest.permission.RECORD_AUDIO)
+        }
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+            perms.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        if (perms.isNotEmpty()) {
+            ActivityCompat.requestPermissions(activity, perms.toTypedArray(), 2001)
         }
 
         val wv = WebView(activity).apply {
@@ -34,28 +40,17 @@ class LunaRuntime : ViewModel() {
             settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             settings.databaseEnabled = true
             settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-            // permite acesso de file:// ao JavascriptInterface
             @Suppress("DEPRECATION")
             settings.allowFileAccessFromFileURLs = true
             @Suppress("DEPRECATION")
             settings.allowUniversalAccessFromFileURLs = true
             webViewClient = object : WebViewClient() {
-                override fun onReceivedError(
-                    view: WebView?,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String?
-                ) {
-                }
-                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                    return false
-                }
+                override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {}
+                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean = false
             }
             webChromeClient = object : WebChromeClient() {
-                override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
-                }
+                override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {}
             }
-            // registra a interface ANTES de carregar a pagina
             addJavascriptInterface(LunaBridge(activity, this), "LunaNative")
         }
         bridge = LunaBridge(activity, wv)
@@ -68,8 +63,7 @@ class LunaRuntime : ViewModel() {
         try {
             webView?.stopLoading()
             webView?.destroy()
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) {}
         webView = null
         bridge = null
     }
