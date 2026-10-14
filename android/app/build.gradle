@@ -11,12 +11,25 @@ android {
         applicationId "space.neural.luna"
         minSdk 24
         targetSdk 34
-        versionCode 76
-        versionName "5.6.2"
+        versionCode 80
+        versionName "5.7.0"
+    }
+
+    signingConfigs {
+        luna {
+            storeFile file("../../luna-release.jks")
+            storePassword "luna123"
+            keyAlias "luna"
+            keyPassword "luna123"
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.luna
+        }
         release {
+            signingConfig signingConfigs.luna
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
