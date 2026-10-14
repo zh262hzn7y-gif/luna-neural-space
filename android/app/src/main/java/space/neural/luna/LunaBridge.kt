@@ -172,4 +172,27 @@ class LunaBridge(private val activity: MainActivity, private val webView: WebVie
     fun getKey(): String {
         return activity.getSharedPreferences("luna", 0).getString("gemini_key", "") ?: ""
     }
+
+    @JavascriptInterface
+    fun setTimerDisplay(text: String) {
+        activity.getSharedPreferences("luna", 0).edit().putString("timer_display", text).apply()
+    }
+
+    @JavascriptInterface
+    fun getTimerDisplay(): String {
+        return activity.getSharedPreferences("luna", 0).getString("timer_display", "00:00:00") ?: "00:00:00"
+    }
+
+
+    @JavascriptInterface
+    fun getPendingAction(): String {
+        val prefs = activity.getSharedPreferences("luna", 0)
+        return prefs.getString("pending_action", "") ?: ""
+    }
+
+    @JavascriptInterface
+    fun clearPendingAction() {
+        activity.getSharedPreferences("luna", 0).edit().remove("pending_action").apply()
+    }
+
 }
