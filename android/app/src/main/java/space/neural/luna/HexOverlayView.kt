@@ -59,6 +59,7 @@ class HexOverlayView @JvmOverloads constructor(
     var windowManager: WindowManager? = null
     var layoutParams: WindowManager.LayoutParams? = null
     var onAction: ((String) -> Unit)? = null
+    var onMenuExpand: ((Boolean) -> Unit)? = null
 
     private var showMenu = false
     private var lastClick = 0L
@@ -68,7 +69,7 @@ class HexOverlayView @JvmOverloads constructor(
     private var startY = 0
     private var dragging = false
 
-    private val menuItems = listOf("Iniciar", "Pausar", "Zerar", "Mic", "+Tamanho", "-Tamanho")
+    private val menuItems = listOf("Iniciar", "Pausar", "Café", "Fechar", "Concluir", "Zerar", "Mic", "+Tamanho", "-Tamanho")
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -163,6 +164,7 @@ class HexOverlayView @JvmOverloads constructor(
                             handleMenuClick(event.x, event.y)
                         } else {
                             showMenu = true
+                            onMenuExpand?.invoke(true)
                             invalidate()
                         }
                         lastClick = now
@@ -185,17 +187,22 @@ class HexOverlayView @JvmOverloads constructor(
                 when (label) {
                     "Iniciar" -> onAction?.invoke("iniciar")
                     "Pausar" -> onAction?.invoke("pausar")
+                    "Café" -> onAction?.invoke("cafe")
+                    "Fechar" -> onAction?.invoke("fechar")
+                    "Concluir" -> onAction?.invoke("concluir")
                     "Zerar" -> onAction?.invoke("zerar")
                     "Mic" -> onAction?.invoke("mic")
                     "+Tamanho" -> onAction?.invoke("size_up")
                     "-Tamanho" -> onAction?.invoke("size_down")
                 }
                 showMenu = false
+                onMenuExpand?.invoke(false)
                 invalidate()
                 return
             }
         }
         showMenu = false
+        onMenuExpand?.invoke(false)
         invalidate()
     }
 
