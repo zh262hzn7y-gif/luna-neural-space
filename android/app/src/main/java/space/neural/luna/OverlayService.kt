@@ -56,6 +56,7 @@ class OverlayService : Service() {
             overlayView = HexOverlayView(this).apply {
                 windowManager = this@OverlayService.windowManager
                 onAction = { action -> handleAction(action) }
+                onMenuExpand = { expand -> expandForMenu(expand) }
             }
 
             layoutParams = WindowManager.LayoutParams(
@@ -89,14 +90,26 @@ class OverlayService : Service() {
         val prefs = getSharedPreferences("luna", 0)
         when (action) {
             "iniciar" -> {
-                timerStart = System.currentTimeMillis()
+                // signal JS to handle
+                prefs.edit().putString("pending_action", "iniciar").apply()
                 timerRunning = true
-                prefs.edit().putBoolean("timer_running", true).putLong("timer_start", timerStart).apply()
                 startTimerTick()
             }
             "pausar" -> {
+                prefs.edit().putString("pending_action", "pausar").apply()
                 timerRunning = false
-                prefs.edit().putBoolean("timer_running", false).apply()
+            }
+            "cafe" -> {
+                prefs.edit().putString("pending_action", "cafe").apply()
+                timerRunning = false
+            }
+            "fechar" -> {
+                prefs.edit().putString("pending_action", "fechar").apply()
+                timerRunning = false
+            }
+            "concluir" -> {
+                prefs.edit().putString("pending_action", "concluir").apply()
+                timerRunning = false
             }
             "zerar" -> {
                 timerRunning = false
@@ -155,6 +168,14 @@ class OverlayService : Service() {
         val channel = NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_LOW)
             .setName("Luna Overlay").build()
         NotificationManagerCompat.from(this).createNotificationChannel(channel)
+    }
+
+
+    private fun expandForMenu(expand: Boolean) {
+        val lp = layoutParams ?: return
+        val sizePx = (bubbleSize * resources.displayMetrics.density).toInt()
+        lp.height = if (expand) sizePx + (48 * 9 + 60) else sizePx
+        try { windowManager?.updateViewLayout(overlayView, lp) } catch (_: Exception) {}
     }
 
     companion object {
