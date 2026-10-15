@@ -194,6 +194,8 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
     </div>
     <div class="apps" id="appBtns"></div>
     <input class="field" id="dValor" type="number" placeholder="Valor (R$)">
+    <button onclick="addPending()" style="width:100%;margin:6px 0;padding:8px;background:var(--c);border:none;border-radius:8px;color:#000;font-weight:700">Adicionar este valor</button>
+    <div id="pendingList" style="font-size:11px;margin:6px 0;background:rgba(0,0,0,.3);padding:6px;border-radius:8px;min-height:30px"></div>
     <label style="font-size:11px;color:#aaa">Horas trabalhadas</label>
     <input class="field" id="dHoras" type="number" step="0.1" placeholder="Ex: 6.5">
     <label style="font-size:11px;color:#aaa">Quilômetros</label>
@@ -203,8 +205,7 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
     <label style="font-size:11px;color:#aaa">Horário de término</label>
     <input class="field" id="dFim" type="time">
     <button onclick="saveDay()" style="width:100%;margin-top:8px;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar</button>
-    <button onclick="deleteDayEntry()" style="width:100%;margin-top:6px;padding:8px;background:#c44;border:none;border-radius:8px;color:#fff">Excluir dia</button>
-    <button onclick="forgetMemory()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid #c44;border-radius:8px;color:#fff;font-size:11px">Apagar memória da Luna</button>
+    
   </div>
 </div>
 
@@ -420,14 +421,14 @@ function buildCal(){
   }
 }
 
+let pendingGanhos={}, pendingGastos=0;
 function openDay(key){
   currentDay=key;
   $('dayTitle').textContent='Registro • '+key;
   const data=state.days[key]||{turns:{},worked:0,ganhos:{},gastos:0,km:0,inicio:'',fim:'',pauses:[]};
-  const g=Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0);
-  $('dGanhos').textContent='R$ '+g.toFixed(0);
-  $('dGastos').textContent='R$ '+(data.gastos||0);
-  $('dLiq').textContent='R$ '+(g-(data.gastos||0)).toFixed(0);
+  pendingGanhos=JSON.parse(JSON.stringify(data.ganhos||{}));
+  pendingGastos=data.gastos||0;
+  updatePendingDisplay();
   $('dHoras').value=data.worked? (data.worked/3600000).toFixed(1) : '';
   $('dKm').value=data.km||'';
   $('dInicio').value=data.inicio||'08:00';
@@ -438,6 +439,26 @@ function openDay(key){
   setType('ganho');
   renderAppBtns();
   $('dayModal').classList.add('show');
+}
+function addPending(){
+  const val=parseFloat($('dValor').value)||0;
+  if(val<=0) return;
+  if(entryType==='ganho') pendingGanhos[selectedApp]=(pendingGanhos[selectedApp]||0)+val;
+  else pendingGastos+=val;
+  $('dValor').value='';
+  updatePendingDisplay();
+}
+function updatePendingDisplay(){
+  const g=Object.values(pendingGanhos).reduce((a,b)=>a+b,0);
+  $('dGanhos').textContent='R$ '+g.toFixed(0);
+  $('dGastos').textContent='R$ '+pendingGastos.toFixed(0);
+  $('dLiq').textContent='R$ '+(g-pendingGastos).toFixed(0);
+  let html='';
+  Object.keys(pendingGanhos).forEach(a=>{
+    if(pendingGanhos[a]>0) html+=`<div style="display:flex;justify-content:space-between;margin:2px 0"><span>${APP_ICONS[a]||''} ${a}</span><b>R$ ${pendingGanhos[a]}</b></div>`;
+  });
+  if(pendingGastos>0) html+=`<div style="display:flex;justify-content:space-between;margin:2px 0;color:#ff8a4c"><span>Gastos</span><b>R$ ${pendingGastos}</b></div>`;
+  $('pendingList').innerHTML=html||'<span style="color:#666">Nenhum valor adicionado ainda</span>';
 }
 function closeDay(){$('dayModal').classList.remove('show')}
 
@@ -479,11 +500,8 @@ function saveDay(){
   applyCustomStart();
   if(!currentDay) return;
   const data=state.days[currentDay]||{turns:{},worked:0,ganhos:{},gastos:0,km:0,inicio:'',fim:'',pauses:[]};
-  const val=parseFloat($('dValor').value)||0;
-  if(val>0){
-    if(entryType==='ganho') data.ganhos[selectedApp]=(data.ganhos[selectedApp]||0)+val;
-    else data.gastos=(data.gastos||0)+val;
-  }
+  data.ganhos=pendingGanhos;
+  data.gastos=pendingGastos;
   data.worked=parseFloat($('dHoras').value)*3600000 || data.worked;
   data.km=parseFloat($('dKm').value)||data.km;
   data.inicio=$('dInicio').value;
@@ -523,22 +541,65 @@ function refresh(){
   });
   $('ainda').innerHTML=ainda||'Nenhum limite';
   let ritmo='';
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth();
+  const daysInMonth=new Date(y,m+1,0).getDate();
   for(let s=1;s<=4;s++){
-    ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>—</span><b>—</b></div>`;
+    const start=(s-1)*7+1, end=Math.min(s*7, daysInMonth);
+    let val=0;
+    for(let d=start;d<=end;d++){
+      const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      if(state.days[key]) val+=Object.values(state.days[key].ganhos||{}).reduce((a,b)=>a+b,0);
+    }
+    const pct=metaTotal>0?Math.min(100,Math.round(val/(metaTotal/4)*100)):0;
+    ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>${pct}%</span><b>R$ ${val.toFixed(0)}</b></div>`;
   }
   $('ritmo').innerHTML=ritmo;
 }
 
-function openPlan(){$('planModal').classList.add('show')}
+function openPlan(){
+  $('pMeta').value=plan.meta||2000;
+  $('pHora').value=plan.hora||30;
+  renderFixas(); renderLimites(); renderFolgas();
+  $('planModal').classList.add('show');
+}
 function closePlan(){$('planModal').classList.remove('show')}
+function renderFixas(){
+  const el=$('fixas'); el.innerHTML='';
+  (plan.fixas||[]).forEach((f,i)=>{
+    el.innerHTML+=`<div class="limit-row"><input class="field" style="flex:2" value="${f.nome||''}" onchange="plan.fixas[${i}].nome=this.value"><input class="field" style="flex:1" type="number" value="${f.valor||0}" onchange="plan.fixas[${i}].valor=parseFloat(this.value)||0"><button onclick="plan.fixas.splice(${i},1);renderFixas()" style="background:#c44;border:none;color:#fff;border-radius:6px;padding:4px 8px">X</button></div>`;
+  });
+}
+function addFixa(){ if(!plan.fixas) plan.fixas=[]; plan.fixas.push({nome:'Nova',valor:0}); renderFixas(); }
+function renderLimites(){
+  const el=$('limites'); el.innerHTML='';
+  (plan.limites||[]).forEach((l,i)=>{
+    el.innerHTML+=`<div class="limit-row"><input class="field" style="flex:2" value="${l.nome||''}" onchange="plan.limites[${i}].nome=this.value"><input class="field" style="flex:1" type="number" value="${l.limite||0}" onchange="plan.limites[${i}].limite=parseFloat(this.value)||0"><button onclick="plan.limites.splice(${i},1);renderLimites()" style="background:#c44;border:none;color:#fff;border-radius:6px;padding:4px 8px">X</button></div>`;
+  });
+}
+function addLimite(){ if(!plan.limites) plan.limites=[]; plan.limites.push({nome:'Novo',limite:0,gasto:0}); renderLimites(); }
+function renderFolgas(){
+  const el=$('weeks'); el.innerHTML='';
+  const days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  for(let w=1;w<=4;w++){
+    el.innerHTML+=`<div style="margin:4px 0"><b>Sem ${w}</b><div class="week">${days.map((d,i)=>{
+      const key='w'+w+'_'+i;
+      const off=(plan.folgas||{})[key];
+      return `<button class="${off?'off':''}" onclick="toggleFolga('${key}',this)">${d}</button>`;
+    }).join('')}</div></div>`;
+  }
+}
+function toggleFolga(key,btn){
+  if(!plan.folgas) plan.folgas={};
+  plan.folgas[key]=!plan.folgas[key];
+  btn.classList.toggle('off');
+}
 function savePlan(){
   plan.meta=parseFloat($('pMeta').value)||2000;
   plan.hora=parseFloat($('pHora').value)||30;
   localStorage.setItem('luna_plan',JSON.stringify(plan));
   closePlan(); refresh();
 }
-function addFixa(){}
-function addLimite(){}
 function openSettings(){$('setModal').classList.add('show')}
 function closeSet(){$('setModal').classList.remove('show')}
 function saveKey(){const k=$('gKey').value.trim();localStorage.setItem('luna_gemini_key',k);try{if(window.LunaNative&&LunaNative.saveKey)LunaNative.saveKey(k)}catch(e){}$('keyStatus').textContent=k?'Salva!':'Removida';alert(k?'Chave salva':'Removida');closeSet()}
@@ -649,7 +710,11 @@ async function sendChat(fromVoice){
   try{ if(window.LunaNative&&LunaNative.saveConversation){ LunaNative.saveConversation('user',t); LunaNative.saveConversation('luna',resp); } }catch(e){}
 }
 
-window.onLunaSpeechResult=function(text){if(!text)return;$('chatInput').value=text;sendChat(true)};
+window.onLunaSpeechResult=function(text){
+  if(!text || text.startsWith('__')) return;
+  $('chatInput').value=text;
+  sendChat(true);
+};
 
 function startMic(){
   var orb=$('orb');
