@@ -200,7 +200,11 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
     <input class="field" id="dKm" type="number" placeholder="Km">
     <label style="font-size:11px;color:#aaa">Horário de início</label>
     <input class="field" id="dInicio" type="time" value="08:00">
+    <label style="font-size:11px;color:#aaa">Horário de término</label>
+    <input class="field" id="dFim" type="time">
     <button onclick="saveDay()" style="width:100%;margin-top:8px;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar</button>
+    <button onclick="deleteDayEntry()" style="width:100%;margin-top:6px;padding:8px;background:#c44;border:none;border-radius:8px;color:#fff">Excluir dia</button>
+    <button onclick="forgetMemory()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid #c44;border-radius:8px;color:#fff;font-size:11px">Apagar memória da Luna</button>
   </div>
 </div>
 
@@ -241,90 +245,149 @@ body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/20
 const APPS=['Uber','99','InDrive','Particular','Gorjeta','Outros'];
 const APP_ICONS={Uber:'🚗',99:'9️⃣','InDrive':'🚙',Particular:'🚕',Gorjeta:'💰',Outros:'📦'};
 const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+function todayKey(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function loadState(){
+  try{return JSON.parse(localStorage.getItem('luna_state')||'{}')}catch(e){return {}}
+}
+function saveState(s){localStorage.setItem('luna_state',JSON.stringify(s))}
+let state=loadState();
+if(!state.date) state.date=todayKey();
+if(!state.turno) state.turno=0;
+if(!state.mode) state.mode='idle'; // idle|running|paused|cafe|closed|concluded
+if(!state.accum) state.accum=0;
+if(!state.start) state.start=0;
+if(!state.pauses) state.pauses=[];
+if(!state.turns) state.turns={};
+if(!state.days) state.days={};
+if(!state.memory) state.memory=[];
+
 let currentDay=null,selectedApp='Uber',entryType='ganho';
-let currentTurno=parseInt(localStorage.getItem('luna_current_turno')||'0');
-let timerStart=parseInt(localStorage.getItem('luna_timer_start')||'0');
-let timerRunning=localStorage.getItem('luna_timer_running')==='1';
-let accumulatedMs=parseInt(localStorage.getItem('luna_accumulated')||'0');
 let plan=JSON.parse(localStorage.getItem('luna_plan')||'{"meta":2000,"hora":30,"fixas":[],"limites":[{"nome":"Mercado","limite":800,"gasto":0},{"nome":"Lanche","limite":200,"gasto":0}],"folgas":{}}');
-let days=JSON.parse(localStorage.getItem('luna_days')||'{}');
 
 function $(id){return document.getElementById(id)}
-
 function formatTime(ms){
-  const s=Math.floor(ms/1000);
+  const s=Math.max(0,Math.floor(ms/1000));
   const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
   return [h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
 }
+function getWorked(){
+  if(state.mode==='running' && state.start) return state.accum + (Date.now()-state.start);
+  return state.accum;
+}
 function updateTimer(){
-  if(!timerRunning||!timerStart)return;
-  const elapsed=accumulatedMs + (Date.now()-timerStart);
-  const text=formatTime(elapsed);
+  const worked=getWorked();
+  const text=formatTime(worked);
   $('cron').textContent=text;
-  // sync to native prefs for bubble
   try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(text); }catch(e){}
-  requestAnimationFrame(updateTimer);
+  if(state.mode==='running') requestAnimationFrame(updateTimer);
 }
-function saveAccumulated(){
-  localStorage.setItem('luna_accumulated', accumulatedMs);
-}
-function pauseTimer(){
-  if(timerRunning && timerStart){
-    accumulatedMs += (Date.now()-timerStart);
-    saveAccumulated();
-  }
-  timerRunning=false;
-  localStorage.setItem('luna_timer_running','0');
-  try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(formatTime(accumulatedMs)); }catch(e){}
-}
-function resumeTimer(){
-  timerStart=Date.now();
-  timerRunning=true;
-  localStorage.setItem('luna_timer_start',timerStart);
-  localStorage.setItem('luna_timer_running','1');
+function persist(){saveState(state)}
+function setMode(m,lbl){
+  state.mode=m;
+  $('turnoLbl').textContent=lbl||m.toUpperCase();
+  persist();
   updateTimer();
+}
+function pauseWork(label){
+  if(state.mode==='running' && state.start){
+    state.accum += (Date.now()-state.start);
+    state.start=0;
+  }
+  setMode('paused', label||'PAUSADO');
+}
+function startCafe(){
+  if(state.mode==='running' && state.start){
+    state.accum += (Date.now()-state.start);
+    state.start=0;
+  }
+  state.pauses.push({type:'cafe',start:Date.now(),end:0});
+  setMode('cafe','CAFÉ');
+}
+function resumeWork(){
+  if(state.mode==='cafe'){
+    const p=state.pauses[state.pauses.length-1];
+    if(p && !p.end) p.end=Date.now();
+  }
+  state.start=Date.now();
+  setMode('running', state.turno+'º TURNO');
   showBubble();
 }
-
 function showBubble(){ try{ if(window.LunaNative&&LunaNative.showOverlay)LunaNative.showOverlay(); }catch(e){} }
 function hideBubble(){ try{ if(window.LunaNative&&LunaNative.hideOverlay)LunaNative.hideOverlay(); }catch(e){} }
 
+function checkMidnight(){
+  const now=todayKey();
+  if(state.date!==now){
+    // finalize previous day
+    if(state.mode==='running' && state.start){
+      state.accum += (Date.now()-state.start);
+      state.start=0;
+    }
+    const prev=state.date;
+    if(!state.days[prev]) state.days[prev]={turns:{},worked:0,ganhos:{},gastos:0,km:0,pauses:[]};
+    state.days[prev].worked=state.accum;
+    state.days[prev].turns=JSON.parse(JSON.stringify(state.turns));
+    state.days[prev].pauses=state.pauses.slice();
+    // reset for new day
+    state.date=now;
+    state.turno=0;
+    state.mode='idle';
+    state.accum=0;
+    state.start=0;
+    state.pauses=[];
+    state.turns={};
+    persist();
+    $('turnoLbl').textContent='NOVO DIA';
+    $('cron').textContent='00:00:00';
+    buildCal();
+    refresh();
+    try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay('00:00:00'); }catch(e){}
+  }
+}
+setInterval(checkMidnight, 30000);
+checkMidnight();
+
 function turno(acao){
   try{
+    checkMidnight();
     if(acao==='iniciar'){
-      if(currentTurno>=4){alert('Já no 4º turno. Conclua o dia.');return}
-      currentTurno++;
-      localStorage.setItem('luna_current_turno',currentTurno);
-      $('turnoLbl').textContent=currentTurno+'º TURNO';
-      resumeTimer();
-    }
-    if(acao==='pausar' || acao==='cafe'){
-      pauseTimer();
-      $('turnoLbl').textContent=acao==='cafe'?'CAFÉ':'PAUSADO';
-    }
-    if(acao==='retomar'){
-      if(currentTurno>0){
-        $('turnoLbl').textContent=currentTurno+'º TURNO';
-        resumeTimer();
+      if(state.turno>=4 && state.mode!=='concluded' && state.mode!=='closed'){alert('Já no 4º turno. Conclua o dia.');return}
+      if(state.mode==='idle' || state.mode==='closed' || state.mode==='concluded'){
+        if(state.turno<4) state.turno++;
+        if(!state.turns[state.turno]) state.turns[state.turno]={start:Date.now(),end:0,worked:0,ganhos:{},gastos:0};
       }
+      resumeWork();
     }
-    if(acao==='fechar'){
-      pauseTimer();
-      if(currentTurno>0)openDay(13);
-      $('turnoLbl').textContent='TURNO FECHADO';
+    else if(acao==='pausar'){
+      pauseWork('PAUSADO');
     }
-    if(acao==='concluir'){
-      pauseTimer();
-      $('turnoLbl').textContent='DIA CONCLUÍDO';
-      // keep accumulated so next iniciar continues; only zerar resets
+    else if(acao==='cafe'){
+      startCafe();
     }
-    if(acao==='zerar'){
-      timerRunning=false;
-      accumulatedMs=0;
-      timerStart=0;
-      localStorage.setItem('luna_timer_running','0');
-      localStorage.setItem('luna_accumulated','0');
-      localStorage.removeItem('luna_timer_start');
+    else if(acao==='retomar' || acao==='continuar'){
+      if(state.turno>0) resumeWork();
+    }
+    else if(acao==='fechar'){
+      pauseWork('TURNO FECHADO');
+      if(state.turns[state.turno]) state.turns[state.turno].end=Date.now();
+      state.mode='closed';
+      persist();
+      openDay(state.date);
+    }
+    else if(acao==='concluir'){
+      pauseWork('TRABALHO CONCLUÍDO');
+      if(state.turns[state.turno]) state.turns[state.turno].end=Date.now();
+      state.mode='concluded';
+      persist();
+      openDay(state.date);
+    }
+    else if(acao==='zerar'){
+      state.mode='idle'; state.accum=0; state.start=0; state.turno=0; state.turns={}; state.pauses=[];
+      persist();
       $('cron').textContent='00:00:00';
       $('turnoLbl').textContent='ZERADO';
       try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay('00:00:00'); }catch(e){}
@@ -332,31 +395,43 @@ function turno(acao){
   }catch(e){console.error(e)}
 }
 
-if(timerRunning&&timerStart){$('turnoLbl').textContent=currentTurno+'º TURNO';updateTimer();showBubble()}
+if(state.mode==='running'){ $('turnoLbl').textContent=state.turno+'º TURNO'; updateTimer(); showBubble(); }
+else if(state.mode==='paused') $('turnoLbl').textContent='PAUSADO';
+else if(state.mode==='cafe') $('turnoLbl').textContent='CAFÉ';
+else if(state.mode==='concluded') $('turnoLbl').textContent='TRABALHO CONCLUÍDO';
+else $('turnoLbl').textContent='PARADO';
+$('cron').textContent=formatTime(getWorked());
 
 function buildCal(){
-  const el=$('cal');el.innerHTML='';
-  for(let i=1;i<=31;i++){
+  const el=$('cal'); if(!el) return;
+  el.innerHTML='';
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const today=todayKey();
+  for(let i=1;i<=daysInMonth;i++){
+    const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(i).padStart(2,'0');
     const d=document.createElement('div');
     d.textContent=i;
-    if(i===13)d.classList.add('today');
-    if(days[i])d.classList.add('has');
-    d.onclick=()=>openDay(i);
+    if(key===today) d.classList.add('today');
+    if(state.days[key]) d.classList.add('has');
+    d.onclick=()=>openDay(key);
     el.appendChild(d);
   }
 }
 
-function openDay(day){
-  currentDay=day;
-  $('dayTitle').textContent='Registro • '+day+'/10/2026';
-  const data=days[day]||{ganhos:{},gastos:0,horas:0,km:0,inicio:'08:00'};
+function openDay(key){
+  currentDay=key;
+  $('dayTitle').textContent='Registro • '+key;
+  const data=state.days[key]||{turns:{},worked:0,ganhos:{},gastos:0,km:0,inicio:'',fim:'',pauses:[]};
   const g=Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0);
-  $('dGanhos').textContent='R$ '+g;
+  $('dGanhos').textContent='R$ '+g.toFixed(0);
   $('dGastos').textContent='R$ '+(data.gastos||0);
-  $('dLiq').textContent='R$ '+(g-(data.gastos||0));
-  $('dHoras').value=data.horas||'';
+  $('dLiq').textContent='R$ '+(g-(data.gastos||0)).toFixed(0);
+  $('dHoras').value=data.worked? (data.worked/3600000).toFixed(1) : '';
   $('dKm').value=data.km||'';
   $('dInicio').value=data.inicio||'08:00';
+  if($('dFim')) $('dFim').value=data.fim||'';
   $('dValor').value='';
   selectedApp='Uber';
   entryType='ganho';
@@ -372,50 +447,60 @@ function setType(t){
   $('btnGasto').classList.toggle('on',t==='gasto');
   $('appBtns').style.display=t==='ganho'?'flex':'none';
 }
-
 function renderAppBtns(){
-  const el=$('appBtns');el.innerHTML='';
+  const el=$('appBtns'); if(!el) return;
+  el.innerHTML='';
   APPS.forEach(a=>{
     const b=document.createElement('button');
     b.textContent=(APP_ICONS[a]||'')+' '+a;
-    if(a===selectedApp)b.classList.add('on');
+    if(a===selectedApp) b.classList.add('on');
     b.onclick=()=>{selectedApp=a;renderAppBtns()};
     el.appendChild(b);
   });
 }
-
 function applyCustomStart(){
   const t=$('dInicio').value;
-  if(!t)return;
+  if(!t || !currentDay) return;
   const [hh,mm]=t.split(':').map(Number);
+  const parts=currentDay.split('-').map(Number);
+  const start=new Date(parts[0],parts[1]-1,parts[2],hh,mm,0);
   const now=new Date();
-  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hh,mm,0);
   const elapsed=Math.max(0, now-start);
-  accumulatedMs=elapsed;
-  saveAccumulated();
-  if(timerRunning){
-    timerStart=Date.now();
-    localStorage.setItem('luna_timer_start',timerStart);
+  // only apply if editing today
+  if(currentDay===todayKey()){
+    state.accum=elapsed;
+    if(state.mode==='running') state.start=Date.now();
+    persist();
+    $('cron').textContent=formatTime(getWorked());
+    try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(formatTime(getWorked())); }catch(e){}
   }
-  $('cron').textContent=formatTime(accumulatedMs);
-  try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(formatTime(accumulatedMs)); }catch(e){}
 }
 function saveDay(){
   applyCustomStart();
-  if(!currentDay)return;
-  const data=days[currentDay]||{ganhos:{},gastos:0,horas:0,km:0,inicio:'08:00'};
+  if(!currentDay) return;
+  const data=state.days[currentDay]||{turns:{},worked:0,ganhos:{},gastos:0,km:0,inicio:'',fim:'',pauses:[]};
   const val=parseFloat($('dValor').value)||0;
-  if(val){
+  if(val>0){
     if(entryType==='ganho') data.ganhos[selectedApp]=(data.ganhos[selectedApp]||0)+val;
     else data.gastos=(data.gastos||0)+val;
   }
-  data.horas=parseFloat($('dHoras').value)||data.horas;
+  data.worked=parseFloat($('dHoras').value)*3600000 || data.worked;
   data.km=parseFloat($('dKm').value)||data.km;
   data.inicio=$('dInicio').value;
-  days[currentDay]=data;
-  localStorage.setItem('luna_days',JSON.stringify(days));
+  if($('dFim')) data.fim=$('dFim').value;
+  state.days[currentDay]=data;
+  persist();
   closeDay();
-  buildCal();refresh();
+  buildCal(); refresh();
+}
+function deleteDayEntry(){
+  if(!currentDay) return;
+  if(confirm('Excluir todos os registros do dia '+currentDay+'?')){
+    delete state.days[currentDay];
+    persist();
+    closeDay();
+    buildCal(); refresh();
+  }
 }
 
 function refresh(){
@@ -424,11 +509,11 @@ function refresh(){
   const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
   const metaTotal=meta+fixas+limites;
   let feito=0;
-  Object.values(days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
+  Object.values(state.days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
   const falta=Math.max(0,metaTotal-feito);
-  const hoje=days[13]?Object.values(days[13].ganhos||{}).reduce((a,b)=>a+b,0):0;
+  const hoje=state.days[todayKey()]?Object.values(state.days[todayKey()].ganhos||{}).reduce((a,b)=>a+b,0):0;
   $('metaBox').innerHTML=`<div class="mini m1">META<br><b>R$ ${metaTotal.toFixed(0)}</b></div><div class="mini m2">FEITO<br><b>R$ ${feito.toFixed(0)}</b></div><div class="mini m3">FALTA<br><b>R$ ${falta.toFixed(0)}</b></div><div class="mini m4">HOJE<br><b>R$ ${hoje.toFixed(0)}</b></div>`;
-  const g=days[13]?.ganhos||{};
+  const g=state.days[todayKey()]?.ganhos||{};
   $('ganhosHoje').innerHTML=APPS.slice(0,4).map(a=>`<div style="display:flex;justify-content:space-between;margin:3px 0"><span>${APP_ICONS[a]||''} ${a}</span><b>R$ ${g[a]||0}</b></div>`).join('');
   let ainda='';
   (plan.limites||[]).forEach(l=>{
@@ -439,64 +524,22 @@ function refresh(){
   $('ainda').innerHTML=ainda||'Nenhum limite';
   let ritmo='';
   for(let s=1;s<=4;s++){
-    const start=(s-1)*7+1,end=s*7;
-    let val=0;
-    for(let d=start;d<=end;d++) if(days[d]) val+=Object.values(days[d].ganhos||{}).reduce((a,b)=>a+b,0);
-    const pct=metaTotal>0?Math.min(100,Math.round(val/(metaTotal/4)*100)):0;
-    ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>${pct}%</span><b>R$ ${val.toFixed(0)}</b></div>`;
+    ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>—</span><b>—</b></div>`;
   }
   $('ritmo').innerHTML=ritmo;
-  let rel='';
-  const sorted=Object.keys(days).sort((a,b)=>+a-+b);
-  if(sorted.length===0) rel='Nenhum dia registrado ainda.';
-  else sorted.forEach(d=>{
-    const data=days[d];
-    const g=Object.values(data.ganhos||{}).reduce((a,b)=>a+b,0);
-    rel+=`<div>Dia ${d}: R$ ${g} ganhos • R$ ${data.gastos||0} gastos • ${data.horas||0}h</div>`;
-  });
-  $('relatorio').innerHTML=rel+rel;
 }
 
-function renderPlan(){
-  const fix=$('fixas');fix.innerHTML='';
-  (plan.fixas||[]).forEach((f,i)=>{fix.innerHTML+=`<div class="limit-row"><input class="field" value="${f.nome}" onchange="plan.fixas[${i}].nome=this.value"><input class="field" type="number" value="${f.valor}" onchange="plan.fixas[${i}].valor=+this.value" style="width:80px"><button onclick="plan.fixas.splice(${i},1);renderPlan()">X</button></div>`});
-  const lim=$('limites');lim.innerHTML='';
-  (plan.limites||[]).forEach((l,i)=>{lim.innerHTML+=`<div class="limit-row"><input class="field" value="${l.nome}" onchange="plan.limites[${i}].nome=this.value"><input class="field" type="number" value="${l.limite}" onchange="plan.limites[${i}].limite=+this.value" style="width:70px"><button onclick="plan.limites.splice(${i},1);renderPlan()">X</button></div>`});
-  const w=$('weeks');w.innerHTML='';
-  for(let s=1;s<=4;s++){w.innerHTML+=`<div style="font-size:11px;margin-top:4px">Semana ${s}</div><div class="week" id="w${s}"></div>`}
-  for(let s=1;s<=4;s++){
-    const el=$(`w${s}`);
-    DIAS.forEach(d=>{
-      const b=document.createElement('button');
-      b.textContent=d;
-      const key=s+'-'+d;
-      if((plan.folgas||{})[key])b.classList.add('off');
-      b.onclick=()=>{plan.folgas=plan.folgas||{};plan.folgas[key]=!plan.folgas[key];renderPlan();calcPlan()};
-      el.appendChild(b);
-    });
-  }
-  calcPlan();
-}
-function addFixa(){plan.fixas=plan.fixas||[];plan.fixas.push({nome:'Nova',valor:0});renderPlan()}
-function addLimite(){plan.limites=plan.limites||[];plan.limites.push({nome:'Novo',limite:0,gasto:0});renderPlan()}
-function calcPlan(){
-  const meta=parseFloat($('pMeta').value)||plan.meta||2000;
-  const hora=parseFloat($('pHora').value)||plan.hora||30;
-  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(+f.valor||0),0);
-  const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
-  const total=meta+fixas+limites;
-  let folgas=0;
-  for(let s=1;s<=4;s++) DIAS.forEach(d=>{if((plan.folgas||{})[s+'-'+d])folgas++});
-  const diasTrab=Math.max(1,28-folgas);
-  const porDia=total/diasTrab;
-  const horasDia=porDia/hora;
-  $('planResult').innerHTML=`Fixas: R$ ${fixas}<br>Limites: R$ ${limites}<br>Meta líquida: R$ ${meta}<br><b>Total mês: R$ ${total.toFixed(0)}</b><br>Dias: ${diasTrab}<br>Por dia: R$ ${porDia.toFixed(0)}<br>Horas/dia: ${horasDia.toFixed(1)}h`;
-}
-function openPlan(){$('pMeta').value=plan.meta||2000;$('pHora').value=plan.hora||30;renderPlan();$('planModal').classList.add('show')}
+function openPlan(){$('planModal').classList.add('show')}
 function closePlan(){$('planModal').classList.remove('show')}
-function savePlan(){plan.meta=parseFloat($('pMeta').value)||2000;plan.hora=parseFloat($('pHora').value)||30;localStorage.setItem('luna_plan',JSON.stringify(plan));closePlan();refresh()}
-
-function openSettings(){$('setModal').classList.add('show');const k=localStorage.getItem('luna_gemini_key')||'';$('gKey').value=k;$('keyStatus').textContent=k?'Chave salva ('+k.substring(0,8)+'...)':'Nenhuma chave'}
+function savePlan(){
+  plan.meta=parseFloat($('pMeta').value)||2000;
+  plan.hora=parseFloat($('pHora').value)||30;
+  localStorage.setItem('luna_plan',JSON.stringify(plan));
+  closePlan(); refresh();
+}
+function addFixa(){}
+function addLimite(){}
+function openSettings(){$('setModal').classList.add('show')}
 function closeSet(){$('setModal').classList.remove('show')}
 function saveKey(){const k=$('gKey').value.trim();localStorage.setItem('luna_gemini_key',k);try{if(window.LunaNative&&LunaNative.saveKey)LunaNative.saveKey(k)}catch(e){}$('keyStatus').textContent=k?'Salva!':'Removida';alert(k?'Chave salva':'Removida');closeSet()}
 function getKey(){return localStorage.getItem('luna_gemini_key')||''}
@@ -510,25 +553,34 @@ async function testGemini(){
   alert(r);
 }
 
+function getWorkContext(){
+  const worked=getWorked();
+  const hoje=state.days[todayKey()]||{};
+  const g=Object.values(hoje.ganhos||{}).reduce((a,b)=>a+b,0);
+  return 'Contexto atual do trabalho: Turno '+state.turno+', modo '+state.mode+', tempo trabalhado hoje '+formatTime(worked)+', ganhos hoje R$ '+g.toFixed(0)+'.';
+}
+function getMemoryContext(){
+  if(!state.memory.length) return '';
+  return 'Memórias salvas: '+state.memory.slice(-5).map(m=>m.text).join('; ')+'.';
+}
 async function askGemini(p){
   const key=getKey();
-  // Prefer native bridge (OkHttp) — works from file:// without CORS
+  const ctx=getWorkContext()+' '+getMemoryContext();
+  const full=ctx+' Pergunta do motorista: '+p;
   try{
     if(window.LunaNative && typeof LunaNative.geminiQuery === 'function'){
-      // save key to native prefs if present
       if(key && LunaNative.saveKey) LunaNative.saveKey(key);
-      const r = LunaNative.geminiQuery(p);
+      const r = LunaNative.geminiQuery(full);
       if(r && r !== '__NO_KEY__' && r !== '__API_ERROR__') return r;
       if(r === '__NO_KEY__') return 'Configure a chave do Gemini em Ajustes (ícone ⚙).';
     }
   }catch(e){ console.error('native gemini', e); }
-  // fallback JS fetch
   if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes.';
   const models=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-pro','gemini-pro'];
   for(const m of models){
     try{
       const url='https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key);
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto do motorista de aplicativo. Responda em português, de forma útil e direta. Pergunta: '+p}]}] })});
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto do motorista de aplicativo. Responda em português, de forma útil e direta. '+full}]}] })});
       if(r.status===404||r.status===400) continue;
       if(!r.ok) continue;
       const d=await r.json();
@@ -539,37 +591,42 @@ async function askGemini(p){
   return 'Não consegui conectar à internet. Verifique a chave do Gemini e sua conexão.';
 }
 
+function remember(text){
+  state.memory.push({text,ts:Date.now()});
+  if(state.memory.length>50) state.memory=state.memory.slice(-50);
+  persist();
+}
+function forgetMemory(){
+  if(confirm('Apagar toda a memória da Luna?')){ state.memory=[]; persist(); alert('Memória apagada'); }
+}
 
 function offlineAnswer(text){
   const l=text.toLowerCase();
-  const meta=parseFloat(plan.meta)||2000;
-  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(+f.valor||0),0);
-  const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
-  const metaTotal=meta+fixas+limites;
-  let feito=0;
-  Object.values(days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
-  const falta=Math.max(0,metaTotal-feito);
-  const hoje=days[13]?Object.values(days[13].ganhos||{}).reduce((a,b)=>a+b,0):0;
-  if(l.includes('meta')||l.includes('quanto falta')||l.includes('falta')) return 'Meta do mês: R$ '+metaTotal.toFixed(0)+'. Feito: R$ '+feito.toFixed(0)+'. Falta: R$ '+falta.toFixed(0)+'.';
-  if(l.includes('hoje')||l.includes('ganhei hoje')) return 'Hoje você fez R$ '+hoje.toFixed(0)+'.';
-  if(l.includes('turno')||l.includes('tempo')) return 'Turno atual: '+currentTurno+'. Tempo: '+$('cron').textContent+'.';
-  if(l.includes('resumo')||l.includes('resultado')) return 'Resumo: Meta R$ '+metaTotal.toFixed(0)+', Feito R$ '+feito.toFixed(0)+', Falta R$ '+falta.toFixed(0)+', Hoje R$ '+hoje.toFixed(0)+'.';
+  const worked=getWorked();
+  const hoje=state.days[todayKey()]||{};
+  const g=Object.values(hoje.ganhos||{}).reduce((a,b)=>a+b,0);
+  if(l.includes('hora')||l.includes('tempo')||l.includes('quanto trabalhei')) return 'Hoje você trabalhou '+formatTime(worked)+'. Turno '+state.turno+' ('+state.mode+').';
+  if(l.includes('ganhei')||l.includes('ganho')||l.includes('fiz hoje')) return 'Hoje você fez R$ '+g.toFixed(0)+'.';
+  if(l.includes('turno')) return 'Turno atual: '+state.turno+'. Modo: '+state.mode+'.';
   return null;
 }
 function handleVoiceCommand(text){
   const lower=text.toLowerCase();
-  const numMatch=text.match(/\\d+/);
+  if(lower.includes('lembra')||lower.includes('guarde')||lower.includes('anote')){
+    const info=text.replace(/lembra|guarde|anote|que/gi,'').trim();
+    if(info){ remember(info); return 'Guardei: '+info; }
+  }
+  const numMatch=text.match(/\d+/);
   const num=numMatch?parseFloat(numMatch[0]):0;
   if(num && (lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione'))){
     let app='Uber';
     if(lower.includes('99')) app='99';
     else if(lower.includes('indrive')) app='InDrive';
     else if(lower.includes('particular')) app='Particular';
-    const data=days[13]||{ganhos:{}};
-    data.ganhos[app]=(data.ganhos[app]||0)+num;
-    days[13]=data;
-    localStorage.setItem('luna_days',JSON.stringify(days));
-    refresh();
+    const key=todayKey();
+    if(!state.days[key]) state.days[key]={turns:{},worked:0,ganhos:{},gastos:0,km:0};
+    state.days[key].ganhos[app]=(state.days[key].ganhos[app]||0)+num;
+    persist(); refresh();
     return 'Adicionei R$ '+num+' em '+app+'.';
   }
   return null;
@@ -577,7 +634,7 @@ function handleVoiceCommand(text){
 
 async function sendChat(fromVoice){
   const inp=$('chatInput');
-  const t=inp.value.trim();if(!t)return;
+  const t=inp.value.trim(); if(!t) return;
   const box=$('chat');
   box.innerHTML+='<div class="msg user">'+t+'</div>';
   inp.value='';
@@ -589,12 +646,13 @@ async function sendChat(fromVoice){
   box.innerHTML+='<div class="msg">'+resp+'</div>';
   box.scrollTop=box.scrollHeight;
   if(fromVoice && window.LunaNative && LunaNative.speak){try{LunaNative.speak(resp)}catch(e){}}
+  try{ if(window.LunaNative&&LunaNative.saveConversation){ LunaNative.saveConversation('user',t); LunaNative.saveConversation('luna',resp); } }catch(e){}
 }
 
 window.onLunaSpeechResult=function(text){if(!text)return;$('chatInput').value=text;sendChat(true)};
 
 function startMic(){
-  var orb = $('orb');
+  var orb=$('orb');
   if(orb) orb.style.filter='drop-shadow(0 0 24px #49E0FF)';
   setTimeout(()=>{
     try{
@@ -622,7 +680,7 @@ setInterval(()=>{
     }
   }catch(e){}
 },500);
-
 </script>
+
 </body>
 </html>
