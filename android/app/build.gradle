@@ -11,8 +11,8 @@ android {
         applicationId "space.neural.luna"
         minSdk 24
         targetSdk 34
-        versionCode 81
-        versionName "5.7.1"
+        versionCode 82
+        versionName "5.8.0"
     }
 
     signingConfigs {
