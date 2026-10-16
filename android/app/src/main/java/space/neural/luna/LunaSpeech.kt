@@ -55,7 +55,7 @@ object LunaSpeech {
                 override fun onPartialResults(partialResults: android.os.Bundle?) {
                     val text = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         ?.firstOrNull() ?: ""
-                    if (text.isNotBlank()) onResult?.invoke(text)
+                    if (text.isNotBlank()) onResult?.invoke("__PARTIAL__:$text")
                 }
                 override fun onEvent(eventType: Int, params: android.os.Bundle?) {
                 }
