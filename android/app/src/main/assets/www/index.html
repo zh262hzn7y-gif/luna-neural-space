@@ -2,750 +2,269 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>LUNA Neural Space</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rota dos Parceiros</title>
 <style>
-:root{--bg:#07060E;--v:#8D6BFF;--c:#49E0FF;--e:#3EE0A0;--o:#FF8A4C;--ice:#F3F0FF}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#07060E url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><circle cx="10" cy="20" r="1" fill="%23fff" opacity=".6"/><circle cx="80" cy="40" r="1.2" fill="%23fff" opacity=".4"/><circle cx="150" cy="15" r=".8" fill="%23fff" opacity=".5"/><circle cx="30" cy="90" r="1" fill="%23fff" opacity=".3"/><circle cx="120" cy="110" r="1.5" fill="%23fff" opacity=".7"/></svg>') repeat;color:var(--ice);font-family:system-ui,-apple-system,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:18px 10px 10px}
-.top{display:flex;align-items:center;justify-content:space-between;background:rgba(20,10,40,.9);border:1px solid rgba(73,224,255,.35);border-radius:16px;padding:14px 16px;margin-bottom:10px;flex-shrink:0;min-height:64px}
-.timer{font-size:28px;font-weight:800}
-.timer span{color:var(--c)}
-.top-btns{display:flex;gap:8px}
-.top-btns button{background:var(--c);color:#000;border:none;border-radius:20px;padding:10px 18px;font-size:14px;font-weight:700}
-.grid{display:grid;grid-template-columns:1.05fr 1.4fr 1fr;gap:8px;flex:1;min-height:0}
-.col{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto}
-.card{background:linear-gradient(160deg,rgba(30,15,60,.8),rgba(7,6,14,.9));border:1px solid rgba(73,224,255,.25);border-radius:12px;padding:9px;overflow:hidden}
-.card h4{font-size:9px;color:var(--c);letter-spacing:.8px;margin-bottom:4px;font-weight:700}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.mini{border-radius:9px;padding:8px;text-align:center;font-size:10px}
-.mini b{display:block;font-size:17px;margin:2px 0}
-.m1{background:linear-gradient(135deg,#6B4BFF,#4B2BFF)}
-.m2{background:linear-gradient(135deg,#00C896,#00A87A);color:#000}
-.m3{background:linear-gradient(135deg,#8D6BFF,#6B4BFF)}
-.m4{background:linear-gradient(135deg,#00B4D8,#0096C7);color:#000}
-.luna{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0}
-.orb{width:130px;height:130px;margin:4px 0;position:relative;animation:pulse 2.4s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(141,107,255,.7))}
-.orb svg{width:100%;height:100%}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-.chat{width:100%;flex:1;overflow-y:auto;font-size:12px;padding:2px 4px;min-height:60px}
-.msg{background:rgba(73,224,255,.14);border-radius:10px;padding:6px 9px;margin:3px 0;max-width:92%;font-size:12px}
-.msg.user{background:rgba(141,107,255,.32);margin-left:auto}
-.inp{display:flex;gap:5px;margin-top:5px;width:100%}
-.inp input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(73,224,255,.3);border-radius:18px;padding:9px 12px;color:#fff;font-size:13px}
-.inp button{background:var(--c);color:#000;border:none;border-radius:18px;padding:0 14px;font-weight:700;font-size:13px}
-.acts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;width:100%;background:rgba(0,0,0,.4);border-radius:12px;padding:6px}
-.acts button{flex:1;min-width:64px;background:rgba(73,224,255,.22);border:1px solid rgba(73,224,255,.4);color:#fff;border-radius:9px;padding:10px 2px;font-size:11px;font-weight:700}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:10px;text-align:center}
-.cal div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;background:rgba(255,255,255,.05);cursor:pointer}
-.cal .today{background:var(--v);font-weight:700}
-.cal .has{background:rgba(62,224,160,.45);color:#000}
-.cc{font-size:11px;line-height:1.3;padding:8px}
-.co{background:linear-gradient(135deg,#FF8A4C,#FF6B35);color:#fff}
-.cp{background:linear-gradient(135deg,#8D6BFF,#6B4BFF);color:#fff}
-.cg{background:linear-gradient(135deg,#3EE0A0,#00C896);color:#000}
-.cb{background:linear-gradient(135deg,#49E0FF,#00B4D8);color:#000}
-.report{height:100px;overflow:hidden;position:relative}
-.report-inner{animation:scrollUp 16s linear infinite;font-size:11px;line-height:1.4}
-@keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
-.week-row{display:flex;justify-content:space-between;font-size:10px;margin:2px 0}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;align-items:center;justify-content:center}
-.modal.show{display:flex}
-.mbox{width:92%;max-width:540px;max-height:90vh;overflow-y:auto;background:linear-gradient(160deg,#1a0a3a,#07060E);border:1px solid rgba(73,224,255,.3);border-radius:14px;padding:14px}
-.apps{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
-.apps button{background:rgba(255,255,255,.08);border:1px solid rgba(73,224,255,.3);color:#fff;border-radius:14px;padding:6px 10px;font-size:11px}
-.apps button.on{background:var(--c);color:#000}
-.field{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);border-radius:8px;padding:8px;color:#fff;margin:4px 0;font-size:13px}
-.week{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
-.week button{background:rgba(255,255,255,.06);border:1px solid rgba(73,224,255,.25);color:#fff;border-radius:8px;padding:6px 8px;font-size:10px;min-width:36px}
-.week button.off{background:var(--o);color:#000;font-weight:700}
-.limit-row{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:12px}
-.limit-row input{flex:1}
-.type-toggle{display:flex;gap:6px;margin:6px 0}
-.type-toggle button{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(73,224,255,.3);background:rgba(255,255,255,.06);color:#fff;font-weight:700}
-.type-toggle button.on{background:var(--e);color:#000}
+:root{--bg:#07060e;--card:#16122b;--line:#34295a;--fg:#f3f0ff;--muted:#b3a8d6;--v:#8d6bff;--c:#49e0ff;--e:#3ee0a0}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:radial-gradient(500px 220px at 0% 0%,rgba(141,107,255,.35),transparent 70%),var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+body{display:flex;flex-direction:column;min-height:100dvh}
+header{display:flex;justify-content:space-between;gap:12px;padding:16px 16px 8px}
+h1{font-size:22px;margin:0}
+p{margin:0}
+.muted{color:var(--muted);font-size:13px}
+.clock{font-size:40px;font-weight:800;letter-spacing:-1px;margin:6px 0}
+main{flex:1;overflow:auto;padding:0 16px 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button,input,select{font:inherit;color:inherit}
+button{min-height:44px;border:0;border-radius:12px;background:var(--v);color:#f7f4ff;font-weight:700}
+.ghost{background:#221b3d;color:var(--fg)}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:#0c1020;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{background:transparent;color:var(--muted);border-radius:0;font-size:11px;min-height:58px}
+.nav button.on{color:var(--c)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row button{flex:1}
+label{display:block;font-size:12px;color:var(--muted);margin-top:8px}
+input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#0c1020;padding:0 10px}
+.msg{background:#221b3d;border-radius:14px;padding:8px 10px;margin:6px 0;font-size:14px}
+.msg.me{background:var(--v)}
+.orb{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#b9f6ff,#8d6bff 55%,#1a1033);box-shadow:0 0 0 6px rgba(141,107,255,.25)}
+.hide{display:none}
+@media(min-width:900px){
+  body{flex-direction:row}
+  .nav{flex-direction:column;width:120px;border-top:0;border-right:1px solid var(--line)}
+  main{padding-top:16px}
+  .grid.wide{grid-template-columns:1fr 1fr 1fr}
+}
 </style>
 </head>
 <body>
-<div class="top">
-  <div class="timer">⏱ <span id="cron">00:00:00</span> <small id="turnoLbl" style="font-size:13px;color:#aaa;margin-left:8px">PARADO</small></div>
-  <div class="top-btns">
-    <button onclick="openPlan()">📋 Plano</button>
-    <button onclick="openSettings()">⚙ Ajustes</button>
+<header>
+  <div>
+    <p class="muted" id="hello">Rota dos Parceiros</p>
+    <h1 id="who">Motorista</h1>
+    <p class="muted" id="sub">Gestão neste aparelho</p>
   </div>
-</div>
-<div class="grid">
-  <div class="col">
-    <div class="card">
-      <h4>META DO MÊS</h4>
-      <div class="meta" id="metaBox"></div>
-    </div>
-    <div class="card">
-      <h4>RITMO SEMANAL</h4>
-      <div id="ritmo"></div>
-    </div>
-    <div class="card">
-      <h4>CALENDÁRIO</h4>
-      <div class="cal" id="cal"></div>
-    </div>
-    <div class="card cc cb"><h4 style="color:#000">🌤 CLIMA</h4>22°C • Noite limpa<br>Valadares • 68%</div>
-  </div>
-  <div class="col">
-    <div class="card luna">
-      <div class="orb" id="orb">
-  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="skin" cx="40%" cy="35%">
-        <stop offset="0%" stop-color="#FFE8D6"/>
-        <stop offset="60%" stop-color="#F5C8A8"/>
-        <stop offset="100%" stop-color="#E8B090"/>
-      </radialGradient>
-      <radialGradient id="hair" cx="50%" cy="30%">
-        <stop offset="0%" stop-color="#4A2C6A"/>
-        <stop offset="100%" stop-color="#1A0A2E"/>
-      </radialGradient>
-      <linearGradient id="cap" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#8D6BFF"/>
-        <stop offset="100%" stop-color="#5A3FD6"/>
-      </linearGradient>
-      <radialGradient id="glow" cx="50%" cy="50%">
-        <stop offset="0%" stop-color="#49E0FF" stop-opacity="0.4"/>
-        <stop offset="100%" stop-color="#49E0FF" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <circle cx="60" cy="60" r="58" fill="url(#glow)"/>
-    <!-- hair back -->
-    <ellipse cx="60" cy="78" rx="38" ry="32" fill="url(#hair)"/>
-    <!-- face -->
-    <ellipse cx="60" cy="68" rx="28" ry="32" fill="url(#skin)"/>
-    <!-- hair sides -->
-    <path d="M32 55 Q28 80 40 95 Q45 70 38 55Z" fill="url(#hair)"/>
-    <path d="M88 55 Q92 80 80 95 Q75 70 82 55Z" fill="url(#hair)"/>
-    <!-- bangs -->
-    <path d="M35 58 Q60 42 85 58 Q70 50 60 52 Q50 50 35 58Z" fill="url(#hair)"/>
-    <!-- cap -->
-    <path d="M30 52 Q60 28 90 52 L88 58 Q60 40 32 58Z" fill="url(#cap)"/>
-    <ellipse cx="60" cy="52" rx="30" ry="6" fill="#6B4BFF"/>
-    <!-- eyes -->
-    <ellipse cx="50" cy="70" rx="5" ry="6" fill="#2A1A4A"/>
-    <ellipse cx="70" cy="70" rx="5" ry="6" fill="#2A1A4A"/>
-    <ellipse cx="51" cy="68" rx="2" ry="2.5" fill="#fff"/>
-    <ellipse cx="71" cy="68" rx="2" ry="2.5" fill="#fff"/>
-    <!-- smile -->
-    <path d="M52 82 Q60 88 68 82" stroke="#D4897A" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <!-- blush -->
-    <ellipse cx="44" cy="78" rx="4" ry="2.5" fill="#FFB8A8" opacity="0.5"/>
-    <ellipse cx="76" cy="78" rx="4" ry="2.5" fill="#FFB8A8" opacity="0.5"/>
-    <!-- LUNA text on cap -->
-    <text x="60" y="50" text-anchor="middle" font-size="7" font-weight="700" fill="#F3F0FF" font-family="system-ui">LUNA</text>
-  </svg>
-</div>
-      <div style="font-size:10px;color:var(--c)">LUNA • PRONTA</div>
-      <div class="chat" id="chat"><div class="msg">Oi, Marlon. Como posso ajudar?</div></div>
-      <div class="inp">
-        <input id="chatInput" placeholder="Fale com a Luna..." onkeydown="if(event.key==='Enter')sendChat()">
-        <button onclick="startMic()">🎤 Falar</button>
-        <button onclick="sendChat()">Enviar</button>
-      </div>
-      <div class="acts">
-        <button onclick="turno('iniciar')">▶ Iniciar</button>
-        <button onclick="turno('pausar')">⏸ Pausar</button>
-        <button onclick="turno('cafe')">☕ Café</button>
-        <button onclick="turno('retomar')">▶ Retomar</button>
-        <button onclick="turno('fechar')">⏹ Fechar</button>
-        <button onclick="turno('concluir')">✓ Concluir</button>
-        <button onclick="turno('zerar')">↺ Zerar</button>
-      </div>
-    </div>
-  </div>
-  <div class="col">
-    <div class="card">
-      <h4>🚗 GANHOS DE HOJE</h4>
-      <div id="ganhosHoje" style="font-size:12px"></div>
-    </div>
-    <div class="card">
-      <h4>🛒 AINDA POSSO GASTAR</h4>
-      <div id="ainda" style="font-size:12px"></div>
-    </div>
-    <div class="card">
-      <h4>📊 RELATÓRIO DO MÊS</h4>
-      <div class="report"><div class="report-inner" id="relatorio"></div></div>
-    </div>
-    <div class="card cc co"><h4 style="color:#fff">🛣️ BR-381</h4>Tráfego normal no trecho Valadares.</div>
-    <div class="card cc cp"><h4 style="color:#fff">📰 NOTÍCIA</h4>Diário do Rio Doce: previsão de chuva isolada.</div>
-    <div class="card cc cg"><h4 style="color:#000">💡 DICA</h4>Evite horas de pico na BR-381.</div>
-  </div>
-</div>
-
-<div class="modal" id="dayModal">
-  <div class="mbox">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h3 id="dayTitle" style="font-size:15px">Registro</h3>
-      <button onclick="closeDay()" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:12px;padding:6px 12px">Fechar</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0;font-size:12px;text-align:center">
-      <div class="card">GANHOS<br><b id="dGanhos">R$ 0</b></div>
-      <div class="card">GASTOS<br><b id="dGastos">R$ 0</b></div>
-      <div class="card">LÍQUIDO<br><b id="dLiq">R$ 0</b></div>
-    </div>
-    <div class="type-toggle">
-      <button id="btnGanho" class="on" onclick="setType('ganho')">Ganhos</button>
-      <button id="btnGasto" onclick="setType('gasto')">Gastos</button>
-    </div>
-    <div class="apps" id="appBtns"></div>
-    <input class="field" id="dValor" type="number" placeholder="Valor (R$)">
-    <button onclick="addPending()" style="width:100%;margin:6px 0;padding:8px;background:var(--c);border:none;border-radius:8px;color:#000;font-weight:700">Adicionar este valor</button>
-    <div id="pendingList" style="font-size:11px;margin:6px 0;background:rgba(0,0,0,.3);padding:6px;border-radius:8px;min-height:30px"></div>
-    <label style="font-size:11px;color:#aaa">Horas trabalhadas</label>
-    <input class="field" id="dHoras" type="number" step="0.1" placeholder="Ex: 6.5">
-    <label style="font-size:11px;color:#aaa">Quilômetros</label>
-    <input class="field" id="dKm" type="number" placeholder="Km">
-    <label style="font-size:11px;color:#aaa">Horário de início</label>
-    <input class="field" id="dInicio" type="time" value="08:00">
-    <label style="font-size:11px;color:#aaa">Horário de término</label>
-    <input class="field" id="dFim" type="time">
-    <button onclick="saveDay()" style="width:100%;margin-top:8px;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar</button>
-    
-  </div>
-</div>
-
-<div class="modal" id="planModal">
-  <div class="mbox">
-    <h3>Planejamento</h3>
-    <label style="font-size:11px">Meta líquida no mês (R$)</label>
-    <input class="field" id="pMeta" type="number" value="2000">
-    <label style="font-size:11px">Ganho por hora (R$)</label>
-    <input class="field" id="pHora" type="number" value="30">
-    <h4 style="margin-top:8px">Contas Fixas</h4>
-    <div id="fixas"></div>
-    <button onclick="addFixa()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar</button>
-    <h4 style="margin-top:8px">Limites de Gasto</h4>
-    <div id="limites"></div>
-    <button onclick="addLimite()" style="font-size:11px;padding:4px 8px;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;margin:4px 0">+ Adicionar</button>
-    <h4 style="margin-top:8px">Folgas</h4>
-    <div id="weeks"></div>
-    <div id="planResult" style="margin:8px 0;font-size:12px;background:rgba(73,224,255,.1);padding:8px;border-radius:8px"></div>
-    <button onclick="savePlan()" style="width:100%;padding:10px;background:var(--e);border:none;border-radius:8px;color:#000;font-weight:700">Salvar</button>
-    <button onclick="closePlan()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid rgba(73,224,255,.3);border-radius:8px;color:#fff">Fechar</button>
-  </div>
-</div>
-
-<div class="modal" id="setModal">
-  <div class="mbox">
-    <h3>Ajustes</h3>
-    <label style="font-size:11px">Chave do Gemini</label>
-    <input class="field" id="gKey" type="password" placeholder="Cole sua chave">
-    <p id="keyStatus" style="font-size:11px;color:#aaa;margin:4px 0"></p>
-    <button onclick="saveKey()" style="width:100%;padding:10px;background:var(--v);border:none;border-radius:8px;color:#fff;font-weight:700">Salvar Chave</button>
-    <button onclick="testGemini()" style="width:100%;margin-top:6px;padding:8px;background:rgba(73,224,255,.2);border:none;border-radius:8px;color:#fff">Testar Chave</button>
-    <button onclick="closeSet()" style="width:100%;margin-top:6px;padding:8px;background:transparent;border:1px solid rgba(73,224,255,.3);border-radius:8px;color:#fff">Fechar</button>
-  </div>
-</div>
-
+  <button class="ghost" id="gear" style="width:44px">⚙</button>
+</header>
+<main id="view"></main>
+<nav class="nav" id="nav"></nav>
 <script>
-const APPS=['Uber','99','InDrive','Particular','Gorjeta','Outros'];
-const APP_ICONS={Uber:'🚗',99:'9️⃣','InDrive':'🚙',Particular:'🚕',Gorjeta:'💰',Outros:'📦'};
-const DIAS=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-
-function todayKey(){
-  const d=new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const KEY="rota_apk_v6";
+const CATS=["Combustível","Alimentação","Pedágio","Estacionamento","Manutenção","Lavagem","Seguro","Outros"];
+const APPS=["Uber","99","inDrive","Particular","Outros"];
+const $=id=>document.getElementById(id);
+function dayKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function money(c){return (c/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function clock(ms){const s=Math.max(0,Math.floor(ms/1000));return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(n=>String(n).padStart(2,"0")).join(":")}
+function hm(ts){return new Date(ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
+function empty(){return {name:"",tab:"inicio",shifts:[],entries:[],plan:{day:0,month:0,basis:"liquido"},track:false,chat:[{role:"luna",text:"Pode escrever ou usar o microfone. Texto não sai em voz, a menos que você peça."}]}}
+let state; try{state=JSON.parse(localStorage.getItem(KEY))||empty()}catch(e){state=empty()}
+function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){persist(); render()}
+function active(){return state.shifts.find(s=>s.state==="working"||s.state==="paused"||s.state==="coffee")}
+function worked(s,now){if(s.state==="working"&&s.segment){const x=now-s.segment; if(x>0&&x<2*3600e3) return s.worked+x} return s.worked}
+function catchUp(now){
+  const s=active(); if(!s||s.state!=="working") return;
+  const d=now-s.seen;
+  if(d<0||d>2*3600e3){s.state="paused"; s.segment=null; s.note="Intervalo longo ou relógio alterado. Não somei essas horas."; s.seen=now; return}
+  s.worked+=d; s.segment=now; s.seen=now;
 }
-function loadState(){
-  try{return JSON.parse(localStorage.getItem('luna_state')||'{}')}catch(e){return {}}
+function start(now){
+  if(active()) return "Já existe turno aberto. Use retomar.";
+  const day=dayKey(new Date(now));
+  const n=state.shifts.filter(s=>s.day===day).length+1;
+  if(n>4) return "Os quatro turnos de hoje já foram usados.";
+  state.shifts.push({id:String(now),day,slot:n,state:"working",started:now,ended:null,worked:0,segment:now,seen:now,pauses:[],coffee:[],km:0,note:""});
+  return "Turno "+n+" iniciado às "+hm(now)+".";
 }
-function saveState(s){localStorage.setItem('luna_state',JSON.stringify(s))}
-let state=loadState();
-if(!state.date) state.date=todayKey();
-if(!state.turno) state.turno=0;
-if(!state.mode) state.mode='idle'; // idle|running|paused|cafe|closed|concluded
-if(!state.accum) state.accum=0;
-if(!state.start) state.start=0;
-if(!state.pauses) state.pauses=[];
-if(!state.turns) state.turns={};
-if(!state.days) state.days={};
-if(!state.memory) state.memory=[];
-
-let currentDay=null,selectedApp='Uber',entryType='ganho';
-let plan=JSON.parse(localStorage.getItem('luna_plan')||'{"meta":2000,"hora":30,"fixas":[],"limites":[{"nome":"Mercado","limite":800,"gasto":0},{"nome":"Lanche","limite":200,"gasto":0}],"folgas":{}}');
-
-function $(id){return document.getElementById(id)}
-function formatTime(ms){
-  const s=Math.max(0,Math.floor(ms/1000));
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
-  return [h,m,sec].map(n=>String(n).padStart(2,'0')).join(':');
+function pause(now){const s=active(); if(!s) return "Nenhum turno aberto."; if(s.state!=="working") return "O turno já está parado."; const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null; s.state="paused"; s.pauses.push([now,null]); s.seen=now; return "Pausa registrada."}
+function cafe(now){const s=active(); if(!s) return "Abra um turno antes do café."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null} s.state="coffee"; s.coffee.push([now,null]); s.seen=now; return "Café separado da pausa."}
+function resume(now){const s=active(); if(!s) return "Nada para retomar."; if(s.state==="working") return "Já está trabalhando."; const list=s.state==="coffee"?s.coffee:s.pauses; const last=list[list.length-1]; if(last&&!last[1]) last[1]=now; s.state="working"; s.segment=now; s.seen=now; return "Retomado. O início continua "+hm(s.started)+"."}
+function closeShift(now){const s=active(); if(!s) return "Nenhum turno aberto."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x} s.segment=null; s.state="closed"; s.ended=now; s.seen=now; return "Turno "+s.slot+" fechado. Trabalhado "+clock(s.worked)+"."}
+function totals(days,now){
+  const inc=state.entries.filter(e=>e.kind==="in"&&days.includes(e.day)).reduce((a,e)=>a+e.cents,0);
+  const exp=state.entries.filter(e=>e.kind==="out"&&days.includes(e.day)).reduce((a,e)=>a+e.cents,0);
+  const shifts=state.shifts.filter(s=>days.includes(s.day));
+  const ms=shifts.reduce((a,s)=>a+worked(s,now),0);
+  const km=shifts.reduce((a,s)=>a+(s.km||0),0);
+  const h=ms/36e5;
+  return {inc,exp,net:inc-exp,ms,km,ph:h>=1/60?Math.round(inc/h):null};
 }
-function getWorked(){
-  if(state.mode==='running' && state.start) return state.accum + (Date.now()-state.start);
-  return state.accum;
-}
-function updateTimer(){
-  const worked=getWorked();
-  const text=formatTime(worked);
-  $('cron').textContent=text;
-  try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(text); }catch(e){}
-  if(state.mode==='running') requestAnimationFrame(updateTimer);
-}
-function persist(){saveState(state)}
-function setMode(m,lbl){
-  state.mode=m;
-  $('turnoLbl').textContent=lbl||m.toUpperCase();
-  persist();
-  updateTimer();
-}
-function pauseWork(label){
-  if(state.mode==='running' && state.start){
-    state.accum += (Date.now()-state.start);
-    state.start=0;
+function intent(text,now){
+  const n=text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  if(/iniciar/.test(n)) return start(now);
+  if(/pausar|pausa/.test(n)) return pause(now);
+  if(/cafe/.test(n)) return cafe(now);
+  if(/retomar|continuar/.test(n)) return resume(now);
+  if(/fechar/.test(n)) return closeShift(now);
+  if(/quanto tempo|trabalhei/.test(n)){const t=totals([dayKey(new Date(now))],now); return "Hoje: "+clock(t.ms)+" trabalhadas."}
+  if(/quanto ganhei|lucro|resultado/.test(n)){const t=totals([dayKey(new Date(now))],now); return "Hoje bruto "+money(t.inc)+", despesas "+money(t.exp)+", líquido "+money(t.net)+"."}
+  const m=n.match(/(\d+[.,]?\d*)/);
+  if(/registre|anota|lanca/.test(n)){
+    if(!m) return "Diga o valor em reais e a categoria.";
+    const cents=Math.round(Number(m[1].replace(",","."))*100);
+    const cat=CATS.find(c=>n.includes(c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").slice(0,6))) || (n.includes("combust")?"Combustível":null);
+    const app=APPS.find(a=>n.includes(a.toLowerCase()));
+    if(!cat && !app) return "Falta a categoria ou o aplicativo. Exemplo: 20 reais de combustível.";
+    state.entries.push({id:String(now),kind:cat?"out":"in",cents,day:dayKey(new Date(now)),cat:cat||"Corrida",app:app||"",note:"Luna"});
+    return "Lancei "+money(cents)+(cat?" em "+cat:" na "+app)+".";
   }
-  setMode('paused', label||'PAUSADO');
+  return "";
 }
-function startCafe(){
-  if(state.mode==='running' && state.start){
-    state.accum += (Date.now()-state.start);
-    state.start=0;
-  }
-  state.pauses.push({type:'cafe',start:Date.now(),end:0});
-  setMode('cafe','CAFÉ');
-}
-function resumeWork(){
-  if(state.mode==='cafe'){
-    const p=state.pauses[state.pauses.length-1];
-    if(p && !p.end) p.end=Date.now();
-  }
-  state.start=Date.now();
-  setMode('running', state.turno+'º TURNO');
-  showBubble();
-}
-function showBubble(){ try{ if(window.LunaNative&&LunaNative.showOverlay)LunaNative.showOverlay(); }catch(e){} }
-function hideBubble(){ try{ if(window.LunaNative&&LunaNative.hideOverlay)LunaNative.hideOverlay(); }catch(e){} }
-
-function checkMidnight(){
-  const now=todayKey();
-  if(state.date!==now){
-    // finalize previous day
-    if(state.mode==='running' && state.start){
-      state.accum += (Date.now()-state.start);
-      state.start=0;
+let tab=state.tab||"inicio";
+function setTab(t){tab=t; state.tab=t; save()}
+const NAV=[["inicio","Início"],["gestao","Gestão"],["mapa","Mapa"],["fala","Comunica"],["luna","Luna"]];
+function render(){
+  const now=Date.now(); catchUp(now);
+  const h=new Date().getHours();
+  $("hello").textContent=(h<12?"Bom dia":h<18?"Boa tarde":"Boa noite");
+  $("who").textContent=state.name||"Motorista";
+  const open=active();
+  $("sub").textContent=open?("Turno "+open.slot+" · "+open.state):"Nenhum turno aberto";
+  $("nav").innerHTML=NAV.map(([id,label])=>`<button class="${tab===id?"on":""}" data-tab="${id}">${label}</button>`).join("");
+  $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  const day=dayKey(new Date());
+  const t=totals([day],now);
+  if(tab==="inicio"){
+    $("view").innerHTML=`
+      <section class="card"><p class="muted">Jornada</p><div class="clock">${open?clock(worked(open,now)):clock(t.ms)}</div>
+      <p class="muted">${open?"Início "+hm(open.started)+(open.note?" · "+open.note:""):"Toque em Gestão para iniciar o turno 1."}</p>
+      <div class="row" style="margin-top:10px"><button id="goj">Abrir turno</button></div></section>
+      <div class="grid wide">
+        <div class="card"><p class="muted">Bruto</p><b>${money(t.inc)}</b></div>
+        <div class="card"><p class="muted">Despesas</p><b>${money(t.exp)}</b></div>
+        <div class="card"><p class="muted">Líquido</p><b>${money(t.net)}</b></div>
+        <div class="card"><p class="muted">Por hora</p><b>${t.ph==null?"Sem dados":money(t.ph)}</b></div>
+      </div>
+      <section class="card" id="clima"><p class="muted">Clima · Governador Valadares</p><p>Consultando Open-Meteo…</p></section>
+      <section class="card"><p class="muted">Notícias</p><p class="muted">Sem alerta inventado.</p>
+        <p><a href="https://www.driododoce.com.br/" style="color:var(--c)">Diário do Rio Doce</a></p>
+        <p><a href="https://news.google.com/search?q=BR-381+Governador+Valadares&hl=pt-BR&gl=BR&ceid=BR:pt-419" style="color:var(--c)">BR-381 nas fontes</a></p>
+      </section>`;
+    $("goj").onclick=()=>setTab("gestao");
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=-18.851&longitude=-41.949&current=temperature_2m,weather_code&timezone=America/Sao_Paulo")
+      .then(r=>r.json()).then(b=>{
+        const box=$("clima"); if(!box) return;
+        const temp=b.current&&typeof b.current.temperature_2m==="number"?Math.round(b.current.temperature_2m)+"°C":"—";
+        box.innerHTML=`<p class="muted">Clima · Open-Meteo</p><b>${temp}</b><p class="muted">${(b.current&&b.current.time||"").replace("T"," ")}</p>`;
+      }).catch(()=>{$("clima")&&($("clima").innerHTML="<p class='muted'>Clima indisponível agora.</p>")});
+  } else if(tab==="gestao"){
+    $("view").innerHTML=`<section class="card"><p class="muted">${open?"Turno "+open.slot:"Sem turno"}</p><div class="clock">${open?clock(worked(open,now)):"00:00:00"}</div>
+      <div class="row">
+        ${!open?'<button id="b1">Iniciar</button>':""}
+        ${open&&open.state==="working"?'<button class="ghost" id="b2">Pausar</button>':""}
+        ${open&&open.state!=="coffee"?'<button class="ghost" id="b3">Café</button>':""}
+        ${open&&open.state!=="working"?'<button id="b4">Retomar</button>':""}
+        ${open?'<button class="ghost" id="b5">Fechar</button>':""}
+      </div><p class="muted" id="note"></p></section>
+      <section class="card"><p class="muted">Lançamento de hoje</p>
+        <div class="row"><button id="kin" class="ghost">Receita</button><button id="kout" class="ghost">Despesa</button></div>
+        <label>Valor</label><input id="val" inputmode="decimal" placeholder="0,00">
+        <label>Categoria ou app</label><select id="cat">${APPS.map(a=>`<option>${a}</option>`).join("")}${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+        <button id="add" style="margin-top:8px;width:100%">Lançar</button>
+        <div id="list"></div>
+      </section>
+      <section class="card"><p class="muted">Meta do mês (R$)</p><input id="meta" inputmode="decimal" value="${state.plan.month||0}"><button id="savem" style="margin-top:8px">Salvar meta</button>
+      <p class="muted">Km manual do turno aberto</p><input id="km" inputmode="decimal" placeholder="km"><button id="savek">Corrigir km</button></section>`;
+    const act=(fn)=>{ $("note").textContent=fn(Date.now()); save() };
+    $("b1")&&($("b1").onclick=()=>act(start));
+    $("b2")&&($("b2").onclick=()=>act(pause));
+    $("b3")&&($("b3").onclick=()=>act(cafe));
+    $("b4")&&($("b4").onclick=()=>act(resume));
+    $("b5")&&($("b5").onclick=()=>{ if(confirm("Fechar o turno?")) act(closeShift) });
+    $("add").onclick=()=>{
+      const cents=Math.round(Number($("val").value.replace(",","."))*100); if(!cents) return;
+      const label=$("cat").value; const out=CATS.includes(label);
+      state.entries.push({id:String(Date.now()),kind:out?"out":"in",cents,day,cat:out?label:"Corrida",app:out?"":label,note:""});
+      save();
+    };
+    $("savem").onclick=()=>{ state.plan.month=Number($("meta").value.replace(",","."))||0; save() };
+    $("savek").onclick=()=>{ const s=active(); if(!s) return; s.km=Number($("km").value.replace(",","."))||0; s.note=(s.note?s.note+" · ":"")+"km editado"; save() };
+    $("list").innerHTML=state.entries.filter(e=>e.day===day).map(e=>`<p>${e.kind==="in"?"Receita":e.cat} ${money(e.cents)}</p>`).join("")||"<p class='muted'>Nada lançado hoje.</p>";
+  } else if(tab==="mapa"){
+    $("view").innerHTML=`<section class="card"><p>Sua posição, se o GPS permitir. Nenhum motorista inventado aparece aqui.</p>
+      <button id="gps">Mostrar meu ponto</button><p class="muted" id="gstat">O mapa dos parceiros entre aparelhos continua na versão com conta. Este APK não publica sua placa.</p>
+      <div id="frame"></div></section>`;
+    $("gps").onclick=()=>{
+      const put=(lat,lng)=>{
+        const d=0.02; const src=`https://www.openstreetmap.org/export/embed.html?bbox=${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lng}`;
+        $("frame").innerHTML=`<iframe title="Mapa" src="${src}" style="width:100%;height:280px;border:0;border-radius:12px;margin-top:8px"></iframe>`;
+        $("gstat").textContent=`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      };
+      if(window.LunaNative&&LunaNative.getLocation){ LunaNative.getLocation("window.__geo"); window.__geo=(a,b)=>put(a,b); return }
+      if(!navigator.geolocation){ $("gstat").textContent="GPS indisponível."; return }
+      navigator.geolocation.getCurrentPosition(p=>put(p.coords.latitude,p.coords.longitude),()=>$("gstat").textContent="Permissão de localização negada.");
+    };
+  } else if(tab==="fala"){
+    $("view").innerHTML=`<section class="card"><h2 style="margin:0 0 8px;font-size:18px">Rádio e chamada</h2>
+      <p>Este APK não transmite áudio entre dois aparelhos. Não há servidor de mídia configurado. Segurar um botão aqui não finge uma transmissão.</p>
+      <p class="muted">O rádio e a chamada ao vivo estão na versão com conta, quando dois motoristas estão online.</p></section>
+      <section class="card"><p class="muted">Recado só neste aparelho</p><input id="note" placeholder="Anotação"><button id="nsave">Guardar</button><div id="notes"></div></section>`;
+    const notes=JSON.parse(localStorage.getItem("rota_notes")||"[]");
+    $("notes").innerHTML=notes.map(n=>`<p class="msg">${n}</p>`).join("");
+    $("nsave").onclick=()=>{ if(!$("note").value.trim()) return; notes.push($("note").value.trim()); localStorage.setItem("rota_notes",JSON.stringify(notes)); render() };
+  } else {
+    $("view").innerHTML=`<section class="card" style="display:flex;gap:10px;align-items:center"><div class="orb"></div><div><b>Luna</b><p class="muted" id="phase">Em espera</p></div></section>
+      <div id="chat"></div>
+      <div class="row"><input id="q" placeholder="Pergunte ou peça um lançamento"><button id="mic">Falar</button><button id="send">Enviar</button></div>
+      <p class="muted">Bolha sobre outros apps pede permissão de sobreposição.</p>
+      <button class="ghost" id="bubble">Mostrar bolha</button>`;
+    const box=$("chat");
+    state.chat.slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"+(m.role==="user"?" me":""); p.textContent=m.text; box.appendChild(p)});
+    function push(role,text,voice){ state.chat.push({role,text}); if(state.chat.length>40) state.chat=state.chat.slice(-40); save();
+      if(voice && window.LunaNative && LunaNative.speak) LunaNative.speak(text);
+      else if(voice && window.speechSynthesis){ const u=new SpeechSynthesisUtterance(text); u.lang="pt-BR"; speechSynthesis.cancel(); speechSynthesis.speak(u) }
     }
-    const prev=state.date;
-    if(!state.days[prev]) state.days[prev]={turns:{},worked:0,ganhos:{},gastos:0,km:0,pauses:[]};
-    state.days[prev].worked=state.accum;
-    state.days[prev].turns=JSON.parse(JSON.stringify(state.turns));
-    state.days[prev].pauses=state.pauses.slice();
-    // reset for new day
-    state.date=now;
-    state.turno=0;
-    state.mode='idle';
-    state.accum=0;
-    state.start=0;
-    state.pauses=[];
-    state.turns={};
-    persist();
-    $('turnoLbl').textContent='NOVO DIA';
-    $('cron').textContent='00:00:00';
-    buildCal();
-    refresh();
-    try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay('00:00:00'); }catch(e){}
-  }
-}
-setInterval(checkMidnight, 30000);
-checkMidnight();
-
-function turno(acao){
-  try{
-    checkMidnight();
-    if(acao==='iniciar'){
-      if(state.turno>=4 && state.mode!=='concluded' && state.mode!=='closed'){alert('Já no 4º turno. Conclua o dia.');return}
-      if(state.mode==='idle' || state.mode==='closed' || state.mode==='concluded'){
-        if(state.turno<4) state.turno++;
-        if(!state.turns[state.turno]) state.turns[state.turno]={start:Date.now(),end:0,worked:0,ganhos:{},gastos:0};
+    async function ask(text,voice){
+      const local=intent(text,Date.now());
+      state.chat.push({role:"user",text});
+      if(local){ push("luna",local,voice); return }
+      if(window.LunaNative && LunaNative.geminiQuery){
+        $("phase").textContent="Processando";
+        const ans=LunaNative.geminiQuery("Responda em português, curto, sem inventar clima ou notícia. Contexto do motorista: "+JSON.stringify({hoje:totals([dayKey(new Date())],Date.now())})+". Pergunta: "+text);
+        if(ans==="__NO_KEY__") push("luna","Sem chave de IA neste aparelho. Comandos de turno e lançamento funcionam mesmo assim. A chave fica em Ajustes.",voice);
+        else if(!ans||ans==="__API_ERROR__") push("luna","A consulta falhou. Os dados da jornada continuam salvos.",false);
+        else push("luna",ans,voice);
+        return;
       }
-      resumeWork();
+      push("luna","Não reconheci o comando. Tente: iniciar o turno, pausar, registrar 20 reais de combustível.",voice);
     }
-    else if(acao==='pausar'){
-      pauseWork('PAUSADO');
-    }
-    else if(acao==='cafe'){
-      startCafe();
-    }
-    else if(acao==='retomar' || acao==='continuar'){
-      if(state.turno>0) resumeWork();
-    }
-    else if(acao==='fechar'){
-      pauseWork('TURNO FECHADO');
-      if(state.turns[state.turno]) state.turns[state.turno].end=Date.now();
-      state.mode='closed';
-      persist();
-      openDay(state.date);
-    }
-    else if(acao==='concluir'){
-      pauseWork('TRABALHO CONCLUÍDO');
-      if(state.turns[state.turno]) state.turns[state.turno].end=Date.now();
-      state.mode='concluded';
-      persist();
-      openDay(state.date);
-    }
-    else if(acao==='zerar'){
-      state.mode='idle'; state.accum=0; state.start=0; state.turno=0; state.turns={}; state.pauses=[];
-      persist();
-      $('cron').textContent='00:00:00';
-      $('turnoLbl').textContent='ZERADO';
-      try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay('00:00:00'); }catch(e){}
-    }
-  }catch(e){console.error(e)}
-}
-
-if(state.mode==='running'){ $('turnoLbl').textContent=state.turno+'º TURNO'; updateTimer(); showBubble(); }
-else if(state.mode==='paused') $('turnoLbl').textContent='PAUSADO';
-else if(state.mode==='cafe') $('turnoLbl').textContent='CAFÉ';
-else if(state.mode==='concluded') $('turnoLbl').textContent='TRABALHO CONCLUÍDO';
-else $('turnoLbl').textContent='PARADO';
-$('cron').textContent=formatTime(getWorked());
-
-function buildCal(){
-  const el=$('cal'); if(!el) return;
-  el.innerHTML='';
-  const now=new Date();
-  const y=now.getFullYear(), m=now.getMonth();
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  const today=todayKey();
-  for(let i=1;i<=daysInMonth;i++){
-    const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(i).padStart(2,'0');
-    const d=document.createElement('div');
-    d.textContent=i;
-    if(key===today) d.classList.add('today');
-    if(state.days[key]) d.classList.add('has');
-    d.onclick=()=>openDay(key);
-    el.appendChild(d);
-  }
-}
-
-let pendingGanhos={}, pendingGastos=0;
-function openDay(key){
-  currentDay=key;
-  $('dayTitle').textContent='Registro • '+key;
-  const data=state.days[key]||{turns:{},worked:0,ganhos:{},gastos:0,km:0,inicio:'',fim:'',pauses:[]};
-  pendingGanhos=JSON.parse(JSON.stringify(data.ganhos||{}));
-  pendingGastos=data.gastos||0;
-  updatePendingDisplay();
-  $('dHoras').value=data.worked? (data.worked/3600000).toFixed(1) : '';
-  $('dKm').value=data.km||'';
-  $('dInicio').value=data.inicio||'08:00';
-  if($('dFim')) $('dFim').value=data.fim||'';
-  $('dValor').value='';
-  selectedApp='Uber';
-  entryType='ganho';
-  setType('ganho');
-  renderAppBtns();
-  $('dayModal').classList.add('show');
-}
-function addPending(){
-  const val=parseFloat($('dValor').value)||0;
-  if(val<=0) return;
-  if(entryType==='ganho') pendingGanhos[selectedApp]=(pendingGanhos[selectedApp]||0)+val;
-  else pendingGastos+=val;
-  $('dValor').value='';
-  updatePendingDisplay();
-}
-function updatePendingDisplay(){
-  const g=Object.values(pendingGanhos).reduce((a,b)=>a+b,0);
-  $('dGanhos').textContent='R$ '+g.toFixed(0);
-  $('dGastos').textContent='R$ '+pendingGastos.toFixed(0);
-  $('dLiq').textContent='R$ '+(g-pendingGastos).toFixed(0);
-  let html='';
-  Object.keys(pendingGanhos).forEach(a=>{
-    if(pendingGanhos[a]>0) html+=`<div style="display:flex;justify-content:space-between;margin:2px 0"><span>${APP_ICONS[a]||''} ${a}</span><b>R$ ${pendingGanhos[a]}</b></div>`;
-  });
-  if(pendingGastos>0) html+=`<div style="display:flex;justify-content:space-between;margin:2px 0;color:#ff8a4c"><span>Gastos</span><b>R$ ${pendingGastos}</b></div>`;
-  $('pendingList').innerHTML=html||'<span style="color:#666">Nenhum valor adicionado ainda</span>';
-}
-function closeDay(){$('dayModal').classList.remove('show')}
-
-function setType(t){
-  entryType=t;
-  $('btnGanho').classList.toggle('on',t==='ganho');
-  $('btnGasto').classList.toggle('on',t==='gasto');
-  $('appBtns').style.display=t==='ganho'?'flex':'none';
-}
-function renderAppBtns(){
-  const el=$('appBtns'); if(!el) return;
-  el.innerHTML='';
-  APPS.forEach(a=>{
-    const b=document.createElement('button');
-    b.textContent=(APP_ICONS[a]||'')+' '+a;
-    if(a===selectedApp) b.classList.add('on');
-    b.onclick=()=>{selectedApp=a;renderAppBtns()};
-    el.appendChild(b);
-  });
-}
-function applyCustomStart(){
-  const t=$('dInicio').value;
-  if(!t || !currentDay) return;
-  const [hh,mm]=t.split(':').map(Number);
-  const parts=currentDay.split('-').map(Number);
-  const start=new Date(parts[0],parts[1]-1,parts[2],hh,mm,0);
-  const now=new Date();
-  const elapsed=Math.max(0, now-start);
-  // only apply if editing today
-  if(currentDay===todayKey()){
-    state.accum=elapsed;
-    if(state.mode==='running') state.start=Date.now();
-    persist();
-    $('cron').textContent=formatTime(getWorked());
-    try{ if(window.LunaNative&&LunaNative.setTimerDisplay)LunaNative.setTimerDisplay(formatTime(getWorked())); }catch(e){}
-  }
-}
-function saveDay(){
-  applyCustomStart();
-  if(!currentDay) return;
-  const data=state.days[currentDay]||{turns:{},worked:0,ganhos:{},gastos:0,km:0,inicio:'',fim:'',pauses:[]};
-  data.ganhos=pendingGanhos;
-  data.gastos=pendingGastos;
-  data.worked=parseFloat($('dHoras').value)*3600000 || data.worked;
-  data.km=parseFloat($('dKm').value)||data.km;
-  data.inicio=$('dInicio').value;
-  if($('dFim')) data.fim=$('dFim').value;
-  state.days[currentDay]=data;
-  persist();
-  closeDay();
-  buildCal(); refresh();
-}
-function deleteDayEntry(){
-  if(!currentDay) return;
-  if(confirm('Excluir todos os registros do dia '+currentDay+'?')){
-    delete state.days[currentDay];
-    persist();
-    closeDay();
-    buildCal(); refresh();
-  }
-}
-
-function refresh(){
-  const meta=parseFloat(plan.meta)||2000;
-  const fixas=(plan.fixas||[]).reduce((a,f)=>a+(+f.valor||0),0);
-  const limites=(plan.limites||[]).reduce((a,l)=>a+(+l.limite||0),0);
-  const metaTotal=meta+fixas+limites;
-  let feito=0;
-  Object.values(state.days).forEach(d=>{feito+=Object.values(d.ganhos||{}).reduce((a,b)=>a+b,0)});
-  const falta=Math.max(0,metaTotal-feito);
-  const hoje=state.days[todayKey()]?Object.values(state.days[todayKey()].ganhos||{}).reduce((a,b)=>a+b,0):0;
-  $('metaBox').innerHTML=`<div class="mini m1">META<br><b>R$ ${metaTotal.toFixed(0)}</b></div><div class="mini m2">FEITO<br><b>R$ ${feito.toFixed(0)}</b></div><div class="mini m3">FALTA<br><b>R$ ${falta.toFixed(0)}</b></div><div class="mini m4">HOJE<br><b>R$ ${hoje.toFixed(0)}</b></div>`;
-  const g=state.days[todayKey()]?.ganhos||{};
-  $('ganhosHoje').innerHTML=APPS.slice(0,4).map(a=>`<div style="display:flex;justify-content:space-between;margin:3px 0"><span>${APP_ICONS[a]||''} ${a}</span><b>R$ ${g[a]||0}</b></div>`).join('');
-  let ainda='';
-  (plan.limites||[]).forEach(l=>{
-    const rest=Math.max(0,(+l.limite||0)-(+l.gasto||0));
-    const ic=l.nome.toLowerCase().includes('merc')?'🛒':l.nome.toLowerCase().includes('lanch')?'🍔':'💳';
-    ainda+=`<div style="display:flex;justify-content:space-between;margin:3px 0"><span>${ic} ${l.nome}</span><b>R$ ${rest}</b></div>`;
-  });
-  $('ainda').innerHTML=ainda||'Nenhum limite';
-  let ritmo='';
-  const now=new Date();
-  const y=now.getFullYear(), m=now.getMonth();
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  for(let s=1;s<=4;s++){
-    const start=(s-1)*7+1, end=Math.min(s*7, daysInMonth);
-    let val=0;
-    for(let d=start;d<=end;d++){
-      const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-      if(state.days[key]) val+=Object.values(state.days[key].ganhos||{}).reduce((a,b)=>a+b,0);
-    }
-    const pct=metaTotal>0?Math.min(100,Math.round(val/(metaTotal/4)*100)):0;
-    ritmo+=`<div class="week-row"><span>Sem ${s}</span><span>${pct}%</span><b>R$ ${val.toFixed(0)}</b></div>`;
-  }
-  $('ritmo').innerHTML=ritmo;
-}
-
-function openPlan(){
-  $('pMeta').value=plan.meta||2000;
-  $('pHora').value=plan.hora||30;
-  renderFixas(); renderLimites(); renderFolgas();
-  $('planModal').classList.add('show');
-}
-function closePlan(){$('planModal').classList.remove('show')}
-function renderFixas(){
-  const el=$('fixas'); el.innerHTML='';
-  (plan.fixas||[]).forEach((f,i)=>{
-    el.innerHTML+=`<div class="limit-row"><input class="field" style="flex:2" value="${f.nome||''}" onchange="plan.fixas[${i}].nome=this.value"><input class="field" style="flex:1" type="number" value="${f.valor||0}" onchange="plan.fixas[${i}].valor=parseFloat(this.value)||0"><button onclick="plan.fixas.splice(${i},1);renderFixas()" style="background:#c44;border:none;color:#fff;border-radius:6px;padding:4px 8px">X</button></div>`;
-  });
-}
-function addFixa(){ if(!plan.fixas) plan.fixas=[]; plan.fixas.push({nome:'Nova',valor:0}); renderFixas(); }
-function renderLimites(){
-  const el=$('limites'); el.innerHTML='';
-  (plan.limites||[]).forEach((l,i)=>{
-    el.innerHTML+=`<div class="limit-row"><input class="field" style="flex:2" value="${l.nome||''}" onchange="plan.limites[${i}].nome=this.value"><input class="field" style="flex:1" type="number" value="${l.limite||0}" onchange="plan.limites[${i}].limite=parseFloat(this.value)||0"><button onclick="plan.limites.splice(${i},1);renderLimites()" style="background:#c44;border:none;color:#fff;border-radius:6px;padding:4px 8px">X</button></div>`;
-  });
-}
-function addLimite(){ if(!plan.limites) plan.limites=[]; plan.limites.push({nome:'Novo',limite:0,gasto:0}); renderLimites(); }
-function renderFolgas(){
-  const el=$('weeks'); el.innerHTML='';
-  const days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-  for(let w=1;w<=4;w++){
-    el.innerHTML+=`<div style="margin:4px 0"><b>Sem ${w}</b><div class="week">${days.map((d,i)=>{
-      const key='w'+w+'_'+i;
-      const off=(plan.folgas||{})[key];
-      return `<button class="${off?'off':''}" onclick="toggleFolga('${key}',this)">${d}</button>`;
-    }).join('')}</div></div>`;
-  }
-}
-function toggleFolga(key,btn){
-  if(!plan.folgas) plan.folgas={};
-  plan.folgas[key]=!plan.folgas[key];
-  btn.classList.toggle('off');
-}
-function savePlan(){
-  plan.meta=parseFloat($('pMeta').value)||2000;
-  plan.hora=parseFloat($('pHora').value)||30;
-  localStorage.setItem('luna_plan',JSON.stringify(plan));
-  closePlan(); refresh();
-}
-function openSettings(){$('setModal').classList.add('show')}
-function closeSet(){$('setModal').classList.remove('show')}
-function saveKey(){const k=$('gKey').value.trim();localStorage.setItem('luna_gemini_key',k);try{if(window.LunaNative&&LunaNative.saveKey)LunaNative.saveKey(k)}catch(e){}$('keyStatus').textContent=k?'Salva!':'Removida';alert(k?'Chave salva':'Removida');closeSet()}
-function getKey(){return localStorage.getItem('luna_gemini_key')||''}
-
-async function testGemini(){
-  const key=getKey();
-  if(!key){alert('Salve a chave primeiro');return}
-  $('keyStatus').textContent='Testando...';
-  const r=await askGemini('Diga apenas: OK');
-  $('keyStatus').textContent=r.substring(0,60);
-  alert(r);
-}
-
-function getWorkContext(){
-  const worked=getWorked();
-  const hoje=state.days[todayKey()]||{};
-  const g=Object.values(hoje.ganhos||{}).reduce((a,b)=>a+b,0);
-  return 'Contexto atual do trabalho: Turno '+state.turno+', modo '+state.mode+', tempo trabalhado hoje '+formatTime(worked)+', ganhos hoje R$ '+g.toFixed(0)+'.';
-}
-function getMemoryContext(){
-  if(!state.memory.length) return '';
-  return 'Memórias salvas: '+state.memory.slice(-5).map(m=>m.text).join('; ')+'.';
-}
-async function askGemini(p){
-  const key=getKey();
-  const ctx=getWorkContext()+' '+getMemoryContext();
-  const full=ctx+' Pergunta do motorista: '+p;
-  try{
-    if(window.LunaNative && typeof LunaNative.geminiQuery === 'function'){
-      if(key && LunaNative.saveKey) LunaNative.saveKey(key);
-      const r = LunaNative.geminiQuery(full);
-      if(r && r !== '__NO_KEY__' && r !== '__API_ERROR__') return r;
-      if(r === '__NO_KEY__') return 'Configure a chave do Gemini em Ajustes (ícone ⚙).';
-    }
-  }catch(e){ console.error('native gemini', e); }
-  if(!key||key.length<10) return 'Configure a chave do Gemini em Ajustes.';
-  const models=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-pro','gemini-pro'];
-  for(const m of models){
-    try{
-      const url='https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key);
-      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Você é a Luna, copiloto do motorista de aplicativo. Responda em português, de forma útil e direta. '+full}]}] })});
-      if(r.status===404||r.status===400) continue;
-      if(!r.ok) continue;
-      const d=await r.json();
-      const text=d.candidates?.[0]?.content?.parts?.[0]?.text;
-      if(text) return text;
-    }catch(e){continue}
-  }
-  return 'Não consegui conectar à internet. Verifique a chave do Gemini e sua conexão.';
-}
-
-function remember(text){
-  state.memory.push({text,ts:Date.now()});
-  if(state.memory.length>50) state.memory=state.memory.slice(-50);
-  persist();
-}
-function forgetMemory(){
-  if(confirm('Apagar toda a memória da Luna?')){ state.memory=[]; persist(); alert('Memória apagada'); }
-}
-
-function offlineAnswer(text){
-  const l=text.toLowerCase();
-  const worked=getWorked();
-  const hoje=state.days[todayKey()]||{};
-  const g=Object.values(hoje.ganhos||{}).reduce((a,b)=>a+b,0);
-  if(l.includes('hora')||l.includes('tempo')||l.includes('quanto trabalhei')) return 'Hoje você trabalhou '+formatTime(worked)+'. Turno '+state.turno+' ('+state.mode+').';
-  if(l.includes('ganhei')||l.includes('ganho')||l.includes('fiz hoje')) return 'Hoje você fez R$ '+g.toFixed(0)+'.';
-  if(l.includes('turno')) return 'Turno atual: '+state.turno+'. Modo: '+state.mode+'.';
-  return null;
-}
-function handleVoiceCommand(text){
-  const lower=text.toLowerCase();
-  if(lower.includes('lembra')||lower.includes('guarde')||lower.includes('anote')){
-    const info=text.replace(/lembra|guarde|anote|que/gi,'').trim();
-    if(info){ remember(info); return 'Guardei: '+info; }
-  }
-  const numMatch=text.match(/\d+/);
-  const num=numMatch?parseFloat(numMatch[0]):0;
-  if(num && (lower.includes('fiz')||lower.includes('ganhei')||lower.includes('adicione'))){
-    let app='Uber';
-    if(lower.includes('99')) app='99';
-    else if(lower.includes('indrive')) app='InDrive';
-    else if(lower.includes('particular')) app='Particular';
-    const key=todayKey();
-    if(!state.days[key]) state.days[key]={turns:{},worked:0,ganhos:{},gastos:0,km:0};
-    state.days[key].ganhos[app]=(state.days[key].ganhos[app]||0)+num;
-    persist(); refresh();
-    return 'Adicionei R$ '+num+' em '+app+'.';
-  }
-  return null;
-}
-
-async function sendChat(fromVoice){
-  const inp=$('chatInput');
-  const t=inp.value.trim(); if(!t) return;
-  const box=$('chat');
-  box.innerHTML+='<div class="msg user">'+t+'</div>';
-  inp.value='';
-  box.scrollTop=box.scrollHeight;
-  const cmd=handleVoiceCommand(t);
-  let resp=cmd;
-  if(!resp) resp=offlineAnswer(t);
-  if(!resp) resp=await askGemini(t);
-  box.innerHTML+='<div class="msg">'+resp+'</div>';
-  box.scrollTop=box.scrollHeight;
-  if(fromVoice && window.LunaNative && LunaNative.speak){try{LunaNative.speak(resp)}catch(e){}}
-  try{ if(window.LunaNative&&LunaNative.saveConversation){ LunaNative.saveConversation('user',t); LunaNative.saveConversation('luna',resp); } }catch(e){}
-}
-
-window.onLunaSpeechResult=function(text){
-  if(!text || text.startsWith('__')) return;
-  $('chatInput').value=text;
-  sendChat(true);
-};
-
-function startMic(){
-  var orb=$('orb');
-  if(orb) orb.style.filter='drop-shadow(0 0 24px #49E0FF)';
-  setTimeout(()=>{
-    try{
-      if(window.LunaNative && typeof LunaNative.startListening === 'function'){
+    $("send").onclick=()=>{ const v=$("q").value.trim(); if(!v) return; $("q").value=""; ask(v,false) };
+    $("mic").onclick=()=>{
+      if(window.LunaNative&&LunaNative.startListening){
+        $("phase").textContent="Ouvindo";
+        window.onLunaSpeechResult=function(res){
+          if(!res||String(res).startsWith("__")) { if(res==="__UNAVAILABLE__"||String(res).startsWith("__ERROR__")) $("phase").textContent="Erro de microfone"; return }
+          if(res==="__LISTENING__"||res==="__SPEAKING__"||String(res).startsWith("__RMS__")||String(res).startsWith("__PARTIAL__")) return;
+          $("phase").textContent="Em espera";
+          ask(String(res),true);
+        };
         LunaNative.startListening();
         return;
       }
-    }catch(e){ console.error(e); }
-    alert('Microfone nativo não conectou. Use o campo de texto por enquanto.');
-  }, 200);
+      $("phase").textContent="Microfone indisponível neste modo";
+    };
+    $("bubble").onclick=()=>{ try{ if(window.LunaNative&&LunaNative.showOverlay) LunaNative.showOverlay(); else alert("A bolha abre no Android com permissão de sobreposição. Aqui a Luna já está nesta tela.") }catch(e){ alert("Não foi possível abrir a bolha.") } };
+  }
 }
-
-buildCal();
-refresh();
-
-// Poll for actions from floating bubble
+$("gear").onclick=()=>{
+  const name=prompt("Seu nome no painel", state.name||"");
+  if(name!=null) state.name=name.trim().slice(0,40);
+  const key=prompt("Chave Gemini (opcional, fica só no aparelho). Deixe vazio para manter.", "");
+  if(key && window.LunaNative && LunaNative.saveKey) LunaNative.saveKey(key.trim());
+  save();
+};
 setInterval(()=>{
-  try{
-    if(window.LunaNative&&LunaNative.getPendingAction){
-      const a=LunaNative.getPendingAction();
-      if(a&&a!=='null'&&a!==''){
-        turno(a);
-        LunaNative.clearPendingAction();
-      }
-    }
-  }catch(e){}
-},500);
+  const s=active();
+  if(!s||s.state!=="working") return;
+  catchUp(Date.now());
+  persist();
+  const el=document.querySelector(".clock");
+  if(el) el.textContent=clock(worked(s,Date.now()));
+},1000);
+render();
 </script>
-
 </body>
 </html>
