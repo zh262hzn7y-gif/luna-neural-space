@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
+import android.webkit.GeolocationPermissions
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -17,11 +19,14 @@ class LunaRuntime : ViewModel() {
 
     @SuppressLint("SetJavaScriptEnabled")
     fun attach(activity: MainActivity) {
-        // Pede permissoes necessarias
         val perms = mutableListOf<String>()
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
             perms.add(Manifest.permission.RECORD_AUDIO)
+        }
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
@@ -40,6 +45,8 @@ class LunaRuntime : ViewModel() {
             settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             settings.databaseEnabled = true
             settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.setGeolocationEnabled(true)
             @Suppress("DEPRECATION")
             settings.allowFileAccessFromFileURLs = true
             @Suppress("DEPRECATION")
@@ -49,7 +56,12 @@ class LunaRuntime : ViewModel() {
                 override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean = false
             }
             webChromeClient = object : WebChromeClient() {
-                override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {}
+                override fun onPermissionRequest(request: PermissionRequest) {
+                    activity.runOnUiThread { request.grant(request.resources) }
+                }
+                override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
+                    callback?.invoke(origin, true, false)
+                }
             }
             addJavascriptInterface(LunaBridge(activity, this), "LunaNative")
         }

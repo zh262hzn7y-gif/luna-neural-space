@@ -7,35 +7,43 @@
 <style>
 :root{--bg:#07060e;--card:#16122b;--line:#34295a;--fg:#f3f0ff;--muted:#b3a8d6;--v:#8d6bff;--c:#49e0ff;--e:#3ee0a0}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:radial-gradient(500px 220px at 0% 0%,rgba(141,107,255,.35),transparent 70%),var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
-body{display:flex;flex-direction:column;min-height:100dvh}
-header{display:flex;justify-content:space-between;gap:12px;padding:16px 16px 8px}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+body{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 16px 6px}
 h1{font-size:22px;margin:0}
 p{margin:0}
 .muted{color:var(--muted);font-size:13px}
-.clock{font-size:40px;font-weight:800;letter-spacing:-1px;margin:6px 0}
-main{flex:1;overflow:auto;padding:0 16px 12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+main{flex:1;overflow:auto;padding:0 16px 12px;width:100%}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.clock{font-size:48px;font-weight:800;letter-spacing:-1px;margin:4px 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
 button,input,select{font:inherit;color:inherit}
-button{min-height:44px;border:0;border-radius:12px;background:var(--v);color:#f7f4ff;font-weight:700}
+button{min-height:48px;border:0;border-radius:12px;background:var(--v);color:#f7f4ff;font-weight:700}
+button:disabled{opacity:.38}
 .ghost{background:#221b3d;color:var(--fg)}
-.nav{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:#0c1020;padding-bottom:env(safe-area-inset-bottom)}
-.nav button{background:transparent;color:var(--muted);border-radius:0;font-size:11px;min-height:58px}
+.good{background:var(--e);color:#06281c}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);width:100%;border-top:1px solid var(--line);background:#0c1020;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{background:transparent;color:var(--muted);border-radius:0;font-size:12px;min-height:56px}
 .nav button.on{color:var(--c)}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row button{flex:1}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
 label{display:block;font-size:12px;color:var(--muted);margin-top:8px}
 input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#0c1020;padding:0 10px}
-.msg{background:#221b3d;border-radius:14px;padding:8px 10px;margin:6px 0;font-size:14px}
-.msg.me{background:var(--v)}
-.orb{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#b9f6ff,#8d6bff 55%,#1a1033);box-shadow:0 0 0 6px rgba(141,107,255,.25)}
-.hide{display:none}
-@media(min-width:900px){
-  body{flex-direction:row}
-  .nav{flex-direction:column;width:120px;border-top:0;border-right:1px solid var(--line)}
-  main{padding-top:16px}
-  .grid.wide{grid-template-columns:1fr 1fr 1fr}
+.msg{background:#221b3d;border-radius:12px;padding:8px 10px;margin:6px 0;font-size:14px}
+.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:10px}
+.tabs button{background:#221b3d;color:var(--muted);min-height:40px}
+.tabs button.on{background:var(--v);color:#f7f4ff}
+.split{display:grid;gap:10px}
+@media(min-width:800px){
+  .split{grid-template-columns:1.15fr .85fr;align-items:start}
+  .clock{font-size:64px}
+  main{padding-top:8px}
+}
+@media(max-height:520px){
+  header{padding:6px 12px}
+  .clock{font-size:32px}
+  button{min-height:42px}
 }
 </style>
 </head>
@@ -46,11 +54,12 @@ input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(
     <h1 id="who">Motorista</h1>
     <p class="muted" id="sub">Gestão neste aparelho</p>
   </div>
-  <button class="ghost" id="gear" style="width:44px">⚙</button>
+  <button class="ghost" id="gear" style="width:48px" aria-label="Configurações">⚙</button>
 </header>
 <main id="view"></main>
 <nav class="nav" id="nav"></nav>
 <script>
+const BUILD=610;
 const KEY="rota_apk_v6";
 const CATS=["Combustível","Alimentação","Pedágio","Estacionamento","Manutenção","Lavagem","Seguro","Outros"];
 const APPS=["Uber","99","inDrive","Particular","Outros"];
@@ -59,7 +68,8 @@ function dayKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,
 function money(c){return (c/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
 function clock(ms){const s=Math.max(0,Math.floor(ms/1000));return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(n=>String(n).padStart(2,"0")).join(":")}
 function hm(ts){return new Date(ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
-function empty(){return {name:"",tab:"inicio",shifts:[],entries:[],plan:{day:0,month:0,basis:"liquido"},track:false,chat:[{role:"luna",text:"Pode escrever ou usar o microfone. Texto não sai em voz, a menos que você peça."}]}}
+function estado(s){return s==="working"?"trabalhando":s==="paused"?"pausado":s==="coffee"?"café":s==="closed"?"fechado":"livre"}
+function empty(){return {name:"",tab:"inicio",gsub:"jornada",shifts:[],entries:[],plan:{day:0,month:0,basis:"liquido"},track:false,chat:[{role:"luna",text:"Pode escrever ou usar o microfone. Texto não sai em voz."}]}}
 let state; try{state=JSON.parse(localStorage.getItem(KEY))||empty()}catch(e){state=empty()}
 function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
 function save(){persist(); render()}
@@ -68,11 +78,11 @@ function worked(s,now){if(s.state==="working"&&s.segment){const x=now-s.segment;
 function catchUp(now){
   const s=active(); if(!s||s.state!=="working") return;
   const d=now-s.seen;
-  if(d<0||d>2*3600e3){s.state="paused"; s.segment=null; s.note="Intervalo longo ou relógio alterado. Não somei essas horas."; s.seen=now; return}
+  if(d<0||d>2*3600e3){s.state="paused"; s.segment=null; s.note="Intervalo longo ou relógio alterado. Não somei essas horas. Use Retomar ou Zerar."; s.seen=now; return}
   s.worked+=d; s.segment=now; s.seen=now;
 }
 function start(now){
-  if(active()) return "Já existe turno aberto. Use retomar.";
+  if(active()) return "Já existe turno aberto. Use Retomar ou Zerar.";
   const day=dayKey(new Date(now));
   const n=state.shifts.filter(s=>s.day===day).length+1;
   if(n>4) return "Os quatro turnos de hoje já foram usados.";
@@ -80,9 +90,10 @@ function start(now){
   return "Turno "+n+" iniciado às "+hm(now)+".";
 }
 function pause(now){const s=active(); if(!s) return "Nenhum turno aberto."; if(s.state!=="working") return "O turno já está parado."; const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null; s.state="paused"; s.pauses.push([now,null]); s.seen=now; return "Pausa registrada."}
-function cafe(now){const s=active(); if(!s) return "Abra um turno antes do café."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null} s.state="coffee"; s.coffee.push([now,null]); s.seen=now; return "Café separado da pausa."}
-function resume(now){const s=active(); if(!s) return "Nada para retomar."; if(s.state==="working") return "Já está trabalhando."; const list=s.state==="coffee"?s.coffee:s.pauses; const last=list[list.length-1]; if(last&&!last[1]) last[1]=now; s.state="working"; s.segment=now; s.seen=now; return "Retomado. O início continua "+hm(s.started)+"."}
+function cafe(now){const s=active(); if(!s) return "Abra um turno antes do café."; if(s.state==="coffee") return "O café já está em andamento."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null} s.state="coffee"; s.coffee.push([now,null]); s.seen=now; return "Café separado da pausa."}
+function resume(now){const s=active(); if(!s) return "Nada para retomar."; if(s.state==="working") return "Já está trabalhando."; const list=s.state==="coffee"?s.coffee:s.pauses; const last=list[list.length-1]; if(last&&!last[1]) last[1]=now; s.state="working"; s.segment=now; s.seen=now; s.note=""; return "Retomado. O início continua "+hm(s.started)+"."}
 function closeShift(now){const s=active(); if(!s) return "Nenhum turno aberto."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x} s.segment=null; s.state="closed"; s.ended=now; s.seen=now; return "Turno "+s.slot+" fechado. Trabalhado "+clock(s.worked)+"."}
+function zerar(now){const s=active(); if(!s) return "Não há turno aberto para zerar."; s.state="working"; s.started=now; s.worked=0; s.segment=now; s.seen=now; s.pauses=[]; s.coffee=[]; s.note=""; return "Turno "+s.slot+" zerado. A contagem recomeçou agora."}
 function totals(days,now){
   const inc=state.entries.filter(e=>e.kind==="in"&&days.includes(e.day)).reduce((a,e)=>a+e.cents,0);
   const exp=state.entries.filter(e=>e.kind==="out"&&days.includes(e.day)).reduce((a,e)=>a+e.cents,0);
@@ -92,28 +103,54 @@ function totals(days,now){
   const h=ms/36e5;
   return {inc,exp,net:inc-exp,ms,km,ph:h>=1/60?Math.round(inc/h):null};
 }
+function monthDays(now){const d=new Date(now); const y=d.getFullYear(), m=d.getMonth(), n=new Date(y,m+1,0).getDate(); const out=[]; for(let i=1;i<=n;i++) out.push(dayKey(new Date(y,m,i))); return out}
 function intent(text,now){
   const n=text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  if(/iniciar/.test(n)) return start(now);
+  if(/zerar|comecar de novo/.test(n)) return zerar(now);
+  if(/iniciar|comecar/.test(n)) return start(now);
   if(/pausar|pausa/.test(n)) return pause(now);
   if(/cafe/.test(n)) return cafe(now);
   if(/retomar|continuar/.test(n)) return resume(now);
-  if(/fechar/.test(n)) return closeShift(now);
+  if(/fechar|encerrar/.test(n)) return closeShift(now);
   if(/quanto tempo|trabalhei/.test(n)){const t=totals([dayKey(new Date(now))],now); return "Hoje: "+clock(t.ms)+" trabalhadas."}
   if(/quanto ganhei|lucro|resultado/.test(n)){const t=totals([dayKey(new Date(now))],now); return "Hoje bruto "+money(t.inc)+", despesas "+money(t.exp)+", líquido "+money(t.net)+"."}
   const m=n.match(/(\d+[.,]?\d*)/);
   if(/registre|anota|lanca/.test(n)){
     if(!m) return "Diga o valor em reais e a categoria.";
     const cents=Math.round(Number(m[1].replace(",","."))*100);
-    const cat=CATS.find(c=>n.includes(c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").slice(0,6))) || (n.includes("combust")?"Combustível":null);
+    const cat=CATS.find(c=>n.includes(c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").slice(0,6)));
     const app=APPS.find(a=>n.includes(a.toLowerCase()));
     if(!cat && !app) return "Falta a categoria ou o aplicativo. Exemplo: 20 reais de combustível.";
     state.entries.push({id:String(now),kind:cat?"out":"in",cents,day:dayKey(new Date(now)),cat:cat||"Corrida",app:app||"",note:"Luna"});
-    return "Lancei "+money(cents)+(cat?" em "+cat:" na "+app)+".";
+    return "Lancei "+money(cents)+(cat?" em "+cat:" na "+(app||"corrida"))+".";
   }
   return "";
 }
+function shiftButtons(open){
+  const dis=on=>on?"":" disabled";
+  return `<div class="acts">
+    <button data-act="start"${dis(!open)}>Iniciar</button>
+    <button class="ghost" data-act="pause"${dis(open&&open.state==="working")}>Pausar</button>
+    <button class="ghost" data-act="cafe"${dis(open&&open.state!=="coffee")}>Café</button>
+    <button class="${open&&open.state!=="working"?"good":""}" data-act="resume"${dis(open&&open.state!=="working")}>Retomar</button>
+    <button class="ghost" data-act="close"${dis(!!open)}>Fechar</button>
+    <button class="ghost" data-act="zero"${dis(!!open)}>Zerar</button>
+  </div><p class="muted" id="note"></p>`;
+}
+function doAct(name){
+  const now=Date.now();
+  let msg="";
+  if(name==="start") msg=start(now);
+  if(name==="pause") msg=pause(now);
+  if(name==="cafe") msg=cafe(now);
+  if(name==="resume") msg=resume(now);
+  if(name==="close"){ if(!confirm("Fechar o turno? O tempo para de contar.")) return; msg=closeShift(now) }
+  if(name==="zero"){ if(!confirm("Zerar este turno? A contagem recomeça agora.")) return; msg=zerar(now) }
+  save();
+  const note=$("note"); if(note) note.textContent=msg;
+}
 let tab=state.tab||"inicio";
+let gsub=state.gsub||"jornada";
 function setTab(t){tab=t; state.tab=t; save()}
 const NAV=[["inicio","Início"],["gestao","Gestão"],["mapa","Mapa"],["fala","Comunica"],["luna","Luna"]];
 function render(){
@@ -122,97 +159,123 @@ function render(){
   $("hello").textContent=(h<12?"Bom dia":h<18?"Boa tarde":"Boa noite");
   $("who").textContent=state.name||"Motorista";
   const open=active();
-  $("sub").textContent=open?("Turno "+open.slot+" · "+open.state):"Nenhum turno aberto";
+  $("sub").textContent=open?("Turno "+open.slot+" · "+estado(open.state)):"Nenhum turno aberto";
   $("nav").innerHTML=NAV.map(([id,label])=>`<button class="${tab===id?"on":""}" data-tab="${id}">${label}</button>`).join("");
   $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
   const day=dayKey(new Date());
   const t=totals([day],now);
   if(tab==="inicio"){
-    $("view").innerHTML=`
-      <section class="card"><p class="muted">Jornada</p><div class="clock">${open?clock(worked(open,now)):clock(t.ms)}</div>
-      <p class="muted">${open?"Início "+hm(open.started)+(open.note?" · "+open.note:""):"Toque em Gestão para iniciar o turno 1."}</p>
-      <div class="row" style="margin-top:10px"><button id="goj">Abrir turno</button></div></section>
-      <div class="grid wide">
-        <div class="card"><p class="muted">Bruto</p><b>${money(t.inc)}</b></div>
-        <div class="card"><p class="muted">Despesas</p><b>${money(t.exp)}</b></div>
-        <div class="card"><p class="muted">Líquido</p><b>${money(t.net)}</b></div>
-        <div class="card"><p class="muted">Por hora</p><b>${t.ph==null?"Sem dados":money(t.ph)}</b></div>
+    $("view").innerHTML=`<div class="split">
+      <section class="card"><p class="muted">Jornada</p><div class="clock" id="clock">${open?clock(worked(open,now)):clock(t.ms)}</div>
+        <p class="muted">${open?"Turno "+open.slot+" · "+estado(open.state)+" · início "+hm(open.started):"Nenhum turno aberto. Os seis botões ficam aqui."}</p>
+        ${open&&open.note?`<p class="muted">${open.note}</p>`:""}
+        ${shiftButtons(open)}
+      </section>
+      <div>
+        <div class="grid">
+          <div class="card"><p class="muted">Bruto</p><b>${money(t.inc)}</b></div>
+          <div class="card"><p class="muted">Despesas</p><b>${money(t.exp)}</b></div>
+          <div class="card"><p class="muted">Líquido</p><b>${money(t.net)}</b></div>
+          <div class="card"><p class="muted">Por hora</p><b>${t.ph==null?"Sem dados":money(t.ph)}</b></div>
+        </div>
+        <section class="card" id="clima" style="margin-top:10px"><p class="muted">Clima · Governador Valadares</p><p>Consultando Open-Meteo…</p></section>
+        <section class="card" style="margin-top:10px"><p class="muted">Notícias</p>
+          <p><a href="https://www.driododoce.com.br/" style="color:var(--c)">Diário do Rio Doce</a></p>
+          <p><a href="https://news.google.com/search?q=BR-381+Governador+Valadares&hl=pt-BR&gl=BR&ceid=BR:pt-419" style="color:var(--c)">BR-381 nas fontes</a></p>
+          <p class="muted">Sem alerta inventado.</p>
+        </section>
       </div>
-      <section class="card" id="clima"><p class="muted">Clima · Governador Valadares</p><p>Consultando Open-Meteo…</p></section>
-      <section class="card"><p class="muted">Notícias</p><p class="muted">Sem alerta inventado.</p>
-        <p><a href="https://www.driododoce.com.br/" style="color:var(--c)">Diário do Rio Doce</a></p>
-        <p><a href="https://news.google.com/search?q=BR-381+Governador+Valadares&hl=pt-BR&gl=BR&ceid=BR:pt-419" style="color:var(--c)">BR-381 nas fontes</a></p>
-      </section>`;
-    $("goj").onclick=()=>setTab("gestao");
+    </div>`;
     fetch("https://api.open-meteo.com/v1/forecast?latitude=-18.851&longitude=-41.949&current=temperature_2m,weather_code&timezone=America/Sao_Paulo")
       .then(r=>r.json()).then(b=>{
         const box=$("clima"); if(!box) return;
+        const names={0:"Céu limpo",1:"Quase limpo",2:"Parcial",3:"Nublado",61:"Chuva",63:"Chuva",80:"Pancadas",95:"Trovoada"};
+        const code=b.current&&b.current.weather_code;
         const temp=b.current&&typeof b.current.temperature_2m==="number"?Math.round(b.current.temperature_2m)+"°C":"—";
-        box.innerHTML=`<p class="muted">Clima · Open-Meteo</p><b>${temp}</b><p class="muted">${(b.current&&b.current.time||"").replace("T"," ")}</p>`;
-      }).catch(()=>{$("clima")&&($("clima").innerHTML="<p class='muted'>Clima indisponível agora.</p>")});
+        box.innerHTML=`<p class="muted">Clima · Open-Meteo</p><b style="font-size:28px">${temp}</b><p class="muted">${names[code]||"Condição na fonte"} · ${(b.current&&b.current.time||"").replace("T"," ")}</p>`;
+      }).catch(()=>{ const box=$("clima"); if(box) box.innerHTML="<p class='muted'>Clima indisponível agora.</p>" });
   } else if(tab==="gestao"){
-    $("view").innerHTML=`<section class="card"><p class="muted">${open?"Turno "+open.slot:"Sem turno"}</p><div class="clock">${open?clock(worked(open,now)):"00:00:00"}</div>
-      <div class="row">
-        ${!open?'<button id="b1">Iniciar</button>':""}
-        ${open&&open.state==="working"?'<button class="ghost" id="b2">Pausar</button>':""}
-        ${open&&open.state!=="coffee"?'<button class="ghost" id="b3">Café</button>':""}
-        ${open&&open.state!=="working"?'<button id="b4">Retomar</button>':""}
-        ${open?'<button class="ghost" id="b5">Fechar</button>':""}
-      </div><p class="muted" id="note"></p></section>
-      <section class="card"><p class="muted">Lançamento de hoje</p>
-        <div class="row"><button id="kin" class="ghost">Receita</button><button id="kout" class="ghost">Despesa</button></div>
-        <label>Valor</label><input id="val" inputmode="decimal" placeholder="0,00">
-        <label>Categoria ou app</label><select id="cat">${APPS.map(a=>`<option>${a}</option>`).join("")}${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+    const subs=[["jornada","Jornada"],["dinheiro","Financeiro"],["plano","Plano"],["cal","Calendário"],["rel","Relatório"]];
+    const md=monthDays(now); const mt=totals(md,now);
+    let body="";
+    if(gsub==="jornada"){
+      const today=state.shifts.filter(s=>s.day===day);
+      body=`<section class="card"><p class="muted">${open?"Turno "+open.slot+" · "+estado(open.state):"Sem turno"}</p><div class="clock" id="clock">${open?clock(worked(open,now)):"00:00:00"}</div>${shiftButtons(open)}
+        <p class="muted">Pausa e café não entram no tempo trabalhado. Quatro turnos por dia.</p></section>
+        <section class="card" style="margin-top:10px">${today.map(s=>`<p>Turno ${s.slot} · ${estado(s.state)} · ${clock(worked(s,now))}</p>`).join("")||"<p class='muted'>Nada lançado hoje.</p>"}</section>`;
+    } else if(gsub==="dinheiro"){
+      body=`<section class="card"><p class="muted">Hoje ${money(t.net)} líquido</p>
+        <div class="row"><button class="ghost" id="kin">Receita</button><button class="ghost" id="kout">Despesa</button></div>
+        <label>Valor em reais</label><input id="val" inputmode="decimal" placeholder="0,00">
+        <label>Aplicativo ou categoria</label><select id="cat">${APPS.map(a=>`<option>${a}</option>`).join("")}${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
         <button id="add" style="margin-top:8px;width:100%">Lançar</button>
-        <div id="list"></div>
-      </section>
-      <section class="card"><p class="muted">Meta do mês (R$)</p><input id="meta" inputmode="decimal" value="${state.plan.month||0}"><button id="savem" style="margin-top:8px">Salvar meta</button>
-      <p class="muted">Km manual do turno aberto</p><input id="km" inputmode="decimal" placeholder="km"><button id="savek">Corrigir km</button></section>`;
-    const act=(fn)=>{ $("note").textContent=fn(Date.now()); save() };
-    $("b1")&&($("b1").onclick=()=>act(start));
-    $("b2")&&($("b2").onclick=()=>act(pause));
-    $("b3")&&($("b3").onclick=()=>act(cafe));
-    $("b4")&&($("b4").onclick=()=>act(resume));
-    $("b5")&&($("b5").onclick=()=>{ if(confirm("Fechar o turno?")) act(closeShift) });
-    $("add").onclick=()=>{
-      const cents=Math.round(Number($("val").value.replace(",","."))*100); if(!cents) return;
+        <div id="list"></div></section>`;
+    } else if(gsub==="plano"){
+      const goal=Math.round((state.plan.month||0)*100); const pct=goal>0?Math.min(100,Math.round(mt.net/goal*100)):0;
+      body=`<section class="card"><p class="muted">Meta do mês</p><p style="font-size:28px;font-weight:800">${goal?pct+"%":"Sem meta"}</p>
+        <p class="muted">${goal?"Feito "+money(mt.net)+" de "+money(goal):"Defina o valor. Sem meta, não invento percentual."}</p>
+        <label>Meta do mês (R$)</label><input id="meta" inputmode="decimal" value="${state.plan.month||""}">
+        <label>Meta do dia (R$)</label><input id="metad" inputmode="decimal" value="${state.plan.day||""}">
+        <button id="savem" style="margin-top:8px;width:100%">Salvar metas</button></section>`;
+    } else if(gsub==="cal"){
+      body=`<section class="card"><p class="muted">${new Date().toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</p>
+        ${md.map(k=>{const sl=totals([k],now); return `<p>${k.slice(8)}/${k.slice(5,7)} · ${sl.net||sl.ms?money(sl.net)+" · "+clock(sl.ms):"<span class='muted'>sem registro</span>"}</p>`}).join("")}
+      </section>`;
+    } else {
+      body=`<section class="card"><p class="muted">Hoje</p><p>Bruto ${money(t.inc)} · despesas ${money(t.exp)} · líquido ${money(t.net)}</p><p>Tempo ${clock(t.ms)} · km ${(t.km||0).toFixed(1)}</p>
+        <p class="muted" style="margin-top:8px">Mês</p><p>Bruto ${money(mt.inc)} · líquido ${money(mt.net)} · ${clock(mt.ms)}</p>
+        <p class="muted">O líquido só desconta despesa lançada. Não é lucro contábil. Km é o que você corrigiu, não odômetro.</p>
+        <label>Km manual do turno aberto</label><input id="km" inputmode="decimal" placeholder="km"><button id="savek" style="margin-top:8px">Corrigir km</button></section>`;
+    }
+    $("view").innerHTML=`<div class="tabs">${subs.map(([id,label])=>`<button data-sub="${id}" class="${gsub===id?"on":""}">${label}</button>`).join("")}</div>${body}`;
+    $("view").querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>{gsub=b.dataset.sub; state.gsub=gsub; save()});
+    if($("add")) $("add").onclick=()=>{
+      const cents=Math.round(Number(($("val").value||"").replace(",","."))*100); if(!cents) return;
       const label=$("cat").value; const out=CATS.includes(label);
       state.entries.push({id:String(Date.now()),kind:out?"out":"in",cents,day,cat:out?label:"Corrida",app:out?"":label,note:""});
       save();
     };
-    $("savem").onclick=()=>{ state.plan.month=Number($("meta").value.replace(",","."))||0; save() };
-    $("savek").onclick=()=>{ const s=active(); if(!s) return; s.km=Number($("km").value.replace(",","."))||0; s.note=(s.note?s.note+" · ":"")+"km editado"; save() };
-    $("list").innerHTML=state.entries.filter(e=>e.day===day).map(e=>`<p>${e.kind==="in"?"Receita":e.cat} ${money(e.cents)}</p>`).join("")||"<p class='muted'>Nada lançado hoje.</p>";
+    if($("savem")) $("savem").onclick=()=>{ state.plan.month=Number(String($("meta").value).replace(",","."))||0; state.plan.day=Number(String($("metad").value).replace(",","."))||0; save() };
+    if($("savek")) $("savek").onclick=()=>{ const s=active(); if(!s) return; s.km=Number(String($("km").value).replace(",","."))||0; s.note="km editado"; save() };
+    if($("list")) $("list").innerHTML=state.entries.filter(e=>e.day===day).map(e=>`<p>${e.kind==="in"?(e.app||"Receita"):e.cat} ${money(e.cents)}</p>`).join("")||"<p class='muted'>Nada lançado hoje.</p>";
   } else if(tab==="mapa"){
-    $("view").innerHTML=`<section class="card"><p>Sua posição, se o GPS permitir. Nenhum motorista inventado aparece aqui.</p>
-      <button id="gps">Mostrar meu ponto</button><p class="muted" id="gstat">O mapa dos parceiros entre aparelhos continua na versão com conta. Este APK não publica sua placa.</p>
-      <div id="frame"></div></section>`;
-    $("gps").onclick=()=>{
-      const put=(lat,lng)=>{
-        const d=0.02; const src=`https://www.openstreetmap.org/export/embed.html?bbox=${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lng}`;
-        $("frame").innerHTML=`<iframe title="Mapa" src="${src}" style="width:100%;height:280px;border:0;border-radius:12px;margin-top:8px"></iframe>`;
-        $("gstat").textContent=`${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      };
-      if(window.LunaNative&&LunaNative.getLocation){ LunaNative.getLocation("window.__geo"); window.__geo=(a,b)=>put(a,b); return }
-      if(!navigator.geolocation){ $("gstat").textContent="GPS indisponível."; return }
-      navigator.geolocation.getCurrentPosition(p=>put(p.coords.latitude,p.coords.longitude),()=>$("gstat").textContent="Permissão de localização negada.");
-    };
+    const shared=(live.peers||[]).filter(p=>p.lat!=null);
+    $("view").innerHTML=`<section class="card"><p class="muted">Mapa real</p><h2 style="margin:4px 0 8px">Você e quem ligou o GPS na sala</h2>
+      <p class="muted" id="gstat">${live.self?live.self.lat.toFixed(4)+", "+live.self.lng.toFixed(4):"Nenhum motorista inventado."}</p>
+      <div class="row" style="margin-top:8px"><button id="gps">Mostrar meu ponto</button><button class="ghost" id="share">${live.share?"Parar de publicar":"Publicar na sala"}</button></div>
+      <div id="frame"></div>
+      <div id="plist" style="margin-top:8px">${shared.map(p=>`<p>${p.name} · ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</p>`).join("")||"<p class='muted'>Ninguém da sala com GPS ligado.</p>"}</div>
+    </section>`;
+    if(live.self) putMap(live.self.lat, live.self.lng);
+    $("gps").onclick=()=>askGps(false);
+    $("share").onclick=()=>{ live.share=!live.share; if(!live.share){live.self=null; live.push()} else askGps(true); render() };
   } else if(tab==="fala"){
-    $("view").innerHTML=`<section class="card"><h2 style="margin:0 0 8px;font-size:18px">Rádio e chamada</h2>
-      <p>Este APK não transmite áudio entre dois aparelhos. Não há servidor de mídia configurado. Segurar um botão aqui não finge uma transmissão.</p>
-      <p class="muted">O rádio e a chamada ao vivo estão na versão com conta, quando dois motoristas estão online.</p></section>
-      <section class="card"><p class="muted">Recado só neste aparelho</p><input id="note" placeholder="Anotação"><button id="nsave">Guardar</button><div id="notes"></div></section>`;
-    const notes=JSON.parse(localStorage.getItem("rota_notes")||"[]");
-    $("notes").innerHTML=notes.map(n=>`<p class="msg">${n}</p>`).join("");
-    $("nsave").onclick=()=>{ if(!$("note").value.trim()) return; notes.push($("note").value.trim()); localStorage.setItem("rota_notes",JSON.stringify(notes)); render() };
+    $("view").innerHTML=`<div class="split">
+      <section class="card"><p class="muted">Sala ao vivo</p><h2 style="margin:4px 0">Quem está no código</h2>
+        <p class="muted" id="lstat">${live.status}</p>
+        <div class="row" style="margin-top:8px"><input id="room" value="${live.room||"valadares"}" maxlength="24"><button id="join">${live.on?"Sair":"Entrar"}</button></div>
+        <button id="ptt" class="${live.talk?"good":""}" style="width:100%;min-height:72px;margin-top:10px;font-size:18px" ${live.on?"":"disabled"}>${live.talk?"Falando…":"Segure para falar"}</button>
+        <p class="muted" style="margin-top:8px">Servidor público gratuito só avisa quem entrou. O áudio vai direto entre os aparelhos. Quem souber o código entra. Não envie placa.</p>
+      </section>
+      <section class="card"><b>Na sala agora</b><div id="plist">${(live.peers||[]).map(p=>`<p>${p.name||"Motorista"} · ${p.talk?"falando":"online"}</p>`).join("")||"<p class='muted'>Ninguém além de você.</p>"}</div>
+        <div id="cbox"></div>
+        <div class="row" style="margin-top:8px"><input id="cmsg" placeholder="Mensagem"><button class="ghost" id="csend">Enviar</button></div>
+      </section>
+    </div>`;
+    (live.chat||[]).slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=(m.name||"")+": "+m.text; $("cbox").appendChild(p)});
+    $("join").onclick=()=>{ if(live.on) live.stop(); else live.start($("room").value); };
+    const ptt=$("ptt");
+    ptt.onpointerdown=e=>{ if(!live.on) return; ptt.setPointerCapture(e.pointerId); live.talk=true; ptt.textContent="Falando…"; ptt.className="good"; live.mic(true) };
+    ptt.onpointerup=()=>{ live.talk=false; ptt.textContent="Segure para falar"; ptt.className=""; live.mic(false) };
+    $("csend").onclick=()=>{ const v=$("cmsg").value.trim(); if(!v) return; live.say(v); $("cmsg").value=""; };
   } else {
-    $("view").innerHTML=`<section class="card" style="display:flex;gap:10px;align-items:center"><div class="orb"></div><div><b>Luna</b><p class="muted" id="phase">Em espera</p></div></section>
+    $("view").innerHTML=`<section class="card"><b>Luna</b><p class="muted" id="phase">Em espera</p></section>
       <div id="chat"></div>
-      <div class="row"><input id="q" placeholder="Pergunte ou peça um lançamento"><button id="mic">Falar</button><button id="send">Enviar</button></div>
-      <p class="muted">Bolha sobre outros apps pede permissão de sobreposição.</p>
-      <button class="ghost" id="bubble">Mostrar bolha</button>`;
+      <div class="row"><input id="q" placeholder="Iniciar, pausar, zerar, registrar 20 reais"><button id="mic">Falar</button><button id="send">Enviar</button></div>
+      <button class="ghost" id="bubble" style="margin-top:8px;width:100%">Mostrar bolha</button>
+      <p class="muted">A tela nova baixa sozinha ao abrir, se a internet deixar. Versão de tela ${BUILD}.</p>`;
     const box=$("chat");
-    state.chat.slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"+(m.role==="user"?" me":""); p.textContent=m.text; box.appendChild(p)});
+    state.chat.slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=m.text; box.appendChild(p)});
     function push(role,text,voice){ state.chat.push({role,text}); if(state.chat.length>40) state.chat=state.chat.slice(-40); save();
       if(voice && window.LunaNative && LunaNative.speak) LunaNative.speak(text);
       else if(voice && window.speechSynthesis){ const u=new SpeechSynthesisUtterance(text); u.lang="pt-BR"; speechSynthesis.cancel(); speechSynthesis.speak(u) }
@@ -221,50 +284,156 @@ function render(){
       const local=intent(text,Date.now());
       state.chat.push({role:"user",text});
       if(local){ push("luna",local,voice); return }
-      if(window.LunaNative && LunaNative.geminiQuery){
-        $("phase").textContent="Processando";
-        const ans=LunaNative.geminiQuery("Responda em português, curto, sem inventar clima ou notícia. Contexto do motorista: "+JSON.stringify({hoje:totals([dayKey(new Date())],Date.now())})+". Pergunta: "+text);
-        if(ans==="__NO_KEY__") push("luna","Sem chave de IA neste aparelho. Comandos de turno e lançamento funcionam mesmo assim. A chave fica em Ajustes.",voice);
-        else if(!ans||ans==="__API_ERROR__") push("luna","A consulta falhou. Os dados da jornada continuam salvos.",false);
-        else push("luna",ans,voice);
-        return;
-      }
-      push("luna","Não reconheci o comando. Tente: iniciar o turno, pausar, registrar 20 reais de combustível.",voice);
+      push("luna","Não reconheci. Tente: iniciar, pausar, café, retomar, fechar, zerar ou registrar 20 reais de combustível.",voice);
     }
     $("send").onclick=()=>{ const v=$("q").value.trim(); if(!v) return; $("q").value=""; ask(v,false) };
     $("mic").onclick=()=>{
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
       if(window.LunaNative&&LunaNative.startListening){
         $("phase").textContent="Ouvindo";
         window.onLunaSpeechResult=function(res){
-          if(!res||String(res).startsWith("__")) { if(res==="__UNAVAILABLE__"||String(res).startsWith("__ERROR__")) $("phase").textContent="Erro de microfone"; return }
-          if(res==="__LISTENING__"||res==="__SPEAKING__"||String(res).startsWith("__RMS__")||String(res).startsWith("__PARTIAL__")) return;
+          if(!res||String(res).startsWith("__")) return;
           $("phase").textContent="Em espera";
           ask(String(res),true);
         };
         LunaNative.startListening();
         return;
       }
-      $("phase").textContent="Microfone indisponível neste modo";
+      if(!SR){ $("phase").textContent="Microfone indisponível neste modo"; return }
+      const rec=new SR(); rec.lang="pt-BR"; rec.onresult=ev=>ask(ev.results[0][0].transcript,true); rec.start();
     };
-    $("bubble").onclick=()=>{ try{ if(window.LunaNative&&LunaNative.showOverlay) LunaNative.showOverlay(); else alert("A bolha abre no Android com permissão de sobreposição. Aqui a Luna já está nesta tela.") }catch(e){ alert("Não foi possível abrir a bolha.") } };
+    $("bubble").onclick=()=>{ try{ if(window.LunaNative&&LunaNative.showOverlay) LunaNative.showOverlay(); else alert("A bolha abre no Android, com permissão de sobreposição.") }catch(e){ alert("Não foi possível abrir a bolha.") } };
   }
+  $("view").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>doAct(b.dataset.act));
 }
+function putMap(lat,lng){
+  const d=0.03; const src=`https://www.openstreetmap.org/export/embed.html?bbox=${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lng}`;
+  const frame=$("frame"); if(frame) frame.innerHTML=`<iframe title="Mapa" src="${src}" style="width:100%;height:240px;border:0;border-radius:12px;margin-top:8px"></iframe>`;
+}
+function askGps(publish){
+  const put=(lat,lng)=>{ live.self={lat,lng}; if(publish||live.share){ live.share=true; live.push() } putMap(lat,lng); const g=$("gstat"); if(g) g.textContent=lat.toFixed(4)+", "+lng.toFixed(4) };
+  if(window.LunaNative&&LunaNative.getLocation){ window.__geo=(a,b)=>put(a,b); LunaNative.getLocation("window.__geo"); return }
+  if(!navigator.geolocation){ const g=$("gstat"); if(g) g.textContent="GPS indisponível."; return }
+  navigator.geolocation.getCurrentPosition(p=>put(p.coords.latitude,p.coords.longitude),()=>{ const g=$("gstat"); if(g) g.textContent="Permissão de localização negada." });
+}
+const live={on:false,room:localStorage.getItem("rota-sala")||"valadares",peers:[],chat:[],status:"Fora da sala. Combine o código com o outro motorista.",talk:false,share:false,self:null,link:null,pcs:new Map(),audios:new Map(),local:null,id:localStorage.getItem("rota-peer")||"",push(){},start(){},stop(){},mic(){},say(){}};
+if(!live.id){ live.id=Math.random().toString(16).slice(2,12); localStorage.setItem("rota-peer", live.id) }
+function mqttFrame(type, body){ const out=[]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); if(n>0) d|=128; out.push(d) }while(n>0); return Uint8Array.from([type, ...out, ...body]) }
+function mqttStr(s){ const b=new TextEncoder().encode(s); return [(b.length>>8)&255, b.length&255, ...b] }
+function connectMqtt(onConn, onMsg){
+  const ws=new WebSocket("wss://broker.emqx.io:8084/mqtt", ["mqtt"]);
+  ws.binaryType="arraybuffer";
+  const pending=[];
+  const send=p=>{ if(ws.readyState===1) ws.send(p); else pending.push(p) };
+  ws.onopen=()=>{ const id=("rota"+live.id).slice(0,23); const flags=0x02|0x80|0x40; send(mqttFrame(0x10, [...mqttStr("MQTT"),4,flags,0,25,...mqttStr(id),...mqttStr("emqx_test"),...mqttStr("emqx_test")])) };
+  ws.onmessage=ev=>{
+    const bytes=new Uint8Array(ev.data); let cursor=0;
+    while(cursor<bytes.length){
+      const type=bytes[cursor]>>4; let index=cursor+1, mult=1, remaining=0, digit=0, guard=0;
+      do{ digit=bytes[index++]||0; remaining+=(digit&127)*mult; mult*=128; guard++ }while(digit&128 && guard<4);
+      const body=index;
+      if(type===2){ const ok=(bytes[body+1]||255)===0; onConn(ok); if(ok) pending.splice(0).forEach(p=>ws.send(p)) }
+      else if(type===3){ const topicLen=(bytes[body]<<8)|bytes[body+1]; const topic=new TextDecoder().decode(bytes.slice(body+2, body+2+topicLen)); const payload=new TextDecoder().decode(bytes.slice(body+2+topicLen, body+remaining)); onMsg(topic, payload) }
+      cursor=body+remaining;
+    }
+  };
+  ws.onerror=()=>onConn(false);
+  return { publish(topic,text){ send(mqttFrame(0x30, [...mqttStr(topic), ...new TextEncoder().encode(text)])) }, subscribe(topic){ send(mqttFrame(0x82, [0,1,...mqttStr(topic),0])) }, close(){ try{ws.close()}catch(e){} } };
+}
+function paintLive(){
+  const stat=$("lstat"); if(stat) stat.textContent=live.status+(live.on?" · "+live.peers.length+" outro(s)":"");
+  const list=$("plist"); if(list && tab==="fala") list.innerHTML=live.peers.map(p=>`<p>${p.name||"Motorista"} · ${p.talk?"falando":"online"}</p>`).join("")||"<p class='muted'>Ninguém além de você.</p>";
+}
+live.push=function(){
+  if(!live.link) return;
+  live.link.publish("rp6/"+live.room+"/p", JSON.stringify({id:live.id,name:state.name||"Motorista",at:Date.now(),lat:live.share&&live.self?live.self.lat:null,lng:live.share&&live.self?live.self.lng:null,talk:!!live.talk}));
+};
+live.start=function(code){
+  const room=String(code||"").toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,24);
+  if(room.length<3){ live.status="O código precisa de 3 caracteres."; paintLive(); return }
+  live.stop();
+  live.room=room; localStorage.setItem("rota-sala", room); live.on=true; live.status="Conectando ao servidor da sala…"; render();
+  const base="rp6/"+room;
+  live.link=connectMqtt(ok=>{
+    if(!ok){ live.status="Servidor de sala indisponível."; live.on=false; paintLive(); return }
+    live.link.subscribe(base+"/p"); live.link.subscribe(base+"/c"); live.link.subscribe(base+"/s/"+live.id);
+    live.status="Na sala "+room; live.push(); paintLive();
+  }, (topic,payload)=>{
+    let data; try{ data=JSON.parse(payload) }catch(e){ return }
+    if(topic.endsWith("/p") && data.id && data.id!==live.id){
+      live.peers=live.peers.filter(p=>p.id!==data.id && Date.now()-p.at<15000); data.at=data.at||Date.now(); live.peers.push(data); paintLive();
+      if(live.id<data.id && !live.pcs.has(data.id)) live.offer(data.id);
+    } else if(topic.endsWith("/c") && data.text && data.id!==live.id){ live.chat.push(data); if(tab==="fala") render() }
+    else if(topic.includes("/s/")) live.signal(data);
+  });
+};
+live.stop=function(){
+  live.on=false; live.talk=false; if(live.link) live.link.close(); live.link=null;
+  live.pcs.forEach(pc=>pc.close()); live.pcs.clear(); live.local&&live.local.getTracks().forEach(t=>t.stop()); live.local=null;
+  live.peers=[]; live.status="Você saiu da sala.";
+};
+live.pcFor=function(id){
+  let pc=live.pcs.get(id);
+  if(pc) return pc;
+  pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"}]});
+  pc.onicecandidate=e=>{ if(e.candidate&&live.link) live.link.publish("rp6/"+live.room+"/s/"+id, JSON.stringify({from:live.id,type:"ice",candidate:e.candidate})) };
+  pc.ontrack=e=>{ let a=live.audios.get(id); if(!a){ a=document.createElement("audio"); a.autoplay=true; a.playsInline=true; document.body.appendChild(a); live.audios.set(id,a) } a.srcObject=e.streams[0]; a.play().catch(()=>{}) };
+  if(live.local) live.local.getTracks().forEach(t=>pc.addTrack(t, live.local));
+  live.pcs.set(id, pc);
+  return pc;
+};
+live.offer=async function(id){
+  if(live.id>=id) return;
+  const pc=live.pcFor(id);
+  if(pc.signalingState!=="stable") return;
+  const desc=await pc.createOffer(); await pc.setLocalDescription(desc);
+  live.link&&live.link.publish("rp6/"+live.room+"/s/"+id, JSON.stringify({from:live.id,type:"offer",sdp:pc.localDescription}));
+};
+live.signal=async function(message){
+  if(!message||!message.from||message.from===live.id||!live.link) return;
+  if(message.type==="mic"){ if(live.id<message.from) await live.offer(message.from); return }
+  const pc=live.pcFor(message.from);
+  if(message.type==="offer" && message.sdp){
+    await pc.setRemoteDescription(message.sdp);
+    const answer=await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    live.link.publish("rp6/"+live.room+"/s/"+message.from, JSON.stringify({from:live.id,type:"answer",sdp:pc.localDescription}));
+  } else if(message.type==="answer" && message.sdp && pc.signalingState==="have-local-offer") await pc.setRemoteDescription(message.sdp);
+  else if(message.type==="ice" && message.candidate){ try{ await pc.addIceCandidate(message.candidate) }catch(e){} }
+};
+live.mic=async function(on){
+  try{
+    if(on && !live.local){
+      live.local=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+      live.pcs.forEach(pc=>live.local.getTracks().forEach(t=>pc.addTrack(t, live.local)));
+      live.peers.forEach(p=>{ if(live.id<p.id) live.offer(p.id); else live.link&&live.link.publish("rp6/"+live.room+"/s/"+p.id, JSON.stringify({from:live.id,type:"mic"})) });
+    }
+    live.local&&live.local.getAudioTracks().forEach(t=>t.enabled=on);
+    live.talk=on; live.push();
+  }catch(e){ live.status="Microfone negado neste aparelho."; paintLive() }
+};
+live.say=function(text){
+  if(!live.link){ live.status="Entre na sala antes de escrever."; paintLive(); return }
+  const msg={id:live.id,name:state.name||"Motorista",text:text.slice(0,280),at:Date.now()};
+  live.chat.push({...msg,name:"Você"}); live.link.publish("rp6/"+live.room+"/c", JSON.stringify(msg)); render();
+};
+setInterval(()=>{ live.peers=live.peers.filter(p=>Date.now()-p.at<15000); if(live.on) live.push() },5000);
 $("gear").onclick=()=>{
   const name=prompt("Seu nome no painel", state.name||"");
   if(name!=null) state.name=name.trim().slice(0,40);
-  const key=prompt("Chave Gemini (opcional, fica só no aparelho). Deixe vazio para manter.", "");
-  if(key && window.LunaNative && LunaNative.saveKey) LunaNative.saveKey(key.trim());
   save();
 };
 setInterval(()=>{
-  const s=active();
-  if(!s||s.state!=="working") return;
-  catchUp(Date.now());
-  persist();
-  const el=document.querySelector(".clock");
-  if(el) el.textContent=clock(worked(s,Date.now()));
+  const s=active(); if(!s||s.state!=="working") return;
+  catchUp(Date.now()); persist();
+  const el=$("clock"); if(el) el.textContent=clock(worked(s,Date.now()));
 },1000);
 render();
+fetch("https://raw.githubusercontent.com/zh262hzn7y-gif/luna-neural-space/main/android/app/src/main/assets/www/index.html?t="+Date.now(),{cache:"no-store"})
+  .then(r=>r.text()).then(html=>{
+    const m=html.match(/const BUILD=(\d+)/);
+    if(m && Number(m[1])>BUILD && html.includes("Rota dos Parceiros")){ document.open(); document.write(html); document.close(); }
+  }).catch(()=>{});
 </script>
 </body>
 </html>
