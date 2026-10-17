@@ -17,13 +17,13 @@ main{flex:1;overflow:auto;padding:0 16px 12px;width:100%}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
 .clock{font-size:48px;font-weight:800;letter-spacing:-1px;margin:4px 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 button,input,select{font:inherit;color:inherit}
 button{min-height:48px;border:0;border-radius:12px;background:var(--v);color:#f7f4ff;font-weight:700}
 button:disabled{opacity:.38}
 .ghost{background:#221b3d;color:var(--fg)}
 .good{background:var(--e);color:#06281c}
-.nav{display:grid;grid-template-columns:repeat(5,1fr);width:100%;border-top:1px solid var(--line);background:#0c1020;padding-bottom:env(safe-area-inset-bottom)}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);width:100%;border-top:1px solid var(--line);background:#0c1020;padding-bottom:env(safe-area-inset-bottom)}
 .nav button{background:transparent;color:var(--muted);border-radius:0;font-size:12px;min-height:56px}
 .nav button.on{color:var(--c)}
 .row{display:flex;gap:8px}
@@ -34,6 +34,13 @@ input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(
 .tabs{display:flex;gap:6px;overflow:auto;margin-bottom:10px}
 .tabs button{background:#221b3d;color:var(--muted);min-height:40px}
 .tabs button.on{background:var(--v);color:#f7f4ff}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal button{min-height:40px;background:#221b3d;font-size:12px;position:relative;padding-bottom:8px}
+.cal button.on{background:var(--v);color:#f7f4ff}
+.cal button.has::after{content:"";position:absolute;left:22%;right:22%;bottom:4px;height:3px;border-radius:2px;background:var(--c)}
+.news{display:block;background:#221b3d;border-radius:12px;padding:10px;margin-top:8px;color:inherit;text-decoration:none}
+.bubble{position:fixed;right:16px;bottom:78px;z-index:6;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9af6ff,#8d6bff 55%,#1a1033)}
+.menu{position:fixed;right:16px;bottom:150px;z-index:6;display:flex;flex-direction:column;gap:6px}
 .split{display:grid;gap:10px}
 @media(min-width:800px){
   .split{grid-template-columns:1.15fr .85fr;align-items:start}
@@ -59,23 +66,36 @@ input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(
 <main id="view"></main>
 <nav class="nav" id="nav"></nav>
 <script>
-const BUILD=610;
+const BUILD=620;
 const KEY="rota_apk_v6";
 const CATS=["Combustível","Alimentação","Pedágio","Estacionamento","Manutenção","Lavagem","Seguro","Outros"];
-const APPS=["Uber","99","inDrive","Particular","Outros"];
+const APPS=["Uber","99","inDrive","Particular","Gorjeta","Outros"];
 const $=id=>document.getElementById(id);
 function dayKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function money(c){return (c/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
 function clock(ms){const s=Math.max(0,Math.floor(ms/1000));return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(n=>String(n).padStart(2,"0")).join(":")}
 function hm(ts){return new Date(ts).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}
 function estado(s){return s==="working"?"trabalhando":s==="paused"?"pausado":s==="coffee"?"café":s==="closed"?"fechado":"livre"}
-function empty(){return {name:"",tab:"inicio",gsub:"jornada",shifts:[],entries:[],plan:{day:0,month:0,basis:"liquido"},track:false,chat:[{role:"luna",text:"Pode escrever ou usar o microfone. Texto não sai em voz."}]}}
+function frozen(){const day=dayKey(new Date()); return [...state.shifts].reverse().find(s=>s.day===day&&s.state==="closed"&&s.seal==="same")||null}
+function midnightOf(day){const p=day.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]+1).getTime()}
+function rollMidnight(now){
+  const today=dayKey(new Date(now));
+  state.shifts.forEach(s=>{
+    if(s.day>=today) return;
+    if(s.state==="working"||s.state==="paused"||s.state==="coffee"){
+      if(s.state==="working"&&s.segment){const gap=now-s.seen; if(gap>=0&&gap<=2*3600e3){const until=Math.min(midnightOf(s.day),now); if(until>s.segment) s.worked+=until-s.segment}}
+      s.state="closed"; s.segment=null; s.ended=midnightOf(s.day)-1; s.seen=now; s.seal="next"; s.note="A meia-noite encerrou este turno. Horas depois do dia não foram somadas.";
+    } else if(s.seal==="same") s.seal="next";
+  });
+}
+function empty(){return {name:"",copilot:"Luna",tab:"inicio",gsub:"jornada",shifts:[],entries:[],plan:{day:0,month:0,basis:"liquido"},track:false,chat:[{role:"luna",text:"Pode escrever ou usar o microfone. Texto não sai em voz."}]}}
 let state; try{state=JSON.parse(localStorage.getItem(KEY))||empty()}catch(e){state=empty()}
 function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
 function save(){persist(); render()}
 function active(){return state.shifts.find(s=>s.state==="working"||s.state==="paused"||s.state==="coffee")}
 function worked(s,now){if(s.state==="working"&&s.segment){const x=now-s.segment; if(x>0&&x<2*3600e3) return s.worked+x} return s.worked}
 function catchUp(now){
+  rollMidnight(now);
   const s=active(); if(!s||s.state!=="working") return;
   const d=now-s.seen;
   if(d<0||d>2*3600e3){s.state="paused"; s.segment=null; s.note="Intervalo longo ou relógio alterado. Não somei essas horas. Use Retomar ou Zerar."; s.seen=now; return}
@@ -83,17 +103,26 @@ function catchUp(now){
 }
 function start(now){
   if(active()) return "Já existe turno aberto. Use Retomar ou Zerar.";
+  const fr=frozen(); if(fr) return "O turno "+fr.slot+" está congelado. Use Retomar. Não abri outro.";
   const day=dayKey(new Date(now));
   const n=state.shifts.filter(s=>s.day===day).length+1;
-  if(n>4) return "Os quatro turnos de hoje já foram usados.";
-  state.shifts.push({id:String(now),day,slot:n,state:"working",started:now,ended:null,worked:0,segment:now,seen:now,pauses:[],coffee:[],km:0,note:""});
+  if(n>4) return "Os quatro turnos de hoje já foram usados. Não existe quinto turno.";
+  state.shifts.push({id:String(now),day,slot:n,state:"working",started:now,ended:null,worked:0,segment:now,seen:now,pauses:[],coffee:[],km:0,note:"",seal:null});
   return "Turno "+n+" iniciado às "+hm(now)+".";
 }
 function pause(now){const s=active(); if(!s) return "Nenhum turno aberto."; if(s.state!=="working") return "O turno já está parado."; const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null; s.state="paused"; s.pauses.push([now,null]); s.seen=now; return "Pausa registrada."}
 function cafe(now){const s=active(); if(!s) return "Abra um turno antes do café."; if(s.state==="coffee") return "O café já está em andamento."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x; s.segment=null} s.state="coffee"; s.coffee.push([now,null]); s.seen=now; return "Café separado da pausa."}
-function resume(now){const s=active(); if(!s) return "Nada para retomar."; if(s.state==="working") return "Já está trabalhando."; const list=s.state==="coffee"?s.coffee:s.pauses; const last=list[list.length-1]; if(last&&!last[1]) last[1]=now; s.state="working"; s.segment=now; s.seen=now; s.note=""; return "Retomado. O início continua "+hm(s.started)+"."}
-function closeShift(now){const s=active(); if(!s) return "Nenhum turno aberto."; if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x} s.segment=null; s.state="closed"; s.ended=now; s.seen=now; return "Turno "+s.slot+" fechado. Trabalhado "+clock(s.worked)+"."}
-function zerar(now){const s=active(); if(!s) return "Não há turno aberto para zerar."; s.state="working"; s.started=now; s.worked=0; s.segment=now; s.seen=now; s.pauses=[]; s.coffee=[]; s.note=""; return "Turno "+s.slot+" zerado. A contagem recomeçou agora."}
+function resume(now){
+  const s=active();
+  if(!s){const fr=frozen(); if(!fr) return "Nada para retomar."; fr.state="working"; fr.ended=null; fr.segment=now; fr.seen=now; fr.seal=null; fr.note=""; return "Turno "+fr.slot+" retomado com "+clock(fr.worked)+" já acumulados."}
+  if(s.state==="working") return "Já está trabalhando.";
+  const list=s.state==="coffee"?s.coffee:s.pauses; const last=list[list.length-1]; if(last&&!last[1]) last[1]=now;
+  s.state="working"; s.segment=now; s.seen=now; s.note=""; return "Retomado. O início continua "+hm(s.started)+".";
+}
+function sealShift(s,now,kind){if(s.state==="working"){const x=now-s.segment; if(x>0&&x<2*3600e3) s.worked+=x} s.segment=null; s.state="closed"; s.ended=now; s.seen=now; s.seal=kind}
+function closeShift(now){const s=active(); if(!s) return "Nenhum turno aberto."; const kind=s.slot>=4?"same":"next"; sealShift(s,now,kind); return kind==="same"?"Turno 4 fechado. Não existe turno 5. Retomar continua nele. Trabalhado "+clock(s.worked)+".":"Turno "+s.slot+" fechado. O próximo Iniciar abre o turno "+(s.slot+1)+". Trabalhado "+clock(s.worked)+"."}
+function conclude(now){const s=active(); if(!s) return "Não há turno para concluir."; sealShift(s,now,"same"); return "Turno "+s.slot+" concluído e congelado. Retomar continua neste mesmo turno."}
+function zerar(now){const s=active()||frozen(); if(!s) return "Não há turno aberto para zerar."; s.state="working"; s.started=now; s.ended=null; s.worked=0; s.segment=now; s.seen=now; s.pauses=[]; s.coffee=[]; s.seal=null; s.note=""; return "Turno "+s.slot+" zerado. O financeiro do dia não foi apagado."}
 function totals(days,now){
   const inc=state.entries.filter(e=>e.kind==="in"&&days.includes(e.day)).reduce((a,e)=>a+e.cents,0);
   const exp=state.entries.filter(e=>e.kind==="out"&&days.includes(e.day)).reduce((a,e)=>a+e.cents,0);
@@ -101,7 +130,7 @@ function totals(days,now){
   const ms=shifts.reduce((a,s)=>a+worked(s,now),0);
   const km=shifts.reduce((a,s)=>a+(s.km||0),0);
   const h=ms/36e5;
-  return {inc,exp,net:inc-exp,ms,km,ph:h>=1/60?Math.round(inc/h):null};
+  return {inc,exp,net:inc-exp,ms,km,ph:h>=1/60?Math.round(inc/h):null,nph:h>=1/60?Math.round((inc-exp)/h):null};
 }
 function monthDays(now){const d=new Date(now); const y=d.getFullYear(), m=d.getMonth(), n=new Date(y,m+1,0).getDate(); const out=[]; for(let i=1;i<=n;i++) out.push(dayKey(new Date(y,m,i))); return out}
 function intent(text,now){
@@ -111,6 +140,7 @@ function intent(text,now){
   if(/pausar|pausa/.test(n)) return pause(now);
   if(/cafe/.test(n)) return cafe(now);
   if(/retomar|continuar/.test(n)) return resume(now);
+  if(/concluir/.test(n)) return conclude(now);
   if(/fechar|encerrar/.test(n)) return closeShift(now);
   if(/quanto tempo|trabalhei/.test(n)){const t=totals([dayKey(new Date(now))],now); return "Hoje: "+clock(t.ms)+" trabalhadas."}
   if(/quanto ganhei|lucro|resultado/.test(n)){const t=totals([dayKey(new Date(now))],now); return "Hoje bruto "+money(t.inc)+", despesas "+money(t.exp)+", líquido "+money(t.net)+"."}
@@ -127,14 +157,16 @@ function intent(text,now){
   return "";
 }
 function shiftButtons(open){
+  const fr=frozen();
   const dis=on=>on?"":" disabled";
   return `<div class="acts">
-    <button data-act="start"${dis(!open)}>Iniciar</button>
+    <button data-act="start"${dis(!open&&!fr)}>Iniciar</button>
     <button class="ghost" data-act="pause"${dis(open&&open.state==="working")}>Pausar</button>
     <button class="ghost" data-act="cafe"${dis(open&&open.state!=="coffee")}>Café</button>
-    <button class="${open&&open.state!=="working"?"good":""}" data-act="resume"${dis(open&&open.state!=="working")}>Retomar</button>
-    <button class="ghost" data-act="close"${dis(!!open)}>Fechar</button>
-    <button class="ghost" data-act="zero"${dis(!!open)}>Zerar</button>
+    <button class="${(open&&open.state!=="working")||fr?"good":""}" data-act="resume"${dis((open&&open.state!=="working")||fr)}>Retomar</button>
+    <button class="ghost" data-act="close"${dis(!!open)}>Fechar turno</button>
+    <button class="ghost" data-act="done"${dis(!!open)}>Concluir</button>
+    <button class="ghost" data-act="zero"${dis(!!open||!!fr)}>Zerar</button>
   </div><p class="muted" id="note"></p>`;
 }
 function doAct(name){
@@ -144,15 +176,18 @@ function doAct(name){
   if(name==="pause") msg=pause(now);
   if(name==="cafe") msg=cafe(now);
   if(name==="resume") msg=resume(now);
-  if(name==="close"){ if(!confirm("Fechar o turno? O tempo para de contar.")) return; msg=closeShift(now) }
-  if(name==="zero"){ if(!confirm("Zerar este turno? A contagem recomeça agora.")) return; msg=zerar(now) }
+  if(name==="close"){ if(!confirm("Fechar este turno? O próximo Iniciar abre o seguinte. No quarto, Retomar continua nele.")) return; msg=closeShift(now) }
+  if(name==="done"){ if(!confirm("Concluir e congelar este turno? Retomar continua nele.")) return; msg=conclude(now) }
+  if(name==="zero"){ if(!confirm("Zerar este turno? Ganhos e despesas ficam.")) return; msg=zerar(now) }
   save();
   const note=$("note"); if(note) note.textContent=msg;
 }
 let tab=state.tab||"inicio";
 let gsub=state.gsub||"jornada";
 function setTab(t){tab=t; state.tab=t; save()}
-const NAV=[["inicio","Início"],["gestao","Gestão"],["mapa","Mapa"],["fala","Comunica"],["luna","Luna"]];
+const NAV=[["inicio","Início"],["radio","Rádio"],["comunidade","Comunidade"],["config","Configuração"]];
+const ALIAS={gestao:"config",mapa:"radio",fala:"radio",luna:"inicio",comunicacao:"comunidade"};
+if(ALIAS[tab]) tab=ALIAS[tab];
 function render(){
   const now=Date.now(); catchUp(now);
   const h=new Date().getHours();
@@ -167,7 +202,7 @@ function render(){
   if(tab==="inicio"){
     $("view").innerHTML=`<div class="split">
       <section class="card"><p class="muted">Jornada</p><div class="clock" id="clock">${open?clock(worked(open,now)):clock(t.ms)}</div>
-        <p class="muted">${open?"Turno "+open.slot+" · "+estado(open.state)+" · início "+hm(open.started):"Nenhum turno aberto. Os seis botões ficam aqui."}</p>
+        <p class="muted">${open?"Turno "+open.slot+" · "+estado(open.state)+" · início "+hm(open.started):"Nenhum turno aberto. São quatro turnos por dia."}</p>
         ${open&&open.note?`<p class="muted">${open.note}</p>`:""}
         ${shiftButtons(open)}
       </section>
@@ -176,13 +211,22 @@ function render(){
           <div class="card"><p class="muted">Bruto</p><b>${money(t.inc)}</b></div>
           <div class="card"><p class="muted">Despesas</p><b>${money(t.exp)}</b></div>
           <div class="card"><p class="muted">Líquido</p><b>${money(t.net)}</b></div>
-          <div class="card"><p class="muted">Por hora</p><b>${t.ph==null?"Sem dados":money(t.ph)}</b></div>
+          <div class="card"><p class="muted">Líquido por hora</p><b>${t.nph==null?"Sem dados":money(t.nph)}</b></div>
         </div>
         <section class="card" id="clima" style="margin-top:10px"><p class="muted">Clima · Governador Valadares</p><p>Consultando Open-Meteo…</p></section>
         <section class="card" style="margin-top:10px"><p class="muted">Notícias</p>
           <p><a href="https://www.driododoce.com.br/" style="color:var(--c)">Diário do Rio Doce</a></p>
           <p><a href="https://news.google.com/search?q=BR-381+Governador+Valadares&hl=pt-BR&gl=BR&ceid=BR:pt-419" style="color:var(--c)">BR-381 nas fontes</a></p>
-          <p class="muted">Sem alerta inventado.</p>
+          <div id="newsbox"><p class="muted">Buscando fontes…</p></div>
+          <p><a href="https://www.driododoce.com.br/" style="color:var(--c)">Diário do Rio Doce</a></p>
+          <p><a href="https://news.google.com/search?q=Governador+Valadares&hl=pt-BR&gl=BR&ceid=BR:pt-419" style="color:var(--c)">Valadares na fonte</a></p>
+          <p><a href="https://news.google.com/search?q=BR-381+Governador+Valadares&hl=pt-BR&gl=BR&ceid=BR:pt-419" style="color:var(--c)">BR-381 na fonte</a></p>
+          <p class="muted">Sem manchete inventada.</p>
+        </section>
+        <section class="card" style="margin-top:10px" id="calbox"></section>
+        <section class="card" style="margin-top:10px"><b>${state.copilot||"Luna"}</b><p class="muted">${state.name?state.name+", ":""}escreva um comando da jornada.</p>
+          <div id="chat"></div>
+          <div class="row"><input id="q" placeholder="Iniciar, pausar, concluir, 20 reais de combustível"><button id="mic">Falar</button><button id="send">Enviar</button></div>
         </section>
       </div>
     </div>`;
@@ -194,7 +238,7 @@ function render(){
         const temp=b.current&&typeof b.current.temperature_2m==="number"?Math.round(b.current.temperature_2m)+"°C":"—";
         box.innerHTML=`<p class="muted">Clima · Open-Meteo</p><b style="font-size:28px">${temp}</b><p class="muted">${names[code]||"Condição na fonte"} · ${(b.current&&b.current.time||"").replace("T"," ")}</p>`;
       }).catch(()=>{ const box=$("clima"); if(box) box.innerHTML="<p class='muted'>Clima indisponível agora.</p>" });
-  } else if(tab==="gestao"){
+  } else if(tab==="config"){
     const subs=[["jornada","Jornada"],["dinheiro","Financeiro"],["plano","Plano"],["cal","Calendário"],["rel","Relatório"]];
     const md=monthDays(now); const mt=totals(md,now);
     let body="";
@@ -238,36 +282,47 @@ function render(){
     if($("savem")) $("savem").onclick=()=>{ state.plan.month=Number(String($("meta").value).replace(",","."))||0; state.plan.day=Number(String($("metad").value).replace(",","."))||0; save() };
     if($("savek")) $("savek").onclick=()=>{ const s=active(); if(!s) return; s.km=Number(String($("km").value).replace(",","."))||0; s.note="km editado"; save() };
     if($("list")) $("list").innerHTML=state.entries.filter(e=>e.day===day).map(e=>`<p>${e.kind==="in"?(e.app||"Receita"):e.cat} ${money(e.cents)}</p>`).join("")||"<p class='muted'>Nada lançado hoje.</p>";
-  } else if(tab==="mapa"){
+  } else if(tab==="radio"){
     const shared=(live.peers||[]).filter(p=>p.lat!=null);
-    $("view").innerHTML=`<section class="card"><p class="muted">Mapa real</p><h2 style="margin:4px 0 8px">Você e quem ligou o GPS na sala</h2>
-      <p class="muted" id="gstat">${live.self?live.self.lat.toFixed(4)+", "+live.self.lng.toFixed(4):"Nenhum motorista inventado."}</p>
-      <div class="row" style="margin-top:8px"><button id="gps">Mostrar meu ponto</button><button class="ghost" id="share">${live.share?"Parar de publicar":"Publicar na sala"}</button></div>
+    const gv=!live.self;
+    $("view").innerHTML=`<section class="card"><p class="muted">Mapa real</p><h2 style="margin:4px 0 8px">Ruas e quem ligou o GPS</h2>
+      <p class="muted" id="gstat">${live.self?live.self.lat.toFixed(4)+", "+live.self.lng.toFixed(4)+" · agora":"Pedindo o GPS. Até autorizar, o mapa é o centro de Valadares."}</p>
+      <div class="row" style="margin-top:8px"><button id="gps">Atualizar GPS</button><button class="ghost" id="share">${live.share?"Parar de publicar":"Publicar na sala"}</button></div>
       <div id="frame"></div>
-      <div id="plist" style="margin-top:8px">${shared.map(p=>`<p>${p.name} · ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</p>`).join("")||"<p class='muted'>Ninguém da sala com GPS ligado.</p>"}</div>
-    </section>`;
-    if(live.self) putMap(live.self.lat, live.self.lng);
-    $("gps").onclick=()=>askGps(false);
-    $("share").onclick=()=>{ live.share=!live.share; if(!live.share){live.self=null; live.push()} else askGps(true); render() };
-  } else if(tab==="fala"){
-    $("view").innerHTML=`<div class="split">
+      <div id="plist" style="margin-top:8px">${shared.map(p=>`<p>${p.name} · ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</p>`).join("")||"<p class='muted'>Ninguém da sala com GPS ligado. Nenhum motorista foi inventado.</p>"}</div>
+    </section>
+    <div class="split" style="margin-top:10px">
       <section class="card"><p class="muted">Sala ao vivo</p><h2 style="margin:4px 0">Quem está no código</h2>
         <p class="muted" id="lstat">${live.status}</p>
         <div class="row" style="margin-top:8px"><input id="room" value="${live.room||"valadares"}" maxlength="24"><button id="join">${live.on?"Sair":"Entrar"}</button></div>
-        <button id="ptt" class="${live.talk?"good":""}" style="width:100%;min-height:72px;margin-top:10px;font-size:18px" ${live.on?"":"disabled"}>${live.talk?"Falando…":"Segure para falar"}</button>
-        <p class="muted" style="margin-top:8px">Servidor público gratuito só avisa quem entrou. O áudio vai direto entre os aparelhos. Quem souber o código entra. Não envie placa.</p>
+        <p class="muted" style="margin-top:8px">Quem ouve: a sala inteira.</p>
+        <button id="ptt" class="${live.talk?"good":""}" style="width:100%;min-height:72px;margin-top:10px;font-size:18px" ${live.on?"":"disabled"}>${live.talk?"Falando para a sala…":"Segure para falar com a sala"}</button>
+        <p class="muted" style="margin-top:8px">Servidor público gratuito só avisa quem entrou. O áudio vai direto entre os aparelhos. Quem souber o código entra. Não envie placa. Sem TURN, algumas redes não completam a chamada.</p>
       </section>
-      <section class="card"><b>Na sala agora</b><div id="plist">${(live.peers||[]).map(p=>`<p>${p.name||"Motorista"} · ${p.talk?"falando":"online"}</p>`).join("")||"<p class='muted'>Ninguém além de você.</p>"}</div>
+      <section class="card"><b>Na sala agora</b><div>${(live.peers||[]).map(p=>`<p>${p.name||"Motorista"} · ${p.talk?"falando":"online"}</p>`).join("")||"<p class='muted'>Ninguém além de você.</p>"}</div>
         <div id="cbox"></div>
-        <div class="row" style="margin-top:8px"><input id="cmsg" placeholder="Mensagem"><button class="ghost" id="csend">Enviar</button></div>
+        <div class="row" style="margin-top:8px"><input id="cmsg" placeholder="Mensagem para a sala"><button class="ghost" id="csend">Enviar</button></div>
       </section>
     </div>`;
+    putMap(live.self?live.self.lat:-18.851, live.self?live.self.lng:-41.949);
+    if(!live.self && !live._asked){ live._asked=true; askGps(false); }
+    $("gps").onclick=()=>askGps(false);
+    $("share").onclick=()=>{ live.share=!live.share; if(!live.share){live.self=null; live.push()} else askGps(true); render() };
     (live.chat||[]).slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=(m.name||"")+": "+m.text; $("cbox").appendChild(p)});
     $("join").onclick=()=>{ if(live.on) live.stop(); else live.start($("room").value); };
     const ptt=$("ptt");
-    ptt.onpointerdown=e=>{ if(!live.on) return; ptt.setPointerCapture(e.pointerId); live.talk=true; ptt.textContent="Falando…"; ptt.className="good"; live.mic(true) };
-    ptt.onpointerup=()=>{ live.talk=false; ptt.textContent="Segure para falar"; ptt.className=""; live.mic(false) };
+    ptt.onpointerdown=e=>{ if(!live.on) return; ptt.setPointerCapture(e.pointerId); live.talk=true; ptt.textContent="Falando para a sala…"; ptt.className="good"; live.mic(true) };
+    ptt.onpointerup=()=>{ live.talk=false; ptt.textContent="Segure para falar com a sala"; ptt.className=""; live.mic(false) };
     $("csend").onclick=()=>{ const v=$("cmsg").value.trim(); if(!v) return; live.say(v); $("cmsg").value=""; };
+    if(gv) { const g=$("gstat"); }
+  } else if(tab==="comunidade"){
+    $("view").innerHTML=`<section class="card"><b>Comunidade</b>
+      <p class="muted">Aqui aparecem só as pessoas que entraram na mesma sala do Rádio. Não há perfil, grupo ou placa inventados.</p>
+      <p style="margin-top:8px">${(live.peers||[]).map(p=>`<span class="msg" style="display:block">${p.name||"Motorista"} · ${p.talk?"falando":"online"}</span>`).join("")||"Ninguém além de você na sala."}</p>
+      <p class="muted" style="margin-top:8px">Grupos com conta, bloqueio e denúncia ficam no aplicativo publicado, depois do cadastro. A placa continua oculta até você autorizar.</p>
+      <label>Seu nome na sala</label><input id="cname" value="${state.name||""}" maxlength="40"><button id="cnameb" style="margin-top:8px;width:100%">Salvar nome</button>
+    </section>`;
+    $("cnameb").onclick=()=>{ state.name=$("cname").value.trim().slice(0,40); $("who").textContent=state.name||"Motorista"; save() };
   } else {
     $("view").innerHTML=`<section class="card"><b>Luna</b><p class="muted" id="phase">Em espera</p></section>
       <div id="chat"></div>
@@ -304,7 +359,68 @@ function render(){
     };
     $("bubble").onclick=()=>{ try{ if(window.LunaNative&&LunaNative.showOverlay) LunaNative.showOverlay(); else alert("A bolha abre no Android, com permissão de sobreposição.") }catch(e){ alert("Não foi possível abrir a bolha.") } };
   }
+  const cal=$("calbox");
+  if(cal){
+    const md=monthDays(now); const first=new Date(now); first.setDate(1); const pad=(first.getDay()+6)%7;
+    const cells=Array.from({length:pad},()=>"<span></span>").concat(md.map(k=>{
+      const sl=totals([k],now); const has=sl.inc||sl.exp||sl.ms;
+      return `<button type="button" class="${has?"has":""}" data-day="${k}">${Number(k.slice(8))}</button>`;
+    })).join("");
+    cal.innerHTML=`<p class="muted">Calendário</p><div class="cal">${cells}</div><p class="muted" id="dayinfo">Toque um dia com a barrinha.</p>`;
+    cal.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{
+      const k=b.dataset.day; const sl=totals([k],now);
+      const info=$("dayinfo"); if(info) info.textContent=k+" · bruto "+money(sl.inc)+" · despesas "+money(sl.exp)+" · líquido "+money(sl.net)+" · "+clock(sl.ms);
+    });
+  }
+  if($("send")){
+    const box=$("chat");
+    (state.chat||[]).slice(-6).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=m.text; box.appendChild(p)});
+    function push(role,text,voice){ state.chat.push({role,text}); if(state.chat.length>40) state.chat=state.chat.slice(-40); persist();
+      if(voice && window.LunaNative && LunaNative.speak) LunaNative.speak(text);
+      else if(voice && window.speechSynthesis){ const u=new SpeechSynthesisUtterance(text); u.lang="pt-BR"; speechSynthesis.cancel(); speechSynthesis.speak(u) }
+    }
+    async function ask(text,voice){ const local=intent(text,Date.now()); state.chat.push({role:"user",text}); if(local){ push("luna",local,voice); render(); return } push("luna","Não reconheci. Tente iniciar, pausar, café, retomar, fechar, concluir ou registrar 20 reais de combustível.",voice); render(); }
+    $("send").onclick=()=>{ const v=$("q").value.trim(); if(!v) return; $("q").value=""; ask(v,false) };
+    $("mic").onclick=()=>{
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(window.LunaNative&&LunaNative.startListening){ window.onLunaSpeechResult=function(res){ if(!res||String(res).startsWith("__")) return; ask(String(res),true) }; LunaNative.startListening(); return }
+      if(!SR) return; const rec=new SR(); rec.lang="pt-BR"; rec.onresult=ev=>ask(ev.results[0][0].transcript,true); rec.start();
+    };
+  }
+  if(tab==="inicio"){ loadNews(); }
+  paintBubble();
   $("view").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>doAct(b.dataset.act));
+}
+function loadNews(){
+  const box=document.getElementById("newsbox"); if(!box) return;
+  if(window.__newsHtml && window.__newsAt && Date.now()-window.__newsAt<120000){ box.innerHTML=window.__newsHtml; return }
+  if(window.__newsBusy) return;
+  window.__newsBusy=true;
+  const jobs=[["Diário do Rio Doce","Diário do Rio Doce Governador Valadares"],["Valadares","Governador Valadares"],["BR-381","BR-381 Governador Valadares"]];
+  Promise.all(jobs.map(async ([source,q])=>{
+    const rss="https://news.google.com/rss/search?q="+encodeURIComponent(q)+"&hl=pt-BR&gl=BR&ceid=BR:pt-419";
+    const res=await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(rss));
+    if(!res.ok) return "";
+    const body=await res.json();
+    const item=(body.items||[]).find(row=>row.title&&String(row.link||"").startsWith("http"));
+    if(!item) return "";
+    const title=String(item.title).replace(/<[^>]+>/g," ");
+    const summary=String(item.description||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim().slice(0,180);
+    const img=item.thumbnail||"";
+    return `<a class="news" href="${item.link}" target="_blank" rel="noreferrer">${img?`<img alt="" src="${img}" style="width:100%;height:92px;object-fit:cover;border-radius:8px">`:"<p class='muted'>A fonte não enviou imagem.</p>"}<b>${title}</b><p class="muted">${summary||"A fonte não enviou resumo."}</p><p class="muted">${source}${item.pubDate?" · "+item.pubDate:""}</p></a>`;
+  })).then(rows=>{ window.__newsBusy=false; const html=rows.filter(Boolean).join("")||"<p class='muted'>A fonte não devolveu manchete agora.</p>"; window.__newsHtml=html; window.__newsAt=Date.now(); if(box) box.innerHTML=html }).catch(()=>{ window.__newsBusy=false; if(box) box.innerHTML="<p class='muted'>Sem rede para as notícias. Nada foi inventado.</p>" });
+}
+function paintBubble(){
+  let bub=document.getElementById("bub");
+  if(!bub){ bub=document.createElement("div"); bub.id="bub"; document.body.appendChild(bub) }
+  if(tab==="inicio"){ bub.innerHTML=""; return }
+  bub.innerHTML=`<div class="menu" id="radial" hidden>
+      <button data-act="start">Iniciar</button><button class="ghost" data-act="pause">Pausar</button>
+      <button class="ghost" data-act="cafe">Café</button><button class="ghost" data-act="close">Fechar</button>
+      <button class="ghost" data-act="done">Concluir</button>
+    </div><button class="bubble" id="orb" aria-label="Controles da jornada"></button>`;
+  $("orb").onclick=()=>{ const m=$("radial"); m.hidden=!m.hidden };
+  bub.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{ doAct(b.dataset.act); const m=$("radial"); if(m) m.hidden=true });
 }
 function putMap(lat,lng){
   const d=0.03; const src=`https://www.openstreetmap.org/export/embed.html?bbox=${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lng}`;
