@@ -319,6 +319,8 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 3. Outro toque: as opções somem, fica só a orb da Luna.
 4. Dois toques simultâneos: abre o aplicativo inteiro.
 
+**Decisão (alternância Luna/sala do microfone):** usar um botão de alternância — um ícone pequeno na orb que troca entre Luna e sala (ícone de robô para Luna, ícone de microfone para sala). O toque simples na orb continua só abrindo e fechando o menu de opções; a alternância é feita pelo botão, evitando erro de acionar a sala quando o usuário queria falar com a Luna. Detalhes em 7.1 e 7.3.
+
 ### 6.2 Estados da orb
 
 | Estado | O que aparece |
@@ -326,6 +328,8 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 | `OCULTA` | App aberto em primeiro plano; a orb não aparece (regra 6.1-1 — ver Q5). |
 | `RECOLHIDA` | Só a orb da Luna, mostrando o contador da jornada (mesmo valor do cronômetro do topo). |
 | `MENU_ABERTO` | Luna no centro e os 7 botões em círculo ao redor: iniciar, pausar, zerar, café, fechar turno, concluir, microfone. |
+
+Em qualquer estado visível, a orb mostra também o **modo do microfone**: `MODO_LUNA` (ícone de robô) ou `MODO_SALA` (ícone de microfone), trocado só pelo botão de alternância.
 
 ### 6.3 Interações
 
@@ -335,7 +339,8 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 | `RECOLHIDA` | Um toque na orb | → `MENU_ABERTO` |
 | `MENU_ABERTO` | Outro toque (na orb/Luna central) | → `RECOLHIDA` (opções somem) |
 | `MENU_ABERTO` | Toque em iniciar / pausar / zerar / café / fechar turno / concluir | Executa a ação da jornada conforme a tabela 5.4; o contador da orb reflete o novo estado. Se o menu fecha após a ação: Q7 |
-| `MENU_ABERTO` | Toque em microfone | Voz em tempo real: falar com a Luna ou com a sala de voz (seção 7, uso 1). Como alternar entre as duas: seção 7.5 Q1 |
+| `MENU_ABERTO` | Toque em microfone | Voz em tempo real (seção 7, uso 1) com quem estiver no modo atual: `MODO_LUNA` → Luna; `MODO_SALA` → sala de voz |
+| `RECOLHIDA` ou `MENU_ABERTO` | Toque no botão de alternância | `MODO_LUNA` ⇄ `MODO_SALA` (ícone robô ⇄ microfone). **Não** abre nem fecha o menu |
 | `RECOLHIDA` ou `MENU_ABERTO` | Dois toques simultâneos | Abre o aplicativo inteiro → `OCULTA` (Q1) |
 
 ### 6.4 Critérios de aceite
@@ -348,6 +353,10 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - Os botões ficam legíveis e clicáveis no celular e no tablet, sem sair da borda da tela.
 - Visual com a paleta da F8 e a foto nova da Luna (F9).
 - Sem a permissão "Exibir sobre outros apps", o app explica e leva o usuário à tela de configuração, sem travar.
+- O botão de alternância Luna/sala fica visível na orb.
+- O modo atual está sempre indicado pelo ícone (robô = Luna, microfone = sala).
+- Tocar no botão de alternância nunca abre nem fecha o menu.
+- O toque simples na orb nunca muda o modo.
 
 ### 6.5 Notas técnicas
 
@@ -364,11 +373,14 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - **Q1 — "Dois toques simultâneos":** é tocar com **dois dedos ao mesmo tempo** ou **toque duplo** (dois toques rápidos com um dedo)?
 - **Q2 — Botões por estado:** **retomar** não está na lista da orb. Como retomar após pausa/café pela orb — "iniciar" faz esse papel (regra 5.2-2)? Botões que não se aplicam ao estado (ex.: pausar com a jornada zerada) somem, ficam apagados ou continuam iguais?
 - **Q3 — Mover e dispensar a orb:** pode arrastar para outro lugar da tela? Ela gruda na borda? Como fechar/esconder a orb (arrastar para um "X", só pelo app)?
-- **Q4 — Microfone:** ~~o que faz exatamente?~~ **Resolvido na seção 7:** voz em tempo real com a Luna ou com a sala de voz (uso 1). Continuam em aberto: como alternar entre Luna e sala (7.5 Q1), se na sala é segurar para falar (PTT) e se dá para ouvir os outros pela orb.
+- **Q4 — Microfone:** ~~o que faz exatamente?~~ **Resolvido na seção 7:** voz em tempo real com a Luna ou com a sala de voz (uso 1). ~~Como alternar entre Luna e sala~~ — **Resolvida:** botão de alternância na orb (ver 6.1 e 7.5 Q1). Continuam em aberto: se na sala é segurar para falar (PTT) e se dá para ouvir os outros pela orb.
 - **Q5 — Quando a orb aparece:** só ao **fechar** o app (remover dos recentes) ou também ao **minimizar** (botão home/trocar de app)? Some quando o app é aberto de novo? Aparece com a jornada zerada ou só com jornada em andamento?
 - **Q6 —** Zerar pela orb precisa de confirmação (relacionado à Q9 da seção 5)?
 - **Q7 —** Depois de tocar num botão de jornada, o menu fecha sozinho ou continua aberto?
 - **Q8 —** A orb deve mostrar também o turno atual (1º–4º) e o estado (pausado/café), ou só o contador?
+- **Q9 — Modo padrão do microfone:** ao abrir a orb pela primeira vez, o modo começa em Luna ou em sala?
+- **Q10 — Modo salvo entre sessões:** o último modo escolhido fica salvo ao fechar/reabrir o app, ou volta sempre ao padrão (e à meia-noite)?
+- **Q11 — Posição do botão de alternância:** fica preso à orb recolhida (ex.: ícone pequeno no canto da orb), dentro do menu radial, ou nos dois? Como não confundir com o botão microfone do menu?
 
 ---
 
@@ -381,6 +393,8 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 1. **Microfone da orb flutuante:** voz em tempo real — falar com a Luna ou com a sala de voz (Rota dos Parceiros).
 2. **Card na página inicial:** comandos de voz que viram ação — ex.: "Luna, anota pra mim tal valor", "Luna, acabei de fazer um valor em tal aplicativo" (anotar corrida particular, dar pausa, anotar valor específico).
 3. **Chat da Rota dos Parceiros:** aceita voz para ditar mensagens em vez de digitar.
+
+**Decisão (uso 1 — alternância Luna/sala):** Um botão de alternância — um ícone pequeno na orb que troca entre Luna e sala (ícone de robô para Luna, ícone de microfone para sala). O toque simples na orb continua só abrindo e fechando o menu de opções; a alternância é feita pelo botão, evitando erro de acionar a sala quando o usuário queria falar com a Luna.
 
 ### 7.2 Comparação
 
@@ -395,6 +409,7 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 **Uso 1 — orb (tempo real)**
 - Tocar no microfone da orb inicia uma conversa de voz ao vivo, com o app fechado/minimizado.
 - O usuário consegue falar com a **Luna** e ouvir a resposta falada, **ou** falar na **sala de voz de Valadares**, e fica claro na orb com qual dos dois está falando.
+- A escolha entre Luna e sala é feita só pelo botão de alternância da orb (ícone de robô = Luna, ícone de microfone = sala); o microfone sempre fala com o modo indicado no ícone (critérios completos em 6.4).
 - Na sala, o comportamento segue F2 (walkie-talkie, todos ouvem).
 
 **Uso 2 — card da página inicial (comando → ação)**
@@ -425,7 +440,7 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 
 ### 7.5 Questões em aberto de voz/IA
 
-- **Q1 — Alternar Luna × sala no microfone da orb:** como o usuário escolhe falar com a Luna ou com a sala? Dois botões, toque curto × segurar, palavra de ativação ("Luna, …"), ou um seletor?
+- **Q1 — Alternar Luna × sala no microfone da orb:** ~~como o usuário escolhe falar com a Luna ou com a sala? Dois botões, toque curto × segurar, palavra de ativação ("Luna, …"), ou um seletor?~~ **Resolvida:** botão de alternância na orb (robô = Luna, microfone = sala); o toque simples só abre/fecha o menu. Ver 6.1, 6.3, 6.4 e 7.1. Novas dúvidas relacionadas (modo padrão, modo salvo, posição do botão): 6.6 Q9–Q11.
 - **Q2 — Confirmação:** confirmar sempre antes de salvar valores/executar ações do card, ou só quando houver dúvida?
 - **Q3 — Offline:** o que deve funcionar sem internet (ex.: ditado e comandos simples com reconhecimento offline do Android)? Gemini e a sala exigem internet.
 - **Q4 — Lista de comandos suportados:** quais comandos exatamente? Exemplos recebidos: anotar corrida particular, dar pausa, anotar valor específico, "acabei de fazer um valor em tal aplicativo". Também iniciar/fechar turno/café/concluir/zerar? Quais aplicativos de corrida devem ser reconhecidos?
@@ -446,5 +461,5 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 9. Arquivo da nova foto da Luna.
 10. Tempo de expiração de alertas de acidente/fluxo e de usuários inativos no mapa.
 11. Lógica da jornada: ver as questões Q1–Q9 na seção 5.7.
-12. Orb flutuante da Luna: ver as questões Q1–Q8 na seção 6.6.
+12. Orb flutuante da Luna: ver as questões Q1–Q11 na seção 6.6.
 13. Voz/IA: ver as questões Q1–Q6 na seção 7.5.
