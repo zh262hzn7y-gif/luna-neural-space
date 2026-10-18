@@ -335,7 +335,7 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 | `RECOLHIDA` | Um toque na orb | → `MENU_ABERTO` |
 | `MENU_ABERTO` | Outro toque (na orb/Luna central) | → `RECOLHIDA` (opções somem) |
 | `MENU_ABERTO` | Toque em iniciar / pausar / zerar / café / fechar turno / concluir | Executa a ação da jornada conforme a tabela 5.4; o contador da orb reflete o novo estado. Se o menu fecha após a ação: Q7 |
-| `MENU_ABERTO` | Toque em microfone | Ação a definir (Q4) — previsto: falar na sala de voz/walkie-talkie (F2/F3) |
+| `MENU_ABERTO` | Toque em microfone | Voz em tempo real: falar com a Luna ou com a sala de voz (seção 7, uso 1). Como alternar entre as duas: seção 7.5 Q1 |
 | `RECOLHIDA` ou `MENU_ABERTO` | Dois toques simultâneos | Abre o aplicativo inteiro → `OCULTA` (Q1) |
 
 ### 6.4 Critérios de aceite
@@ -357,14 +357,14 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - **Layout radial:** Luna no centro e os 7 botões distribuídos em círculo (≈ 51,4° entre cada um); quando a orb está perto de uma borda, usar arco/semicírculo para os botões não saírem da tela. Janela `TYPE_APPLICATION_OVERLAY`.
 - **Detecção de toques:** distinguir toque simples × dois toques (`GestureDetector` / multitouch com `pointerCount == 2`, conforme a resposta da Q1); se for duplo toque, o toque simples precisa esperar a janela do duplo toque (~300 ms) para não abrir o menu por engano.
 - **Mesmo estado da jornada da seção 5:** a orb (nativa) e a WebView leem e gravam o mesmo estado persistido (ex.: `SharedPreferences` exposto à WebView pelo `LunaBridge`), com timestamps — a orb calcula o contador sozinha, sem depender da WebView ativa.
-- **Microfone:** ligar ao walkie-talkie/sala de voz (F2/F3). Hoje a voz roda em WebRTC dentro da WebView; com o app fechado a WebView pode estar pausada, então falar pela orb provavelmente exige mover a voz para o lado nativo (ex.: SDK Android do LiveKit) — a confirmar.
+- **Microfone:** voz em tempo real com a Luna ou com a sala de voz/walkie-talkie (F2/F3) — detalhado na seção 7 (uso 1). Hoje a voz roda em WebRTC dentro da WebView; com o app fechado a WebView pode estar pausada, então falar pela orb provavelmente exige mover a voz para o lado nativo (ex.: SDK Android do LiveKit) — a confirmar.
 
 ### 6.6 Questões em aberto da orb
 
 - **Q1 — "Dois toques simultâneos":** é tocar com **dois dedos ao mesmo tempo** ou **toque duplo** (dois toques rápidos com um dedo)?
 - **Q2 — Botões por estado:** **retomar** não está na lista da orb. Como retomar após pausa/café pela orb — "iniciar" faz esse papel (regra 5.2-2)? Botões que não se aplicam ao estado (ex.: pausar com a jornada zerada) somem, ficam apagados ou continuam iguais?
 - **Q3 — Mover e dispensar a orb:** pode arrastar para outro lugar da tela? Ela gruda na borda? Como fechar/esconder a orb (arrastar para um "X", só pelo app)?
-- **Q4 — Microfone:** o que faz exatamente? Segurar para falar (PTT) na sala de Valadares, gravar uma mensagem de áudio, ou comando de voz para a Luna? Ouvir os outros também pela orb?
+- **Q4 — Microfone:** ~~o que faz exatamente?~~ **Resolvido na seção 7:** voz em tempo real com a Luna ou com a sala de voz (uso 1). Continuam em aberto: como alternar entre Luna e sala (7.5 Q1), se na sala é segurar para falar (PTT) e se dá para ouvir os outros pela orb.
 - **Q5 — Quando a orb aparece:** só ao **fechar** o app (remover dos recentes) ou também ao **minimizar** (botão home/trocar de app)? Some quando o app é aberto de novo? Aparece com a jornada zerada ou só com jornada em andamento?
 - **Q6 —** Zerar pela orb precisa de confirmação (relacionado à Q9 da seção 5)?
 - **Q7 —** Depois de tocar num botão de jornada, o menu fecha sozinho ou continua aberto?
@@ -372,7 +372,69 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 
 ---
 
-## 7. Questões em aberto
+## 7. Separação dos três usos de voz/IA
+
+O app tem **três usos diferentes de voz**, que não devem ser misturados: conversa em tempo real (orb), comandos que viram ação (card da página inicial) e ditado de mensagens (chat). As regras abaixo foram passadas pelo usuário; pontos ambíguos estão em **7.5 Questões em aberto de voz/IA**.
+
+### 7.1 Regras
+
+1. **Microfone da orb flutuante:** voz em tempo real — falar com a Luna ou com a sala de voz (Rota dos Parceiros).
+2. **Card na página inicial:** comandos de voz que viram ação — ex.: "Luna, anota pra mim tal valor", "Luna, acabei de fazer um valor em tal aplicativo" (anotar corrida particular, dar pausa, anotar valor específico).
+3. **Chat da Rota dos Parceiros:** aceita voz para ditar mensagens em vez de digitar.
+
+### 7.2 Comparação
+
+| Uso | Onde | Entrada | Saída | Tecnologia sugerida | Latência esperada |
+|---|---|---|---|---|---|
+| **1. Voz em tempo real** | Botão microfone da orb flutuante (seção 6) | Fala contínua do usuário (áudio ao vivo) | Com a Luna: resposta falada da Luna. Com a sala: áudio para todos da sala de Valadares (F2/F3) | Luna: Gemini Live API (áudio em tempo real) ou agente LiveKit com Gemini. Sala: WebRTC atual → LiveKit (SFU) | Tempo real (conversa; idealmente < 1 s) |
+| **2. Comando de voz → ação** | Card na página inicial | Frase curta falada ("Luna, anota…") | Ação no app: anotar valor/corrida particular, pausar jornada etc., com confirmação | Reconhecimento de fala (pt-BR) → texto → Gemini interpreta a intenção e extrai os dados → ação em jornada/finanças | Alguns segundos são aceitáveis |
+| **3. Ditado** | Campo de mensagem do chat da Rota dos Parceiros (F2) | Fala do usuário | Texto no campo de mensagem, para revisar e enviar | Android `SpeechRecognizer` (via `LunaBridge`) ou Web Speech API, idioma pt-BR | Quase imediato (texto aparece enquanto fala) |
+
+### 7.3 Critérios de aceite
+
+**Uso 1 — orb (tempo real)**
+- Tocar no microfone da orb inicia uma conversa de voz ao vivo, com o app fechado/minimizado.
+- O usuário consegue falar com a **Luna** e ouvir a resposta falada, **ou** falar na **sala de voz de Valadares**, e fica claro na orb com qual dos dois está falando.
+- Na sala, o comportamento segue F2 (walkie-talkie, todos ouvem).
+
+**Uso 2 — card da página inicial (comando → ação)**
+- Frases como "Luna, anota pra mim tal valor" e "Luna, acabei de fazer um valor em tal aplicativo" viram a ação correspondente (anotar corrida particular, dar pausa, anotar valor específico), com valor e aplicativo extraídos da fala.
+- Antes de executar, o app mostra o que entendeu (ex.: "Anotar R$ 25,00 — corrida particular") — ver Q2 sobre confirmação.
+- "Dar pausa" executa a mesma ação do botão **pausar** da jornada (seção 5); valores entram nas finanças existentes, sem mudar a lógica de negócio.
+- Se a frase não for entendida, o app avisa e não faz nada.
+
+**Uso 3 — chat (ditado)**
+- O chat tem botão de microfone que transcreve a fala em pt-BR para o campo de texto.
+- O texto ditado pode ser editado antes de enviar; nada é enviado automaticamente.
+- Ditado é diferente da mensagem de áudio gravada da F2 (aqui sai texto, não áudio).
+
+### 7.4 Notas técnicas
+
+- **Orb / tempo real (uso 1):**
+  - Luna: Gemini Live API (streaming de áudio bidirecional) ou um agente LiveKit com Gemini na sala. A chave do Gemini não deve ficar no APK (F10) — usar token efêmero/servidor.
+  - Sala: WebRTC/MQTT atual (seção 4.2) no MVP; LiveKit (SFU) quando houver servidor de tokens.
+  - Com o app fechado, o áudio precisa rodar no lado nativo e em foreground service do tipo `microphone` (seção 6.5).
+- **Card / comando → ação (uso 2):**
+  - Fala → texto com `SpeechRecognizer` (pt-BR) ou STT do próprio Gemini; texto → Gemini com saída estruturada (JSON, ex.: `{acao: "anotar_valor", valor: 25.00, app: "…", tipo: "particular"}`) ou function calling.
+  - O app só executa ações de uma **lista fechada** (ver Q4) e sempre via as mesmas funções dos botões existentes (jornada/finanças).
+  - Valores em reais: tratar fala como "vinte e cinco e cinquenta" → 25,50.
+- **Chat / ditado (uso 3):**
+  - Android `SpeechRecognizer` com `EXTRA_LANGUAGE = "pt-BR"` exposto pelo `LunaBridge`, ou Web Speech API na WebView (o suporte na WebView Android é limitado — preferir o nativo).
+  - Ditado não precisa de Gemini.
+- Permissão `RECORD_AUDIO` já existe; pedir em tempo de execução se ainda não concedida.
+
+### 7.5 Questões em aberto de voz/IA
+
+- **Q1 — Alternar Luna × sala no microfone da orb:** como o usuário escolhe falar com a Luna ou com a sala? Dois botões, toque curto × segurar, palavra de ativação ("Luna, …"), ou um seletor?
+- **Q2 — Confirmação:** confirmar sempre antes de salvar valores/executar ações do card, ou só quando houver dúvida?
+- **Q3 — Offline:** o que deve funcionar sem internet (ex.: ditado e comandos simples com reconhecimento offline do Android)? Gemini e a sala exigem internet.
+- **Q4 — Lista de comandos suportados:** quais comandos exatamente? Exemplos recebidos: anotar corrida particular, dar pausa, anotar valor específico, "acabei de fazer um valor em tal aplicativo". Também iniciar/fechar turno/café/concluir/zerar? Quais aplicativos de corrida devem ser reconhecidos?
+- **Q5 —** O card da página inicial escuta só quando o usuário toca no microfone, ou fica ouvindo a palavra "Luna" o tempo todo?
+- **Q6 —** A Luna na orb (uso 1) também pode executar ações (como no uso 2), ou só conversa?
+
+---
+
+## 8. Questões em aberto
 1. Qual é o segundo nome de ferramenta que o usuário lembrava além do LiveKit? (não identificado no repositório)
 2. Haverá backend próprio (tokens LiveKit, push, armazenamento de áudio e alertas)? Onde hospedar?
 3. Login: por e-mail (como cita o aviso atual), apenas apelido, ou outro?
@@ -385,3 +447,4 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 10. Tempo de expiração de alertas de acidente/fluxo e de usuários inativos no mapa.
 11. Lógica da jornada: ver as questões Q1–Q9 na seção 5.7.
 12. Orb flutuante da Luna: ver as questões Q1–Q8 na seção 6.6.
+13. Voz/IA: ver as questões Q1–Q6 na seção 7.5.
