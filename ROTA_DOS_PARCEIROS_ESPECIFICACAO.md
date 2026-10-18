@@ -492,13 +492,24 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 
 **Decisão (uso 1 — alternância Luna/sala):** Um botão de alternância — um ícone pequeno na orb que troca entre Luna e sala (ícone de robô para Luna, ícone de microfone para sala). O toque simples na orb continua só abrindo e fechando o menu de opções; a alternância é feita pelo botão, evitando erro de acionar a sala quando o usuário queria falar com a Luna.
 
+### 7.1.1 Decisões do Marlon (voz/IA)
+
+- **V1.** Sem internet: o app funciona normal, praticamente tudo offline — turno, ganhos, gastos, metas, anotações. A Luna é uma IA híbrida: pensa e responde localmente perguntas do dia a dia, com base no que aprende automaticamente com o uso. Só vai online quando precisa pesquisar algo ou fornecer dado que não tá no app (notícia, clima etc.). Ela entende sozinha quando desconectar a internet ou não.
+- **V2.** Lista de comandos e aplicativos: tudo que está no aplicativo funciona offline, porque o app faz coisas básicas.
+- **V3.** Card escuta: só ao tocar — você toca, fala, e ela para de escutar; não fica ouvindo "Luna" o tempo todo.
+- **V4.** Luna na orb executa ações também, não só conversa.
+
+**Observações (sem regra nova):**
+- O que **exige internet por natureza** e não pode ser offline: sala de voz/ligação e chat do grupo (F2/F3), localização dos outros usuários no mapa (F1), socorro para os outros (F4), alertas (F5), notícias, clima (Open-Meteo) e pesquisa. "Praticamente tudo offline" (V1) se refere às funções do próprio usuário: turno/jornada, ganhos, gastos, metas e anotações.
+- "Aprende automaticamente com o uso" e "pensa localmente" precisam de definição e têm limites técnicos — ver Q8–Q11.
+
 ### 7.2 Comparação
 
 | Uso | Onde | Entrada | Saída | Tecnologia sugerida | Latência esperada |
 |---|---|---|---|---|---|
-| **1. Voz em tempo real** | Botão microfone da orb flutuante (seção 6) | Fala contínua do usuário (áudio ao vivo) | Com a Luna: resposta falada da Luna. Com a sala: áudio para todos da sala de Valadares (F2/F3) | Luna: Gemini Live API (áudio em tempo real) ou agente LiveKit com Gemini. Sala: WebRTC atual → LiveKit (SFU) | Tempo real (conversa; idealmente < 1 s) |
-| **2. Comando de voz → ação** | Card na página inicial | Frase curta falada ("Luna, anota…") | Ação no app: anotar valor/corrida particular, pausar jornada etc., com confirmação | Reconhecimento de fala (pt-BR) → texto → Gemini interpreta a intenção e extrai os dados → ação em jornada/finanças | Alguns segundos são aceitáveis |
-| **3. Ditado** | Campo de mensagem do chat da Rota dos Parceiros (F2) | Fala do usuário | Texto no campo de mensagem, para revisar e enviar | Android `SpeechRecognizer` (via `LunaBridge`) ou Web Speech API, idioma pt-BR | Quase imediato (texto aparece enquanto fala) |
+| **1. Voz em tempo real** | Botão microfone da orb flutuante (seção 6) | Fala contínua do usuário (áudio ao vivo) | Com a Luna: resposta falada **e ações no app** (V4). Com a sala: áudio para todos da sala de Valadares (F2/F3) | Luna **híbrida** (V1): offline → reconhecimento de fala no aparelho + parser de intenções local/modelo no aparelho + voz sintetizada local; online (só notícia, clima, pesquisa) → Gemini Live API ou agente LiveKit com Gemini. Sala: WebRTC atual → LiveKit (SFU) — **sempre online** | Offline: alguns segundos; online: tempo real (idealmente < 1 s) |
+| **2. Comando de voz → ação** | Card na página inicial; escuta **só ao tocar** (V3) | Frase curta falada ("Luna, anota…") | Qualquer ação do app (V2): anotar valor/corrida particular, pausar jornada etc. — ver Q2 sobre confirmação | **Offline primeiro** (V1/V2): reconhecimento de fala pt-BR no aparelho → parser de intenções local (regras + modelo no aparelho, se disponível) → ação em jornada/finanças. Online só quando o pedido precisa de dado de fora do app | Alguns segundos são aceitáveis |
+| **3. Ditado** | Campo de mensagem do chat da Rota dos Parceiros (F2) | Fala do usuário | Texto no campo de mensagem, para revisar e enviar | Android `SpeechRecognizer` (via `LunaBridge`) em pt-BR, **preferindo reconhecimento offline** no aparelho. O envio da mensagem precisa de internet | Quase imediato (texto aparece enquanto fala) |
 
 ### 7.3 Critérios de aceite
 
@@ -507,36 +518,53 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 - Na sala de voz (dentro da opção "rádio" da Rota dos Parceiros — M5), o usuário pode entrar na ligação coletiva ao vivo, mandar mensagem de texto ou segurar para mandar áudio; quem está na ligação continua falando, ouvindo e sendo ouvido mesmo com o app fechado (M6).
 - O modo do microfone começa sempre em Luna (M11).
 - Durante a ligação, falar com a Luna pela orb **não** envia áudio ao grupo, o usuário continua ouvindo o grupo, e o microfone da ligação volta sozinho quando ele termina (L1–L5, critérios completos em 6.4).
-- A Luna da orb pode fazer anotações (L3) — as mesmas ações do uso 2, pela mesma lista fechada.
+- A Luna da orb **executa ações** (V4), não só conversa: anotações (L3) e controle da jornada (iniciar/retomar, pausar, café, fechar turno, concluir, zerar) — as mesmas ações do uso 2, pela mesma lista fechada. Zerar mantém a confirmação "tem certeza?" (M8).
+- **Sem internet**, a Luna continua respondendo perguntas do dia a dia sobre os dados do app (ex.: quanto ganhou hoje, horas trabalhadas, meta) e executando ações (V1).
+- Pedidos que precisam de dado de fora do app (notícia, clima, pesquisa) usam a internet automaticamente quando ela existe; sem internet, a Luna avisa que não consegue responder isso agora (V1).
 - O usuário consegue falar com a **Luna** e ouvir a resposta falada, **ou** falar na **sala de voz de Valadares**, e fica claro na orb com qual dos dois está falando.
 - A escolha entre Luna e sala é feita só pelo botão de alternância da orb (ícone de robô = Luna, ícone de microfone = sala); o microfone sempre fala com o modo indicado no ícone (critérios completos em 6.4).
 - Na sala, o comportamento segue F2 (walkie-talkie, todos ouvem).
 
 **Uso 2 — card da página inicial (comando → ação)**
+- O card **só escuta depois de um toque**; o usuário fala e a escuta para sozinha ao fim da fala. Nunca fica ouvindo "Luna" em segundo plano (V3).
+- Todos os comandos funcionam **sem internet** (V2).
 - Frases como "Luna, anota pra mim tal valor" e "Luna, acabei de fazer um valor em tal aplicativo" viram a ação correspondente (anotar corrida particular, dar pausa, anotar valor específico), com valor e aplicativo extraídos da fala.
 - Antes de executar, o app mostra o que entendeu (ex.: "Anotar R$ 25,00 — corrida particular") — ver Q2 sobre confirmação.
 - "Dar pausa" executa a mesma ação do botão **pausar** da jornada (seção 5); valores entram nas finanças existentes, sem mudar a lógica de negócio.
 - Se a frase não for entendida, o app avisa e não faz nada.
 
+**Geral — offline (V1)**
+- Sem internet: turno/jornada, ganhos, gastos, metas e anotações funcionam normalmente, com dados salvos no aparelho.
+- A troca entre local e online é automática, sem o usuário escolher (V1).
+
 **Uso 3 — chat (ditado)**
-- O chat tem botão de microfone que transcreve a fala em pt-BR para o campo de texto.
+- O chat tem botão de microfone que transcreve a fala em pt-BR para o campo de texto, inclusive sem internet quando o pacote de idioma offline estiver instalado (Q10).
 - O texto ditado pode ser editado antes de enviar; nada é enviado automaticamente.
 - Ditado é diferente da mensagem de áudio gravada da F2 (aqui sai texto, não áudio).
 
 ### 7.4 Notas técnicas
 
+- **Luna híbrida (V1–V4):**
+  - **Roteador local × online:** cada pedido passa primeiro por um **parser de intenções local** (regras/padrões em pt-BR para os comandos do app + extração de valores e nomes de aplicativos). Se for ação do app ou pergunta sobre dados do app, responde **no aparelho**. Só se precisar de dado de fora (notícia, clima, pesquisa) vai para o Gemini online.
+  - **Modelo no aparelho (opcional):** Gemini Nano via Android AICore / ML Kit GenAI para conversa e entendimento mais livres offline. **Limitação:** só funciona em alguns aparelhos recentes (lista limitada de modelos com AICore); nos demais, a Luna offline fica restrita ao parser local + respostas por modelo de texto pronto. Modelos abertos pequenos rodando no aparelho (ex.: via MediaPipe LLM Inference) são alternativa, mas aumentam muito o tamanho do APK e o uso de memória/bateria — ver Q9.
+  - **Respostas do dia a dia offline:** consultas sobre os dados locais (ganhos do dia/semana, horas da jornada, metas, gastos) respondidas a partir do banco local, com frases montadas pelo app ou pelo modelo no aparelho.
+  - **"Aprende com o uso":** sem definição ainda (Q8). Possível interpretação técnica: guardar localmente preferências e padrões (aplicativos mais usados, valores frequentes, apelidos/termos que o usuário usa) para melhorar o parser e sugestões — não é treinamento de modelo.
+  - **Detecção automática de conectividade:** `ConnectivityManager.NetworkCallback` (`NET_CAPABILITY_VALIDATED`) no nativo, exposto à WebView pelo `LunaBridge`; a Luna escolhe local/online sozinha e, sem rede, avisa quando o pedido precisa de internet.
+  - **Voz offline:** reconhecimento pt-BR no aparelho (`SpeechRecognizer` com `EXTRA_PREFER_OFFLINE` ou `SpeechRecognizer.createOnDeviceSpeechRecognizer`, Android 12+; exige o pacote de idioma pt-BR baixado) e resposta falada com `TextToSpeech` usando voz pt-BR offline.
+  - **Armazenamento local:** jornada, ganhos, gastos, metas, anotações e o que a Luna "aprende" ficam em banco local (ex.: Room/SQLite no nativo, ou IndexedDB/`localStorage` na WebView via `LunaBridge`), funcionando sem servidor. Backup/sincronização: Q11.
 - **Orb / tempo real (uso 1):**
-  - Luna: Gemini Live API (streaming de áudio bidirecional) ou um agente LiveKit com Gemini na sala. A chave do Gemini não deve ficar no APK (F10) — usar token efêmero/servidor.
+  - Luna online (só notícia, clima, pesquisa): Gemini Live API (streaming de áudio bidirecional) ou um agente LiveKit com Gemini na sala. A chave do Gemini não deve ficar no APK (F10) — usar token efêmero/servidor.
   - Sala: WebRTC/MQTT atual (seção 4.2) no MVP; LiveKit (SFU) quando houver servidor de tokens.
   - Com o app fechado, o áudio precisa rodar no lado nativo e em foreground service do tipo `microphone` (seção 6.5).
   - Falar com a Luna na ligação: mutar a trilha de saída da ligação, manter o áudio do grupo tocando, enviar o microfone só para a sessão da Luna e usar VAD/detecção de fim de turno para voltar à ligação (detalhes em 6.5).
-  - Anotações feitas pela Luna na orb usam o mesmo parser/lista fechada do uso 2.
+  - Ações feitas pela Luna na orb (anotações e controle da jornada — V4) usam o mesmo parser local/lista fechada do uso 2 e as mesmas funções dos botões.
 - **Card / comando → ação (uso 2):**
-  - Fala → texto com `SpeechRecognizer` (pt-BR) ou STT do próprio Gemini; texto → Gemini com saída estruturada (JSON, ex.: `{acao: "anotar_valor", valor: 25.00, app: "…", tipo: "particular"}`) ou function calling.
-  - O app só executa ações de uma **lista fechada** (ver Q4) e sempre via as mesmas funções dos botões existentes (jornada/finanças).
+  - Escuta só ao tocar (V3): abrir o reconhecimento ao toque e encerrar no fim da fala (`onEndOfSpeech`/silêncio); sem *hotword* em segundo plano.
+  - Fala → texto **offline** com `SpeechRecognizer` (pt-BR); texto → **parser de intenções local** que gera uma ação estruturada (ex.: `{acao: "anotar_valor", valor: 25.00, app: "…", tipo: "particular"}`). Gemini online só como reforço para frases que o parser local não entende, quando houver internet.
+  - A **lista fechada** de ações = todas as funções que já existem no app (V2): jornada (iniciar/retomar, pausar, café, fechar turno, concluir, zerar), ganhos, gastos, metas e anotações; os aplicativos reconhecidos são os que já existem no app. Sempre via as mesmas funções dos botões existentes.
   - Valores em reais: tratar fala como "vinte e cinco e cinquenta" → 25,50.
 - **Chat / ditado (uso 3):**
-  - Android `SpeechRecognizer` com `EXTRA_LANGUAGE = "pt-BR"` exposto pelo `LunaBridge`, ou Web Speech API na WebView (o suporte na WebView Android é limitado — preferir o nativo).
+  - Android `SpeechRecognizer` com `EXTRA_LANGUAGE = "pt-BR"` e preferência offline, exposto pelo `LunaBridge` (a Web Speech API na WebView Android é limitada e depende de internet — preferir o nativo).
   - Ditado não precisa de Gemini.
 - Permissão `RECORD_AUDIO` já existe; pedir em tempo de execução se ainda não concedida.
 
@@ -544,11 +572,15 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 
 - **Q1 — Alternar Luna × sala no microfone da orb:** ~~como o usuário escolhe falar com a Luna ou com a sala? Dois botões, toque curto × segurar, palavra de ativação ("Luna, …"), ou um seletor?~~ **Resolvida:** botão de alternância na orb (robô = Luna, microfone = sala); o toque simples só abre/fecha o menu. Ver 6.1, 6.3, 6.4 e 7.1. Dúvidas relacionadas (modo padrão, modo salvo, posição do botão — 6.6 Q9–Q11) também **resolvidas** pelas decisões M11 e M13. Ainda em aberto: o que o microfone faz no modo sala (6.6 Q4/Q16).
 - **Q2 — Confirmação:** confirmar sempre antes de salvar valores/executar ações do card, ou só quando houver dúvida?
-- **Q3 — Offline:** o que deve funcionar sem internet (ex.: ditado e comandos simples com reconhecimento offline do Android)? Gemini e a sala exigem internet.
-- **Q4 — Lista de comandos suportados:** quais comandos exatamente? Exemplos recebidos: anotar corrida particular, dar pausa, anotar valor específico, "acabei de fazer um valor em tal aplicativo". Também iniciar/fechar turno/café/concluir/zerar? Quais aplicativos de corrida devem ser reconhecidos?
-- **Q5 —** O card da página inicial escuta só quando o usuário toca no microfone, ou fica ouvindo a palavra "Luna" o tempo todo?
-- **Q6 —** ~~A Luna na orb (uso 1) também pode executar ações (como no uso 2), ou só conversa?~~ **Resolvida** (6.1.2 L3): a Luna faz a anotação ou conversa. Continua em aberto: além de anotações, ela pode executar ações de jornada (pausar, café etc.) pela voz na orb? (relacionado à Q4)
+- **Q3 — Offline:** ~~o que deve funcionar sem internet (ex.: ditado e comandos simples com reconhecimento offline do Android)? Gemini e a sala exigem internet.~~ **Resolvida** (7.1.1 V1): praticamente tudo funciona offline — turno, ganhos, gastos, metas, anotações; a Luna é híbrida e só vai online para notícia, clima, pesquisa etc., decidindo sozinha. Sala/ligação, mapa compartilhado, socorro e alertas continuam exigindo internet (observação em 7.1.1).
+- **Q4 — Lista de comandos suportados:** ~~quais comandos exatamente? Também iniciar/fechar turno/café/concluir/zerar? Quais aplicativos de corrida devem ser reconhecidos?~~ **Resolvida** (7.1.1 V2): tudo o que está no aplicativo, funcionando offline — inclusive jornada, ganhos, gastos, metas e anotações; os aplicativos reconhecidos são os que já existem no app.
+- **Q5 —** ~~O card da página inicial escuta só quando o usuário toca no microfone, ou fica ouvindo a palavra "Luna" o tempo todo?~~ **Resolvida** (7.1.1 V3): só ao tocar; para de escutar quando o usuário termina de falar.
+- **Q6 —** ~~A Luna na orb (uso 1) também pode executar ações (como no uso 2), ou só conversa?~~ **Resolvida** (6.1.2 L3): a Luna faz a anotação ou conversa. ~~Continua em aberto: além de anotações, ela pode executar ações de jornada (pausar, café etc.) pela voz na orb?~~ **Resolvida** (7.1.1 V4): a Luna na orb executa ações também, incluindo o controle da jornada.
 - **Q7 —** Questões de áudio e fim de fala ao falar com a Luna durante a ligação: ver 6.6 Q17–Q21.
+- **Q8 — "Aprende automaticamente com o uso" (V1):** o que exatamente a Luna deve aprender (aplicativos e valores mais usados, horários, metas, jeito de falar)? Isso fica só no aparelho? O usuário pode ver/apagar o que ela aprendeu?
+- **Q9 — Limite da IA offline:** modelos no aparelho (Gemini Nano/AICore) só existem em alguns celulares recentes e são bem mais limitados que o Gemini online. Nos outros aparelhos, aceitar uma Luna offline mais simples (comandos do app + respostas sobre os dados do app, sem conversa livre)? Vale aumentar o tamanho do APK para incluir um modelo próprio?
+- **Q10 — Voz offline:** o reconhecimento pt-BR offline exige o pacote de idioma baixado no Android (e voz pt-BR offline para a Luna falar). O app deve orientar o usuário a baixar, e o que fazer em aparelhos sem suporte?
+- **Q11 — Dados locais:** com tudo salvo no aparelho, haverá backup/sincronização quando voltar a internet (troca de celular, reinstalação)? E "ela entende sozinha quando desconectar a internet" significa só detectar a falta de rede, ou também evitar usar dados móveis de propósito (economia)?
 
 ---
 
@@ -565,4 +597,4 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 10. Tempo de expiração de alertas de acidente/fluxo e de usuários inativos no mapa.
 11. Lógica da jornada: ver as questões Q1–Q9 na seção 5.7.
 12. Orb flutuante da Luna: ver a seção 6.6 (Q1 e Q6–Q11 resolvidas pelas decisões do Marlon; Q2–Q5 e Q16 parcialmente; Q12–Q15 e Q17–Q21 abertas).
-13. Voz/IA: ver as questões Q1–Q7 na seção 7.5 (Q1 e Q6 resolvidas).
+13. Voz/IA: ver a seção 7.5 (Q1 e Q3–Q6 resolvidas — Q3–Q6 pelas decisões do Marlon em 7.1.1; Q2 confirmação continua aberta; Q7 remete a 6.6 Q17–Q21; novas Q8–Q11 sobre aprendizado, limites da IA offline, voz offline e dados locais).
