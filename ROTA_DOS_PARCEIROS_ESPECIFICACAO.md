@@ -308,7 +308,71 @@ Consequências diretas destas regras (sem regra nova):
 
 ---
 
-## 6. Questões em aberto
+## 6. Orb flutuante da Luna (bolha flutuante)
+
+Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seção 5) sem abrir o aplicativo. As regras abaixo foram passadas pelo usuário; pontos ambíguos estão em **6.6 Questões em aberto da orb**.
+
+### 6.1 Regras
+
+1. Ao fechar o aplicativo, aparece a orb da Luna na tela, mostrando o contador da jornada.
+2. Um toque na orb: abre as opções de jornada ao redor dela — **iniciar, pausar, zerar, café, fechar turno, concluir e microfone** — com a Luna no meio e as opções ao redor para clicar.
+3. Outro toque: as opções somem, fica só a orb da Luna.
+4. Dois toques simultâneos: abre o aplicativo inteiro.
+
+### 6.2 Estados da orb
+
+| Estado | O que aparece |
+|---|---|
+| `OCULTA` | App aberto em primeiro plano; a orb não aparece (regra 6.1-1 — ver Q5). |
+| `RECOLHIDA` | Só a orb da Luna, mostrando o contador da jornada (mesmo valor do cronômetro do topo). |
+| `MENU_ABERTO` | Luna no centro e os 7 botões em círculo ao redor: iniciar, pausar, zerar, café, fechar turno, concluir, microfone. |
+
+### 6.3 Interações
+
+| Estado atual | Ação | Resultado |
+|---|---|---|
+| App aberto | Fechar o aplicativo | → `RECOLHIDA` (orb aparece com o contador) |
+| `RECOLHIDA` | Um toque na orb | → `MENU_ABERTO` |
+| `MENU_ABERTO` | Outro toque (na orb/Luna central) | → `RECOLHIDA` (opções somem) |
+| `MENU_ABERTO` | Toque em iniciar / pausar / zerar / café / fechar turno / concluir | Executa a ação da jornada conforme a tabela 5.4; o contador da orb reflete o novo estado. Se o menu fecha após a ação: Q7 |
+| `MENU_ABERTO` | Toque em microfone | Ação a definir (Q4) — previsto: falar na sala de voz/walkie-talkie (F2/F3) |
+| `RECOLHIDA` ou `MENU_ABERTO` | Dois toques simultâneos | Abre o aplicativo inteiro → `OCULTA` (Q1) |
+
+### 6.4 Critérios de aceite
+
+- Ao fechar o app (com a permissão concedida), a orb aparece em até ~1 s e mostra o contador da jornada atualizado em tempo real.
+- O contador da orb é sempre igual ao do cronômetro do app (mesma fonte de estado — seção 5).
+- Um toque abre o menu radial com exatamente os 7 botões ao redor da Luna; outro toque fecha e deixa só a orb.
+- Cada botão de jornada na orb tem o mesmo efeito do botão correspondente dentro do app (tabela 5.4), incluindo persistência e reset de meia-noite.
+- Dois toques simultâneos abrem o aplicativo inteiro.
+- Os botões ficam legíveis e clicáveis no celular e no tablet, sem sair da borda da tela.
+- Visual com a paleta da F8 e a foto nova da Luna (F9).
+- Sem a permissão "Exibir sobre outros apps", o app explica e leva o usuário à tela de configuração, sem travar.
+
+### 6.5 Notas técnicas
+
+- **Já existe uma bolha flutuante desde a v6.0.0:** `OverlayService` (foreground service `specialUse`, subtipo "Bolha flutuante de controle de turno do motorista"), aberto/fechado pela WebView via `LunaBridge.showOverlay()` / `hideOverlay()`; no 6.2.1 há o botão "Mostrar bolha" nos ajustes. A orb deve evoluir esse serviço, não criar outro.
+- **Permissão `SYSTEM_ALERT_WINDOW` ("Exibir sobre outros apps")** já está no manifesto; precisa ser concedida pelo usuário em Configurações (`Settings.ACTION_MANAGE_OVERLAY_PERMISSION`); checar com `Settings.canDrawOverlays()`.
+- **Foreground service** com notificação persistente para a orb não ser encerrada pelo sistema (`FOREGROUND_SERVICE` e `FOREGROUND_SERVICE_SPECIAL_USE` já declarados; `POST_NOTIFICATIONS` precisa ser pedida no Android 13+). Se o mesmo serviço também mantiver localização (seção 4.1), combinar com o tipo `location` ou separar serviços. Para usar o microfone com o app em segundo plano, o Android 14 exige serviço do tipo `microphone` (`FOREGROUND_SERVICE_MICROPHONE`), iniciado enquanto o app está visível.
+- **Layout radial:** Luna no centro e os 7 botões distribuídos em círculo (≈ 51,4° entre cada um); quando a orb está perto de uma borda, usar arco/semicírculo para os botões não saírem da tela. Janela `TYPE_APPLICATION_OVERLAY`.
+- **Detecção de toques:** distinguir toque simples × dois toques (`GestureDetector` / multitouch com `pointerCount == 2`, conforme a resposta da Q1); se for duplo toque, o toque simples precisa esperar a janela do duplo toque (~300 ms) para não abrir o menu por engano.
+- **Mesmo estado da jornada da seção 5:** a orb (nativa) e a WebView leem e gravam o mesmo estado persistido (ex.: `SharedPreferences` exposto à WebView pelo `LunaBridge`), com timestamps — a orb calcula o contador sozinha, sem depender da WebView ativa.
+- **Microfone:** ligar ao walkie-talkie/sala de voz (F2/F3). Hoje a voz roda em WebRTC dentro da WebView; com o app fechado a WebView pode estar pausada, então falar pela orb provavelmente exige mover a voz para o lado nativo (ex.: SDK Android do LiveKit) — a confirmar.
+
+### 6.6 Questões em aberto da orb
+
+- **Q1 — "Dois toques simultâneos":** é tocar com **dois dedos ao mesmo tempo** ou **toque duplo** (dois toques rápidos com um dedo)?
+- **Q2 — Botões por estado:** **retomar** não está na lista da orb. Como retomar após pausa/café pela orb — "iniciar" faz esse papel (regra 5.2-2)? Botões que não se aplicam ao estado (ex.: pausar com a jornada zerada) somem, ficam apagados ou continuam iguais?
+- **Q3 — Mover e dispensar a orb:** pode arrastar para outro lugar da tela? Ela gruda na borda? Como fechar/esconder a orb (arrastar para um "X", só pelo app)?
+- **Q4 — Microfone:** o que faz exatamente? Segurar para falar (PTT) na sala de Valadares, gravar uma mensagem de áudio, ou comando de voz para a Luna? Ouvir os outros também pela orb?
+- **Q5 — Quando a orb aparece:** só ao **fechar** o app (remover dos recentes) ou também ao **minimizar** (botão home/trocar de app)? Some quando o app é aberto de novo? Aparece com a jornada zerada ou só com jornada em andamento?
+- **Q6 —** Zerar pela orb precisa de confirmação (relacionado à Q9 da seção 5)?
+- **Q7 —** Depois de tocar num botão de jornada, o menu fecha sozinho ou continua aberto?
+- **Q8 —** A orb deve mostrar também o turno atual (1º–4º) e o estado (pausado/café), ou só o contador?
+
+---
+
+## 7. Questões em aberto
 1. Qual é o segundo nome de ferramenta que o usuário lembrava além do LiveKit? (não identificado no repositório)
 2. Haverá backend próprio (tokens LiveKit, push, armazenamento de áudio e alertas)? Onde hospedar?
 3. Login: por e-mail (como cita o aviso atual), apenas apelido, ou outro?
@@ -320,3 +384,4 @@ Consequências diretas destas regras (sem regra nova):
 9. Arquivo da nova foto da Luna.
 10. Tempo de expiração de alertas de acidente/fluxo e de usuários inativos no mapa.
 11. Lógica da jornada: ver as questões Q1–Q9 na seção 5.7.
+12. Orb flutuante da Luna: ver as questões Q1–Q8 na seção 6.6.
