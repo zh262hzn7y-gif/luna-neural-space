@@ -213,7 +213,102 @@ O usuário informou que já enviou chaves. **Nenhum valor de chave é escrito ne
 
 ---
 
-## 5. Questões em aberto
+## 5. Lógica da jornada (quatro turnos)
+
+Esta seção descreve o funcionamento do cronômetro de jornada (exibido no topo — ver F9). As regras abaixo foram passadas pelo usuário; pontos ambíguos estão em **5.7 Questões em aberto da jornada** e não foram decididos aqui.
+
+### 5.1 Regras
+
+1. Não há horários fixos — os turnos são sequenciais.
+2. Ao clicar em **iniciar**, abre o primeiro turno.
+3. Ao clicar em **fechar turno**, fecha o turno atual e avança automaticamente para o próximo: fecha o 1º vai pro 2º, fecha o 2º vai pro 3º, fecha o 3º vai pro 4º.
+4. No 4º turno não existe 5º — ao fechar o 4º, trava, sem avançar.
+5. **Concluir**: trava o tempo trabalhado até agora e conclui o turno.
+6. **Retomar**: continua no turno atual (ex.: retomar o 4º turno).
+7. **Zerar**: zera tudo e trava no zero.
+8. O dia vai até meia-noite: quando bate meia-noite, independente de quantas horas trabalhadas, zera tudo para iniciar o novo dia.
+9. Botões da jornada: **iniciar**, **pausar**, **café** (pausa que não conta no tempo), **retomar**, **fechar turno**, **concluir** e **zerar**.
+
+### 5.2 Regras de contagem de tempo
+
+1. **Pausar**: congela o contador no tempo atual.
+2. **Iniciar de novo ou retomar**: continua contando de onde parou.
+3. **Fechar turno**: fecha e para no tempo atual, registrando as horas daquele turno, **sem zerar o contador**.
+4. Ao iniciar o segundo turno, o contador continua contando (somando ao total do dia).
+5. Fechar o segundo e iniciar o terceiro: continua contando.
+6. O objetivo é saber as **horas exatas trabalhadas no dia, somando todos os turnos**.
+
+Consequências diretas destas regras (sem regra nova):
+- Existe **um contador do dia, cumulativo** entre turnos; ele só volta a zero com **zerar** ou na **meia-noite**.
+- Cada turno tem seu **registro de horas próprio** (duração trabalhada dentro daquele turno), gravado ao fechar o turno.
+- Total do dia = soma das horas registradas dos turnos (fechados + o turno em andamento).
+- Tempo de **café** não entra no tempo trabalhado.
+
+### 5.3 Estados
+
+| Estado | Significado | Contador do dia |
+|---|---|---|
+| `ZERADO` | Início do dia, após zerar ou após meia-noite. Travado no zero. | 00:00:00, parado |
+| `TRABALHANDO(n)` | Turno *n* (1–4) em andamento. | contando |
+| `PAUSADO(n)` | Turno *n* pausado. | congelado |
+| `CAFE(n)` | Turno *n* em pausa de café. | congelado (café não conta) |
+| `TURNO_FECHADO(n→n+1)` | Turno *n* fechado e registrado; o próximo turno (*n+1*) já é o turno atual, aguardando contagem (ver questão Q1). | parado no total atual |
+| `TRAVADO_4` | 4º turno fechado; não há 5º. | parado no total atual |
+| `CONCLUIDO(n)` | Jornada concluída no turno *n*; tempo travado. | parado no total atual |
+
+### 5.4 Transições por botão
+
+| Estado atual | iniciar | pausar | café | retomar | fechar turno | concluir | zerar |
+|---|---|---|---|---|---|---|---|
+| `ZERADO` | → `TRABALHANDO(1)` | — | — | — | — | — | permanece `ZERADO` |
+| `TRABALHANDO(n)` | — | → `PAUSADO(n)` | → `CAFE(n)` | — | registra horas do turno *n*; n<4 → `TURNO_FECHADO(n→n+1)`; n=4 → `TRAVADO_4` | registra e → `CONCLUIDO(n)` | → `ZERADO` |
+| `PAUSADO(n)` | → `TRABALHANDO(n)` (continua de onde parou) | — | ? (Q3) | → `TRABALHANDO(n)` | idem `TRABALHANDO(n)` (Q5) | idem `TRABALHANDO(n)` | → `ZERADO` |
+| `CAFE(n)` | → `TRABALHANDO(n)` | ? (Q3) | — | → `TRABALHANDO(n)` | ? (Q5) | ? (Q5) | → `ZERADO` |
+| `TURNO_FECHADO(n→n+1)` | → `TRABALHANDO(n+1)` (contador continua somando) | — | — | ? (Q1) | — | ? (Q6) | → `ZERADO` |
+| `TRAVADO_4` | — | — | — | ? (Q4) | — | — | → `ZERADO` |
+| `CONCLUIDO(n)` | ? (Q4) | — | — | ? (Q4) | — | — | → `ZERADO` |
+| **Qualquer estado à meia-noite** | → `ZERADO` (automático) | | | | | | |
+
+"—" = botão desabilitado/sem efeito. "?" = comportamento a definir (ver 5.7).
+
+### 5.5 Critérios de aceite
+
+- Sem horários fixos: o 1º turno começa quando o usuário toca **iniciar**, a qualquer hora.
+- **Pausar** congela o contador; **retomar**/**iniciar** continua do mesmo valor, sem perder nem somar segundos.
+- **Café** congela o contador e o tempo de café **não** é somado ao tempo trabalhado (nem do turno nem do dia).
+- **Fechar turno** grava as horas daquele turno, mantém o contador do dia no valor atual (não zera) e o turno atual passa a ser o seguinte (1→2, 2→3, 3→4).
+- Ao iniciar o 2º, 3º ou 4º turno, o contador do dia continua a partir do total acumulado.
+- Fechar o 4º turno trava a jornada; nunca aparece "5º turno".
+- **Concluir** trava o tempo trabalhado no valor atual.
+- **Zerar** leva contador do dia e registros de turno a zero e trava no zero até novo **iniciar**.
+- À **meia-noite** (hora local do aparelho, America/Sao_Paulo), tudo é zerado automaticamente, qualquer que seja o estado ou as horas trabalhadas.
+- A tela mostra: turno atual (1º–4º), contador do dia e as horas registradas de cada turno.
+- Total do dia exibido = soma exata das horas de todos os turnos.
+- Fechar e reabrir o app (ou o sistema matar o app) não altera o tempo nem o estado.
+
+### 5.6 Notas técnicas
+
+- **Persistência entre reinícios do app:** não contar tempo com `setInterval` acumulando segundos. Guardar marcos de tempo: estado, turno atual, `inicioSegmento` (timestamp de quando começou a contar), `acumuladoTurno` e lista de horas registradas por turno. O tempo exibido = acumulado + (agora − `inicioSegmento`) quando contando. Salvar a cada transição (ex.: `localStorage` da WebView e/ou `SharedPreferences` via `LunaBridge`), assim o app reaberto recalcula o valor correto.
+- **Reset de meia-noite:** usar a hora local do aparelho (America/Sao_Paulo). Guardar a data (AAAA-MM-DD) da jornada; ao abrir o app, ao voltar do segundo plano e por timer agendado para 00:00, se a data mudou → `ZERADO`. Se o app estava fechado à meia-noite, o reset acontece na próxima abertura. Se o turno estiver contando na virada, o comportamento sobre o tempo antes/depois de 00:00 está em Q7.
+- **Café fora do tempo trabalhado:** ao entrar em `CAFE`, encerrar o segmento contando (somar ao acumulado) e não abrir novo segmento até retomar/iniciar. Opcionalmente registrar a duração do café à parte, só para exibição.
+- A bolha flutuante (`OverlayService`) e o cronômetro do topo devem ler o mesmo estado persistido.
+- Não alterar lógica de negócio existente fora da jornada (finanças etc.).
+
+### 5.7 Questões em aberto da jornada
+
+- **Q1 — Fechar turno: avança contando ou espera "iniciar"?** A regra 5.1-3 diz que fechar "avança automaticamente para o próximo"; as regras 5.2-3/4/5 dizem que fechar "para no tempo atual" e que o contador continua "ao iniciar o segundo turno". Interpretação adotada na tabela: o turno seguinte vira o turno atual, mas o contador fica parado até tocar **iniciar** (ou **retomar**?). Confirmar.
+- **Q2 — Diferença entre pausar e café:** pela regra 5.2-1 pausar também congela o contador, ou seja, nenhum dos dois soma tempo. A diferença é só o registro/rótulo (café aparece separado)? Pausa deveria contar como tempo trabalhado? Confirmar.
+- **Q3 —** Dá para ir de pausa para café (e vice-versa) diretamente?
+- **Q4 — Retomar depois de concluir ou de fechar o 4º:** a regra 5.1-6 cita "retomar o 4º turno". Retomar é permitido depois de **concluir** e/ou depois de **fechar o 4º** (destravando)? Iniciar também?
+- **Q5 —** Pode fechar turno ou concluir estando em pausa/café? O tempo da pausa entra no turno?
+- **Q6 — Concluir vs. fechar o 4º:** qual é a diferença prática? Concluir encerra a jornada do dia em qualquer turno (ex.: concluir no 2º sem fazer 3º e 4º)? Concluir registra as horas do turno atual como "fechado"? Pode concluir em `TURNO_FECHADO`?
+- **Q7 — Turno ativo na meia-noite:** o tempo trabalhado antes das 00:00 se perde ao zerar (regra 5.1-8 diz "zera tudo") ou deve ser salvo num histórico do dia anterior? E o tempo depois das 00:00 começa a contar sozinho ou exige novo **iniciar**?
+- **Q8 —** Deve existir histórico de dias anteriores (relacionado ao histórico de km da F6), ou só o dia atual?
+- **Q9 —** Zerar precisa de confirmação para evitar toque acidental?
+
+---
+
+## 6. Questões em aberto
 1. Qual é o segundo nome de ferramenta que o usuário lembrava além do LiveKit? (não identificado no repositório)
 2. Haverá backend próprio (tokens LiveKit, push, armazenamento de áudio e alertas)? Onde hospedar?
 3. Login: por e-mail (como cita o aviso atual), apenas apelido, ou outro?
@@ -224,3 +319,4 @@ O usuário informou que já enviou chaves. **Nenhum valor de chave é escrito ne
 8. Cor do botão de socorro: vermelho fora da paleta é aceitável?
 9. Arquivo da nova foto da Luna.
 10. Tempo de expiração de alertas de acidente/fluxo e de usuários inativos no mapa.
+11. Lógica da jornada: ver as questões Q1–Q9 na seção 5.7.
