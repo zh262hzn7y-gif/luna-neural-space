@@ -342,6 +342,19 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - **M12:** "abre na tela inicial" e "volta sempre aonde o usuário parou" podem ser contraditórios — ver Q13.
 - **M13 × regra 6.1-2:** a regra original põe "a Luna no meio" do menu; M13 põe o microfone grande "no centro do menu" — ver Q14.
 
+### 6.1.2 Decisão: Falar com a Luna durante a ligação
+
+- **L1.** Se o usuário já estiver no chat aberto, o botão que aparece na orb é o de falar com a Luna.
+- **L2.** Ao clicar nesse botão, o usuário manda uma mensagem pra Luna e a ligação desativa — o grupo não ouve o que ele falar com a Luna.
+- **L3.** A Luna faz a anotação ou conversa com ele até ele responder.
+- **L4.** Quando ele terminar, a Luna entende que ele não está mais falando com ela, fecha o microfone dela e reabre o microfone do chat/ligação.
+- **L5.** Mesmo com o microfone pausado, o usuário continua ouvindo o grupo.
+
+**Observações (sem regra nova):**
+- Interpretação adotada: "chat aberto" = usuário está na sala/ligação da Rota dos Parceiros (`NA_LIGACAO`, M5/M6) — confirmar em Q17.
+- L1 define qual botão aparece na orb durante a ligação; como isso convive com o botão de alternância Luna/sala (M13) está em Q18.
+- L4 exige que o app detecte sozinho o fim da conversa com a Luna — ver Q19.
+
 ### 6.2 Estados da orb
 
 | Estado | O que aparece |
@@ -355,6 +368,15 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 **Modo do microfone** (em `RECOLHIDA` e `MENU_ABERTO`): `MODO_LUNA` (ícone de robô) ou `MODO_SALA` (ícone de microfone), trocado só pelo botão de alternância. **Sempre começa em `MODO_LUNA`** (M11).
 
 **Ligação (independente da orb):** `NA_LIGACAO` quando o usuário entrou na ligação coletiva da sala (M5); continua mesmo com o app fechado (M6).
+
+**Sub-estados da ligação (6.1.2):**
+
+| Sub-estado | Microfone para o grupo | Microfone para a Luna | Áudio do grupo |
+|---|---|---|---|
+| `LIGACAO_ATIVA` | aberto | fechado | tocando |
+| `FALANDO_COM_LUNA` | **desativado** — o grupo não ouve (L2) | aberto; a Luna anota ou conversa (L3) | **continua tocando** (L5) |
+
+Em `NA_LIGACAO`, o botão que aparece na orb é o de **falar com a Luna** (L1).
 
 ### 6.3 Interações
 
@@ -375,6 +397,9 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 | `RECOLHIDA` ou `MENU_ABERTO` | Arrastar a orb pra fora da tela | → `ESCONDIDA`; app continua rodando (M4) |
 | `RECOLHIDA` ou `MENU_ABERTO` | Toque no xizinho da orb | Fecha a orb (M4) — se também encerra o app/ligação: Q12 |
 | Qualquer | Botão de fechar (encerrar o app) | Encerra o app de vez (M4) — conflito com M6: Q12 |
+| `NA_LIGACAO` / `LIGACAO_ATIVA` | Toque no botão "falar com a Luna" da orb (L1) | → `FALANDO_COM_LUNA`: microfone da ligação desativa, o grupo não ouve; a fala vai para a Luna (L2); o usuário continua ouvindo o grupo (L5) |
+| `FALANDO_COM_LUNA` | Usuário fala / responde | A Luna faz a anotação ou conversa com ele (L3) |
+| `FALANDO_COM_LUNA` | Usuário termina (detectado pela Luna) | Luna fecha o microfone dela e reabre o microfone da ligação → `LIGACAO_ATIVA` (L4) |
 
 ### 6.4 Critérios de aceite
 
@@ -399,6 +424,12 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - Com o menu fechado existe só um microfone na tela (o da orb); com o menu aberto, o da orb é o pequeno do canto e o do menu é o grande do centro, que só aparece com o menu aberto (M13).
 - Se o usuário entrou na ligação da sala, continua falando, ouvindo e sendo ouvido com o app fechado (M6).
 - Ao reabrir o app, ele abre conforme M12 (comportamento exato: Q13).
+- Na ligação, a orb mostra o botão de falar com a Luna (L1).
+- Ao tocar nele, **nenhum áudio** do que o usuário fala com a Luna chega ao grupo (L2).
+- Enquanto fala com a Luna, o usuário **continua ouvindo o grupo** sem interrupção (L5).
+- A Luna executa a anotação pedida ou responde/conversa (L3).
+- Ao terminar, o microfone da Luna fecha e o da ligação reabre **sozinho**, sem o usuário tocar em nada (L4).
+- A ligação nunca cai por causa da conversa com a Luna.
 
 ### 6.5 Notas técnicas
 
@@ -413,6 +444,13 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - **Modo do microfone (M11):** sempre inicia em `MODO_LUNA`; não é necessário persistir o último modo.
 - **Reabrir o app (M12):** salvar a última tela/aba e o scroll da WebView (ex.: `localStorage`) para restaurar ao reabrir — conforme a resposta da Q13.
 - **Microfone:** voz em tempo real com a Luna ou com a sala de voz/walkie-talkie (F2/F3) — detalhado na seção 7 (uso 1). Sala dentro da opção "rádio" da Rota dos Parceiros (M5).
+- **Roteamento de áudio ao falar com a Luna na ligação (6.1.2):**
+  - Ao entrar em `FALANDO_COM_LUNA`, **mutar a trilha de áudio de saída da ligação** (WebRTC: `track.enabled = false` / `RTCRtpSender.replaceTrack(null)`; LiveKit: `setMicrophoneEnabled(false)` ou `localTrack.mute()`), **sem sair da sala** — o grupo não recebe nada (L2).
+  - Enviar o áudio do microfone só para a sessão da Luna (Gemini Live ou agente LiveKit em sala separada/privada — nunca a sala do grupo).
+  - **Manter as trilhas de entrada do grupo tocando** (L5). Mixar a voz da Luna com o áudio do grupo, ou baixar o volume do grupo enquanto a Luna fala (*ducking*) — a definir (Q20).
+  - Usar cancelamento de eco (AEC) para que o áudio do grupo que sai no alto-falante não seja captado como fala para a Luna.
+  - Ao sair de `FALANDO_COM_LUNA`, fechar a sessão de microfone da Luna e reativar a trilha de saída da ligação (L4).
+- **Detecção de fim de fala (L4):** VAD (detecção de atividade de voz) / *end-of-turn detection* — o Gemini Live tem detecção automática de atividade de voz; o LiveKit Agents tem detecção de turno. Encerrar a conversa com a Luna após resposta concluída + silêncio do usuário por X segundos (valor a definir — Q19). Prever também um timeout máximo.
 
 ### 6.6 Questões em aberto da orb
 
@@ -431,7 +469,12 @@ Orb com a Luna, exibida por cima de outros apps, para controlar a jornada (seç�
 - **Q13 — Reabrir o app (M12):** "abre na tela inicial" e "volta sempre aonde o usuário parou" — qual vale? Ex.: volta à última tela se só minimizou e abre na tela inicial se o app foi fechado?
 - **Q14 — Centro do menu (M13 × 6.1-2):** o microfone grande fica no centro **no lugar** da Luna, ou sobre/abaixo da imagem da Luna?
 - **Q15 — Orb escondida (M4):** como trazer de volta uma orb arrastada pra fora da tela (notificação, abrir o app, puxar da borda)?
-- **Q16 — Microfone com o menu fechado (M13):** o ícone pequeno do canto serve para alternar o modo **e** para falar, ou só alterna? Com o menu fechado e no modo Luna o ícone é um robô — então o "único microfone na tela" é qual?
+- **Q16 — Microfone com o menu fechado (M13):** ~~Durante a ligação, qual botão aparece na orb?~~ **Resolvida em parte** (L1): na ligação, o botão da orb é o de falar com a Luna. Continua em aberto fora da ligação: o ícone pequeno do canto serve para alternar o modo **e** para falar, ou só alterna? Com o menu fechado e no modo Luna o ícone é um robô — então o "único microfone na tela" é qual?
+- **Q17 — "Chat aberto" (L1):** significa estar **na ligação** (`NA_LIGACAO`), estar com a **tela do chat** da sala aberta, ou os dois?
+- **Q18 — L1 × botão de alternância (M13):** na ligação, o botão de alternância Luna/sala continua existindo? O botão "falar com a Luna" substitui o microfone da orb, o microfone grande do menu, ou o ícone do canto? Dá para falar com a sala pela orb nesse momento (o microfone da ligação já está aberto)?
+- **Q19 — Fim da conversa com a Luna (L4):** quanto tempo de silêncio conta como "terminou"? Existe timeout máximo? O usuário pode encerrar manualmente (tocar de novo no botão) se a Luna não perceber?
+- **Q20 — Áudio enquanto fala com a Luna (L5):** a voz da Luna e o áudio do grupo tocam juntos, ou o volume do grupo abaixa enquanto a Luna responde?
+- **Q21 — Aviso ao grupo:** o grupo vê algum indicador de que o usuário está com o microfone pausado/falando com a Luna (ex.: ícone "mudo" no nome)?
 
 ---
 
@@ -444,6 +487,8 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 1. **Microfone da orb flutuante:** voz em tempo real — falar com a Luna ou com a sala de voz (Rota dos Parceiros).
 2. **Card na página inicial:** comandos de voz que viram ação — ex.: "Luna, anota pra mim tal valor", "Luna, acabei de fazer um valor em tal aplicativo" (anotar corrida particular, dar pausa, anotar valor específico).
 3. **Chat da Rota dos Parceiros:** aceita voz para ditar mensagens em vez de digitar.
+
+**Decisão (uso 1 — falar com a Luna durante a ligação):** regras L1–L5 da seção 6.1.2 — na ligação, a orb mostra o botão de falar com a Luna; ao usá-lo, o microfone da ligação desativa (o grupo não ouve), a Luna anota ou conversa, e ao terminar ela fecha o microfone dela e reabre o da ligação; o usuário continua ouvindo o grupo o tempo todo.
 
 **Decisão (uso 1 — alternância Luna/sala):** Um botão de alternância — um ícone pequeno na orb que troca entre Luna e sala (ícone de robô para Luna, ícone de microfone para sala). O toque simples na orb continua só abrindo e fechando o menu de opções; a alternância é feita pelo botão, evitando erro de acionar a sala quando o usuário queria falar com a Luna.
 
@@ -461,6 +506,8 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 - Tocar no microfone da orb inicia uma conversa de voz ao vivo com o app minimizado (a orb aparece ao minimizar — M7).
 - Na sala de voz (dentro da opção "rádio" da Rota dos Parceiros — M5), o usuário pode entrar na ligação coletiva ao vivo, mandar mensagem de texto ou segurar para mandar áudio; quem está na ligação continua falando, ouvindo e sendo ouvido mesmo com o app fechado (M6).
 - O modo do microfone começa sempre em Luna (M11).
+- Durante a ligação, falar com a Luna pela orb **não** envia áudio ao grupo, o usuário continua ouvindo o grupo, e o microfone da ligação volta sozinho quando ele termina (L1–L5, critérios completos em 6.4).
+- A Luna da orb pode fazer anotações (L3) — as mesmas ações do uso 2, pela mesma lista fechada.
 - O usuário consegue falar com a **Luna** e ouvir a resposta falada, **ou** falar na **sala de voz de Valadares**, e fica claro na orb com qual dos dois está falando.
 - A escolha entre Luna e sala é feita só pelo botão de alternância da orb (ícone de robô = Luna, ícone de microfone = sala); o microfone sempre fala com o modo indicado no ícone (critérios completos em 6.4).
 - Na sala, o comportamento segue F2 (walkie-talkie, todos ouvem).
@@ -482,6 +529,8 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
   - Luna: Gemini Live API (streaming de áudio bidirecional) ou um agente LiveKit com Gemini na sala. A chave do Gemini não deve ficar no APK (F10) — usar token efêmero/servidor.
   - Sala: WebRTC/MQTT atual (seção 4.2) no MVP; LiveKit (SFU) quando houver servidor de tokens.
   - Com o app fechado, o áudio precisa rodar no lado nativo e em foreground service do tipo `microphone` (seção 6.5).
+  - Falar com a Luna na ligação: mutar a trilha de saída da ligação, manter o áudio do grupo tocando, enviar o microfone só para a sessão da Luna e usar VAD/detecção de fim de turno para voltar à ligação (detalhes em 6.5).
+  - Anotações feitas pela Luna na orb usam o mesmo parser/lista fechada do uso 2.
 - **Card / comando → ação (uso 2):**
   - Fala → texto com `SpeechRecognizer` (pt-BR) ou STT do próprio Gemini; texto → Gemini com saída estruturada (JSON, ex.: `{acao: "anotar_valor", valor: 25.00, app: "…", tipo: "particular"}`) ou function calling.
   - O app só executa ações de uma **lista fechada** (ver Q4) e sempre via as mesmas funções dos botões existentes (jornada/finanças).
@@ -498,7 +547,8 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 - **Q3 — Offline:** o que deve funcionar sem internet (ex.: ditado e comandos simples com reconhecimento offline do Android)? Gemini e a sala exigem internet.
 - **Q4 — Lista de comandos suportados:** quais comandos exatamente? Exemplos recebidos: anotar corrida particular, dar pausa, anotar valor específico, "acabei de fazer um valor em tal aplicativo". Também iniciar/fechar turno/café/concluir/zerar? Quais aplicativos de corrida devem ser reconhecidos?
 - **Q5 —** O card da página inicial escuta só quando o usuário toca no microfone, ou fica ouvindo a palavra "Luna" o tempo todo?
-- **Q6 —** A Luna na orb (uso 1) também pode executar ações (como no uso 2), ou só conversa?
+- **Q6 —** ~~A Luna na orb (uso 1) também pode executar ações (como no uso 2), ou só conversa?~~ **Resolvida** (6.1.2 L3): a Luna faz a anotação ou conversa. Continua em aberto: além de anotações, ela pode executar ações de jornada (pausar, café etc.) pela voz na orb? (relacionado à Q4)
+- **Q7 —** Questões de áudio e fim de fala ao falar com a Luna durante a ligação: ver 6.6 Q17–Q21.
 
 ---
 
@@ -514,5 +564,5 @@ O app tem **três usos diferentes de voz**, que não devem ser misturados: conve
 9. Arquivo da nova foto da Luna.
 10. Tempo de expiração de alertas de acidente/fluxo e de usuários inativos no mapa.
 11. Lógica da jornada: ver as questões Q1–Q9 na seção 5.7.
-12. Orb flutuante da Luna: ver a seção 6.6 (Q1 e Q6–Q11 resolvidas pelas decisões do Marlon; Q2–Q5 parcialmente; Q12–Q16 abertas).
-13. Voz/IA: ver as questões Q1–Q6 na seção 7.5.
+12. Orb flutuante da Luna: ver a seção 6.6 (Q1 e Q6–Q11 resolvidas pelas decisões do Marlon; Q2–Q5 e Q16 parcialmente; Q12–Q15 e Q17–Q21 abertas).
+13. Voz/IA: ver as questões Q1–Q7 na seção 7.5 (Q1 e Q6 resolvidas).
