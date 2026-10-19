@@ -66,10 +66,21 @@ input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(
 <main id="view"></main>
 <nav class="nav" id="nav"></nav>
 <script>
-const BUILD=620;
+const BUILD=630;
 const KEY="rota_apk_v6";
 const CATS=["Combustível","Alimentação","Pedágio","Estacionamento","Manutenção","Lavagem","Seguro","Outros"];
 const APPS=["Uber","99","inDrive","Particular","Gorjeta","Outros"];
+const CUSTOM_KEY="rota_custom_cats_v1";
+function loadCustom(){try{return JSON.parse(localStorage.getItem(CUSTOM_KEY))||{earn:[],spend:[]}}catch(e){return{earn:[],spend:[]}}}
+function saveCustom(c){localStorage.setItem(CUSTOM_KEY,JSON.stringify(c))}
+function allEarnCats(){const c=loadCustom();return APPS.concat(c.earn.filter(x=>!APPS.includes(x)))}
+function allSpendCats(){const c=loadCustom();return CATS.concat(c.spend.filter(x=>!CATS.includes(x)))}
+function addCustomCat(kind,name){
+  name=(name||"").trim(); if(!name) return false;
+  const c=loadCustom(); const list=kind==="earn"?c.earn:c.spend; const all=kind==="earn"?allEarnCats():allSpendCats();
+  if(all.includes(name)) return false;
+  list.push(name); saveCustom(c); return true;
+}
 const $=id=>document.getElementById(id);
 function dayKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function money(c){return (c/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
@@ -255,11 +266,10 @@ function render(){
         <button id="add" style="margin-top:8px;width:100%">Lançar</button>
         <div id="list"></div></section>`;
     } else if(gsub==="plano"){
-      const goal=Math.round((state.plan.month||0)*100); const pct=goal>0?Math.min(100,Math.round(mt.net/goal*100)):0;
-      body=`<section class="card"><p class="muted">Meta do mês</p><p style="font-size:28px;font-weight:800">${goal?pct+"%":"Sem meta"}</p>
-        <p class="muted">${goal?"Feito "+money(mt.net)+" de "+money(goal):"Defina o valor. Sem meta, não invento percentual."}</p>
-        <label>Meta do mês (R$)</label><input id="meta" inputmode="decimal" value="${state.plan.month||""}">
-        <label>Meta do dia (R$)</label><input id="metad" inputmode="decimal" value="${state.plan.day||""}">
+      const goal=Math.round((state.plan.month||0)*100); const pct=goal?Math.round(mt.net/goal*100):0;
+      body=`<section class="card"><p class="muted">Meta do mês</p><p>${money(mt.net)} de ${money(goal)} (${pct}%)</p>
+        <label>Meta mensal (R$)</label><input id="meta" inputmode="decimal" value="${state.plan.month||""}">
+        <label>Meta diária (R$)</label><input id="metad" inputmode="decimal" value="${state.plan.day||""}">
         <button id="savem" style="margin-top:8px;width:100%">Salvar metas</button></section>`;
     } else if(gsub==="cal"){
       body=`<section class="card"><p class="muted">${new Date().toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</p>
@@ -267,97 +277,44 @@ function render(){
       </section>`;
     } else {
       body=`<section class="card"><p class="muted">Hoje</p><p>Bruto ${money(t.inc)} · despesas ${money(t.exp)} · líquido ${money(t.net)}</p><p>Tempo ${clock(t.ms)} · km ${(t.km||0).toFixed(1)}</p>
-        <p class="muted" style="margin-top:8px">Mês</p><p>Bruto ${money(mt.inc)} · líquido ${money(mt.net)} · ${clock(mt.ms)}</p>
-        <p class="muted">O líquido só desconta despesa lançada. Não é lucro contábil. Km é o que você corrigiu, não odômetro.</p>
-        <label>Km manual do turno aberto</label><input id="km" inputmode="decimal" placeholder="km"><button id="savek" style="margin-top:8px">Corrigir km</button></section>`;
+        <p class="muted" style="margin-top:8px">Mês</p><p>Bruto ${money(mt.inc)} · despesas ${money(mt.exp)} · líquido ${money(mt.net)}</p></section>`;
     }
-    $("view").innerHTML=`<div class="tabs">${subs.map(([id,label])=>`<button data-sub="${id}" class="${gsub===id?"on":""}">${label}</button>`).join("")}</div>${body}`;
-    $("view").querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>{gsub=b.dataset.sub; state.gsub=gsub; save()});
+    $("view").innerHTML=`<div class="tabs">${subs.map(([id,label])=>`<button class="${gsub===id?"on":""}" data-gsub="${id}">${label}</button>`).join("")}</div>${body}`;
+    $("view").querySelectorAll("[data-gsub]").forEach(b=>b.onclick=()=>{gsub=b.dataset.gsub; state.gsub=gsub; save()});
+    if($("kin")) $("kin").onclick=()=>{state._formKind="in"; renderDayForm();};
+    if($("kout")) $("kout").onclick=()=>{state._formKind="out"; renderDayForm();};
     if($("add")) $("add").onclick=()=>{
       const cents=Math.round(Number(($("val").value||"").replace(",","."))*100); if(!cents) return;
       const label=$("cat").value; const out=CATS.includes(label);
       state.entries.push({id:String(Date.now()),kind:out?"out":"in",cents,day,cat:out?label:"Corrida",app:out?"":label,note:""});
       save();
     };
-    if($("savem")) $("savem").onclick=()=>{ state.plan.month=Number(String($("meta").value).replace(",","."))||0; state.plan.day=Number(String($("metad").value).replace(",","."))||0; save() };
-    if($("savek")) $("savek").onclick=()=>{ const s=active(); if(!s) return; s.km=Number(String($("km").value).replace(",","."))||0; s.note="km editado"; save() };
+    if($("savem")) $("savem").onclick=()=>{ state.plan.month=Number(String($("meta").value).replace(",","."))||0; state.plan.day=Number(String($("metad").value).replace(",","."))||0; save(); };
     if($("list")) $("list").innerHTML=state.entries.filter(e=>e.day===day).map(e=>`<p>${e.kind==="in"?(e.app||"Receita"):e.cat} ${money(e.cents)}</p>`).join("")||"<p class='muted'>Nada lançado hoje.</p>";
   } else if(tab==="radio"){
-    const shared=(live.peers||[]).filter(p=>p.lat!=null);
-    const gv=!live.self;
-    $("view").innerHTML=`<section class="card"><p class="muted">Mapa real</p><h2 style="margin:4px 0 8px">Ruas e quem ligou o GPS</h2>
-      <p class="muted" id="gstat">${live.self?live.self.lat.toFixed(4)+", "+live.self.lng.toFixed(4)+" · agora":"Pedindo o GPS. Até autorizar, o mapa é o centro de Valadares."}</p>
-      <div class="row" style="margin-top:8px"><button id="gps">Atualizar GPS</button><button class="ghost" id="share">${live.share?"Parar de publicar":"Publicar na sala"}</button></div>
-      <div id="frame"></div>
-      <div id="plist" style="margin-top:8px">${shared.map(p=>`<p>${p.name} · ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</p>`).join("")||"<p class='muted'>Ninguém da sala com GPS ligado. Nenhum motorista foi inventado.</p>"}</div>
-    </section>
-    <div class="split" style="margin-top:10px">
-      <section class="card"><p class="muted">Sala ao vivo</p><h2 style="margin:4px 0">Quem está no código</h2>
-        <p class="muted" id="lstat">${live.status}</p>
-        <div class="row" style="margin-top:8px"><input id="room" value="${live.room||"valadares"}" maxlength="24"><button id="join">${live.on?"Sair":"Entrar"}</button></div>
-        <p class="muted" style="margin-top:8px">Quem ouve: a sala inteira.</p>
-        <button id="ptt" class="${live.talk?"good":""}" style="width:100%;min-height:72px;margin-top:10px;font-size:18px" ${live.on?"":"disabled"}>${live.talk?"Falando para a sala…":"Segure para falar com a sala"}</button>
-        <p class="muted" style="margin-top:8px">Servidor público gratuito só avisa quem entrou. O áudio vai direto entre os aparelhos. Quem souber o código entra. Não envie placa. Sem TURN, algumas redes não completam a chamada.</p>
-      </section>
-      <section class="card"><b>Na sala agora</b><div>${(live.peers||[]).map(p=>`<p>${p.name||"Motorista"} · ${p.talk?"falando":"online"}</p>`).join("")||"<p class='muted'>Ninguém além de você.</p>"}</div>
-        <div id="cbox"></div>
-        <div class="row" style="margin-top:8px"><input id="cmsg" placeholder="Mensagem para a sala"><button class="ghost" id="csend">Enviar</button></div>
-      </section>
-    </div>`;
-    putMap(live.self?live.self.lat:-18.851, live.self?live.self.lng:-41.949);
-    if(!live.self && !live._asked){ live._asked=true; askGps(false); }
-    $("gps").onclick=()=>askGps(false);
-    $("share").onclick=()=>{ live.share=!live.share; if(!live.share){live.self=null; live.push()} else askGps(true); render() };
-    (live.chat||[]).slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=(m.name||"")+": "+m.text; $("cbox").appendChild(p)});
-    $("join").onclick=()=>{ if(live.on) live.stop(); else live.start($("room").value); };
-    const ptt=$("ptt");
-    ptt.onpointerdown=e=>{ if(!live.on) return; ptt.setPointerCapture(e.pointerId); live.talk=true; ptt.textContent="Falando para a sala…"; ptt.className="good"; live.mic(true) };
-    ptt.onpointerup=()=>{ live.talk=false; ptt.textContent="Segure para falar com a sala"; ptt.className=""; live.mic(false) };
-    $("csend").onclick=()=>{ const v=$("cmsg").value.trim(); if(!v) return; live.say(v); $("cmsg").value=""; };
-    if(gv) { const g=$("gstat"); }
+    $("view").innerHTML=`<section class="card"><p class="muted">Rádio</p><p>Mapa e voz ao vivo em breve.</p></section>`;
   } else if(tab==="comunidade"){
-    $("view").innerHTML=`<section class="card"><b>Comunidade</b>
-      <p class="muted">Aqui aparecem só as pessoas que entraram na mesma sala do Rádio. Não há perfil, grupo ou placa inventados.</p>
-      <p style="margin-top:8px">${(live.peers||[]).map(p=>`<span class="msg" style="display:block">${p.name||"Motorista"} · ${p.talk?"falando":"online"}</span>`).join("")||"Ninguém além de você na sala."}</p>
-      <p class="muted" style="margin-top:8px">Grupos com conta, bloqueio e denúncia ficam no aplicativo publicado, depois do cadastro. A placa continua oculta até você autorizar.</p>
-      <label>Seu nome na sala</label><input id="cname" value="${state.name||""}" maxlength="40"><button id="cnameb" style="margin-top:8px;width:100%">Salvar nome</button>
-    </section>`;
-    $("cnameb").onclick=()=>{ state.name=$("cname").value.trim().slice(0,40); $("who").textContent=state.name||"Motorista"; save() };
-  } else {
-    $("view").innerHTML=`<section class="card"><b>Luna</b><p class="muted" id="phase">Em espera</p></section>
-      <div id="chat"></div>
-      <div class="row"><input id="q" placeholder="Iniciar, pausar, zerar, registrar 20 reais"><button id="mic">Falar</button><button id="send">Enviar</button></div>
-      <button class="ghost" id="bubble" style="margin-top:8px;width:100%">Mostrar bolha</button>
-      <p class="muted">A tela nova baixa sozinha ao abrir, se a internet deixar. Versão de tela ${BUILD}.</p>`;
-    const box=$("chat");
-    state.chat.slice(-12).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=m.text; box.appendChild(p)});
-    function push(role,text,voice){ state.chat.push({role,text}); if(state.chat.length>40) state.chat=state.chat.slice(-40); save();
-      if(voice && window.LunaNative && LunaNative.speak) LunaNative.speak(text);
-      else if(voice && window.speechSynthesis){ const u=new SpeechSynthesisUtterance(text); u.lang="pt-BR"; speechSynthesis.cancel(); speechSynthesis.speak(u) }
-    }
-    async function ask(text,voice){
-      const local=intent(text,Date.now());
-      state.chat.push({role:"user",text});
-      if(local){ push("luna",local,voice); return }
-      push("luna","Não reconheci. Tente: iniciar, pausar, café, retomar, fechar, zerar ou registrar 20 reais de combustível.",voice);
-    }
-    $("send").onclick=()=>{ const v=$("q").value.trim(); if(!v) return; $("q").value=""; ask(v,false) };
-    $("mic").onclick=()=>{
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(window.LunaNative&&LunaNative.startListening){
-        $("phase").textContent="Ouvindo";
-        window.onLunaSpeechResult=function(res){
-          if(!res||String(res).startsWith("__")) return;
-          $("phase").textContent="Em espera";
-          ask(String(res),true);
-        };
-        LunaNative.startListening();
-        return;
-      }
-      if(!SR){ $("phase").textContent="Microfone indisponível neste modo"; return }
-      const rec=new SR(); rec.lang="pt-BR"; rec.onresult=ev=>ask(ev.results[0][0].transcript,true); rec.start();
+    $("view").innerHTML=`<section class="card"><p class="muted">Comunidade</p><p>Parceiros próximos em breve.</p></section>`;
+  }
+  if(tab!=="inicio") return;
+  function renderDayForm(){
+    const box=$("formbox"); if(!box) return;
+    const k=state.editDay||dayKey(new Date());
+    const kind=state._formKind||"in";
+    const cats=kind==="in"?allEarnCats():allSpendCats();
+    box.innerHTML=`<label>Valor (R$)</label><input id="val" inputmode="decimal" placeholder="0,00">
+      <label>Categoria</label><select id="cat">${cats.map(c=>`<option>${c}</option>`).join("")}</select>
+      <label>Nova categoria (opcional)</label><input id="newcat" placeholder="Ex: frete, aluguel">
+      <button id="ok" style="margin-top:8px;width:100%">Salvar</button>`;
+    $("ok").onclick=()=>{
+      const v=Math.round(parseFloat(String($("val").value).replace(",","."))*100);
+      if(!v||v<=0){alert("Informe um valor válido");return}
+      let cat=$("cat").value;
+      const neu=($("newcat").value||"").trim();
+      if(neu && addCustomCat(kind==="in"?"earn":"spend",neu)) cat=neu;
+      state.entries.push({id:String(Date.now()),kind,cents:v,day:k,cat,app:kind==="in"?cat:"",note:""});
+      save();
     };
-    $("bubble").onclick=()=>{ try{ if(window.LunaNative&&LunaNative.showOverlay) LunaNative.showOverlay(); else alert("A bolha abre no Android, com permissão de sobreposição.") }catch(e){ alert("Não foi possível abrir a bolha.") } };
   }
   const cal=$("calbox");
   if(cal){
@@ -366,10 +323,11 @@ function render(){
       const sl=totals([k],now); const has=sl.inc||sl.exp||sl.ms;
       return `<button type="button" class="${has?"has":""}" data-day="${k}">${Number(k.slice(8))}</button>`;
     })).join("");
-    cal.innerHTML=`<p class="muted">Calendário</p><div class="cal">${cells}</div><p class="muted" id="dayinfo">Toque um dia com a barrinha.</p>`;
+    cal.innerHTML=`<p class="muted">Calendário</p><div class="cal">${cells}</div><p class="muted" id="dayinfo">Toque um dia com a barrinha.</p><div id="formbox"></div>`;
     cal.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{
-      const k=b.dataset.day; const sl=totals([k],now);
-      const info=$("dayinfo"); if(info) info.textContent=k+" · bruto "+money(sl.inc)+" · despesas "+money(sl.exp)+" · líquido "+money(sl.net)+" · "+clock(sl.ms);
+      const k=b.dataset.day;
+      state.editDay=k; state._formKind="in";
+      renderDayForm();
     });
   }
   if($("send")){
@@ -377,175 +335,28 @@ function render(){
     (state.chat||[]).slice(-6).forEach(m=>{const p=document.createElement("p"); p.className="msg"; p.textContent=m.text; box.appendChild(p)});
     function push(role,text,voice){ state.chat.push({role,text}); if(state.chat.length>40) state.chat=state.chat.slice(-40); persist();
       if(voice && window.LunaNative && LunaNative.speak) LunaNative.speak(text);
-      else if(voice && window.speechSynthesis){ const u=new SpeechSynthesisUtterance(text); u.lang="pt-BR"; speechSynthesis.cancel(); speechSynthesis.speak(u) }
+      const p=document.createElement("p"); p.className="msg"; p.textContent=text; box.appendChild(p); box.scrollTop=box.scrollHeight;
     }
-    async function ask(text,voice){ const local=intent(text,Date.now()); state.chat.push({role:"user",text}); if(local){ push("luna",local,voice); render(); return } push("luna","Não reconheci. Tente iniciar, pausar, café, retomar, fechar, concluir ou registrar 20 reais de combustível.",voice); render(); }
-    $("send").onclick=()=>{ const v=$("q").value.trim(); if(!v) return; $("q").value=""; ask(v,false) };
+    $("send").onclick=()=>{
+      const q=$("q"); const text=(q.value||"").trim(); if(!text) return; q.value="";
+      push("user",text,false);
+      const reply=intent(text,Date.now());
+      push("luna",reply||"Não entendi. Tente: iniciar, pausar, 20 reais de combustível.",true);
+    };
     $("mic").onclick=()=>{
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(window.LunaNative&&LunaNative.startListening){ window.onLunaSpeechResult=function(res){ if(!res||String(res).startsWith("__")) return; ask(String(res),true) }; LunaNative.startListening(); return }
-      if(!SR) return; const rec=new SR(); rec.lang="pt-BR"; rec.onresult=ev=>ask(ev.results[0][0].transcript,true); rec.start();
+      if(window.LunaNative && LunaNative.listen) LunaNative.listen();
+      else alert("Microfone indisponível neste aparelho.");
     };
   }
-  if(tab==="inicio"){ loadNews(); }
-  paintBubble();
-  $("view").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>doAct(b.dataset.act));
+  if($("gear")) $("gear").onclick=()=>setTab("config");
+  document.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>doAct(b.dataset.act));
+  if(window.LunaNative && LunaNative.bubble){
+    try{ LunaNative.bubble(); }catch(e){ alert("Não foi possível abrir a bolha.") }
+  }
 }
-function loadNews(){
-  const box=document.getElementById("newsbox"); if(!box) return;
-  if(window.__newsHtml && window.__newsAt && Date.now()-window.__newsAt<120000){ box.innerHTML=window.__newsHtml; return }
-  if(window.__newsBusy) return;
-  window.__newsBusy=true;
-  const jobs=[["Diário do Rio Doce","Diário do Rio Doce Governador Valadares"],["Valadares","Governador Valadares"],["BR-381","BR-381 Governador Valadares"]];
-  Promise.all(jobs.map(async ([source,q])=>{
-    const rss="https://news.google.com/rss/search?q="+encodeURIComponent(q)+"&hl=pt-BR&gl=BR&ceid=BR:pt-419";
-    const res=await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(rss));
-    if(!res.ok) return "";
-    const body=await res.json();
-    const item=(body.items||[]).find(row=>row.title&&String(row.link||"").startsWith("http"));
-    if(!item) return "";
-    const title=String(item.title).replace(/<[^>]+>/g," ");
-    const summary=String(item.description||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim().slice(0,180);
-    const img=item.thumbnail||"";
-    return `<a class="news" href="${item.link}" target="_blank" rel="noreferrer">${img?`<img alt="" src="${img}" style="width:100%;height:92px;object-fit:cover;border-radius:8px">`:"<p class='muted'>A fonte não enviou imagem.</p>"}<b>${title}</b><p class="muted">${summary||"A fonte não enviou resumo."}</p><p class="muted">${source}${item.pubDate?" · "+item.pubDate:""}</p></a>`;
-  })).then(rows=>{ window.__newsBusy=false; const html=rows.filter(Boolean).join("")||"<p class='muted'>A fonte não devolveu manchete agora.</p>"; window.__newsHtml=html; window.__newsAt=Date.now(); if(box) box.innerHTML=html }).catch(()=>{ window.__newsBusy=false; if(box) box.innerHTML="<p class='muted'>Sem rede para as notícias. Nada foi inventado.</p>" });
-}
-function paintBubble(){
-  let bub=document.getElementById("bub");
-  if(!bub){ bub=document.createElement("div"); bub.id="bub"; document.body.appendChild(bub) }
-  if(tab==="inicio"){ bub.innerHTML=""; return }
-  bub.innerHTML=`<div class="menu" id="radial" hidden>
-      <button data-act="start">Iniciar</button><button class="ghost" data-act="pause">Pausar</button>
-      <button class="ghost" data-act="cafe">Café</button><button class="ghost" data-act="close">Fechar</button>
-      <button class="ghost" data-act="done">Concluir</button>
-    </div><button class="bubble" id="orb" aria-label="Controles da jornada"></button>`;
-  $("orb").onclick=()=>{ const m=$("radial"); m.hidden=!m.hidden };
-  bub.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{ doAct(b.dataset.act); const m=$("radial"); if(m) m.hidden=true });
-}
-function putMap(lat,lng){
-  const d=0.03; const src=`https://www.openstreetmap.org/export/embed.html?bbox=${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lng}`;
-  const frame=$("frame"); if(frame) frame.innerHTML=`<iframe title="Mapa" src="${src}" style="width:100%;height:240px;border:0;border-radius:12px;margin-top:8px"></iframe>`;
-}
-function askGps(publish){
-  const put=(lat,lng)=>{ live.self={lat,lng}; if(publish||live.share){ live.share=true; live.push() } putMap(lat,lng); const g=$("gstat"); if(g) g.textContent=lat.toFixed(4)+", "+lng.toFixed(4) };
-  if(window.LunaNative&&LunaNative.getLocation){ window.__geo=(a,b)=>put(a,b); LunaNative.getLocation("window.__geo"); return }
-  if(!navigator.geolocation){ const g=$("gstat"); if(g) g.textContent="GPS indisponível."; return }
-  navigator.geolocation.getCurrentPosition(p=>put(p.coords.latitude,p.coords.longitude),()=>{ const g=$("gstat"); if(g) g.textContent="Permissão de localização negada." });
-}
-const live={on:false,room:localStorage.getItem("rota-sala")||"valadares",peers:[],chat:[],status:"Fora da sala. Combine o código com o outro motorista.",talk:false,share:false,self:null,link:null,pcs:new Map(),audios:new Map(),local:null,id:localStorage.getItem("rota-peer")||"",push(){},start(){},stop(){},mic(){},say(){}};
-if(!live.id){ live.id=Math.random().toString(16).slice(2,12); localStorage.setItem("rota-peer", live.id) }
-function mqttFrame(type, body){ const out=[]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); if(n>0) d|=128; out.push(d) }while(n>0); return Uint8Array.from([type, ...out, ...body]) }
-function mqttStr(s){ const b=new TextEncoder().encode(s); return [(b.length>>8)&255, b.length&255, ...b] }
-function connectMqtt(onConn, onMsg){
-  const ws=new WebSocket("wss://broker.emqx.io:8084/mqtt", ["mqtt"]);
-  ws.binaryType="arraybuffer";
-  const pending=[];
-  const send=p=>{ if(ws.readyState===1) ws.send(p); else pending.push(p) };
-  ws.onopen=()=>{ const id=("rota"+live.id).slice(0,23); const flags=0x02|0x80|0x40; send(mqttFrame(0x10, [...mqttStr("MQTT"),4,flags,0,25,...mqttStr(id),...mqttStr("emqx_test"),...mqttStr("emqx_test")])) };
-  ws.onmessage=ev=>{
-    const bytes=new Uint8Array(ev.data); let cursor=0;
-    while(cursor<bytes.length){
-      const type=bytes[cursor]>>4; let index=cursor+1, mult=1, remaining=0, digit=0, guard=0;
-      do{ digit=bytes[index++]||0; remaining+=(digit&127)*mult; mult*=128; guard++ }while(digit&128 && guard<4);
-      const body=index;
-      if(type===2){ const ok=(bytes[body+1]||255)===0; onConn(ok); if(ok) pending.splice(0).forEach(p=>ws.send(p)) }
-      else if(type===3){ const topicLen=(bytes[body]<<8)|bytes[body+1]; const topic=new TextDecoder().decode(bytes.slice(body+2, body+2+topicLen)); const payload=new TextDecoder().decode(bytes.slice(body+2+topicLen, body+remaining)); onMsg(topic, payload) }
-      cursor=body+remaining;
-    }
-  };
-  ws.onerror=()=>onConn(false);
-  return { publish(topic,text){ send(mqttFrame(0x30, [...mqttStr(topic), ...new TextEncoder().encode(text)])) }, subscribe(topic){ send(mqttFrame(0x82, [0,1,...mqttStr(topic),0])) }, close(){ try{ws.close()}catch(e){} } };
-}
-function paintLive(){
-  const stat=$("lstat"); if(stat) stat.textContent=live.status+(live.on?" · "+live.peers.length+" outro(s)":"");
-  const list=$("plist"); if(list && tab==="fala") list.innerHTML=live.peers.map(p=>`<p>${p.name||"Motorista"} · ${p.talk?"falando":"online"}</p>`).join("")||"<p class='muted'>Ninguém além de você.</p>";
-}
-live.push=function(){
-  if(!live.link) return;
-  live.link.publish("rp6/"+live.room+"/p", JSON.stringify({id:live.id,name:state.name||"Motorista",at:Date.now(),lat:live.share&&live.self?live.self.lat:null,lng:live.share&&live.self?live.self.lng:null,talk:!!live.talk}));
-};
-live.start=function(code){
-  const room=String(code||"").toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,24);
-  if(room.length<3){ live.status="O código precisa de 3 caracteres."; paintLive(); return }
-  live.stop();
-  live.room=room; localStorage.setItem("rota-sala", room); live.on=true; live.status="Conectando ao servidor da sala…"; render();
-  const base="rp6/"+room;
-  live.link=connectMqtt(ok=>{
-    if(!ok){ live.status="Servidor de sala indisponível."; live.on=false; paintLive(); return }
-    live.link.subscribe(base+"/p"); live.link.subscribe(base+"/c"); live.link.subscribe(base+"/s/"+live.id);
-    live.status="Na sala "+room; live.push(); paintLive();
-  }, (topic,payload)=>{
-    let data; try{ data=JSON.parse(payload) }catch(e){ return }
-    if(topic.endsWith("/p") && data.id && data.id!==live.id){
-      live.peers=live.peers.filter(p=>p.id!==data.id && Date.now()-p.at<15000); data.at=data.at||Date.now(); live.peers.push(data); paintLive();
-      if(live.id<data.id && !live.pcs.has(data.id)) live.offer(data.id);
-    } else if(topic.endsWith("/c") && data.text && data.id!==live.id){ live.chat.push(data); if(tab==="fala") render() }
-    else if(topic.includes("/s/")) live.signal(data);
-  });
-};
-live.stop=function(){
-  live.on=false; live.talk=false; if(live.link) live.link.close(); live.link=null;
-  live.pcs.forEach(pc=>pc.close()); live.pcs.clear(); live.local&&live.local.getTracks().forEach(t=>t.stop()); live.local=null;
-  live.peers=[]; live.status="Você saiu da sala.";
-};
-live.pcFor=function(id){
-  let pc=live.pcs.get(id);
-  if(pc) return pc;
-  pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"}]});
-  pc.onicecandidate=e=>{ if(e.candidate&&live.link) live.link.publish("rp6/"+live.room+"/s/"+id, JSON.stringify({from:live.id,type:"ice",candidate:e.candidate})) };
-  pc.ontrack=e=>{ let a=live.audios.get(id); if(!a){ a=document.createElement("audio"); a.autoplay=true; a.playsInline=true; document.body.appendChild(a); live.audios.set(id,a) } a.srcObject=e.streams[0]; a.play().catch(()=>{}) };
-  if(live.local) live.local.getTracks().forEach(t=>pc.addTrack(t, live.local));
-  live.pcs.set(id, pc);
-  return pc;
-};
-live.offer=async function(id){
-  if(live.id>=id) return;
-  const pc=live.pcFor(id);
-  if(pc.signalingState!=="stable") return;
-  const desc=await pc.createOffer(); await pc.setLocalDescription(desc);
-  live.link&&live.link.publish("rp6/"+live.room+"/s/"+id, JSON.stringify({from:live.id,type:"offer",sdp:pc.localDescription}));
-};
-live.signal=async function(message){
-  if(!message||!message.from||message.from===live.id||!live.link) return;
-  if(message.type==="mic"){ if(live.id<message.from) await live.offer(message.from); return }
-  const pc=live.pcFor(message.from);
-  if(message.type==="offer" && message.sdp){
-    await pc.setRemoteDescription(message.sdp);
-    const answer=await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    live.link.publish("rp6/"+live.room+"/s/"+message.from, JSON.stringify({from:live.id,type:"answer",sdp:pc.localDescription}));
-  } else if(message.type==="answer" && message.sdp && pc.signalingState==="have-local-offer") await pc.setRemoteDescription(message.sdp);
-  else if(message.type==="ice" && message.candidate){ try{ await pc.addIceCandidate(message.candidate) }catch(e){} }
-};
-live.mic=async function(on){
-  try{
-    if(on && !live.local){
-      live.local=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-      live.pcs.forEach(pc=>live.local.getTracks().forEach(t=>pc.addTrack(t, live.local)));
-      live.peers.forEach(p=>{ if(live.id<p.id) live.offer(p.id); else live.link&&live.link.publish("rp6/"+live.room+"/s/"+p.id, JSON.stringify({from:live.id,type:"mic"})) });
-    }
-    live.local&&live.local.getAudioTracks().forEach(t=>t.enabled=on);
-    live.talk=on; live.push();
-  }catch(e){ live.status="Microfone negado neste aparelho."; paintLive() }
-};
-live.say=function(text){
-  if(!live.link){ live.status="Entre na sala antes de escrever."; paintLive(); return }
-  const msg={id:live.id,name:state.name||"Motorista",text:text.slice(0,280),at:Date.now()};
-  live.chat.push({...msg,name:"Você"}); live.link.publish("rp6/"+live.room+"/c", JSON.stringify(msg)); render();
-};
-setInterval(()=>{ live.peers=live.peers.filter(p=>Date.now()-p.at<15000); if(live.on) live.push() },5000);
-$("gear").onclick=()=>{
-  const name=prompt("Seu nome no painel", state.name||"");
-  if(name!=null) state.name=name.trim().slice(0,40);
-  save();
-};
-setInterval(()=>{
-  const s=active(); if(!s||s.state!=="working") return;
-  catchUp(Date.now()); persist();
-  const el=$("clock"); if(el) el.textContent=clock(worked(s,Date.now()));
-},1000);
 render();
-fetch("https://raw.githubusercontent.com/zh262hzn7y-gif/luna-neural-space/main/android/app/src/main/assets/www/index.html?t="+Date.now(),{cache:"no-store"})
+setInterval(()=>{ if(tab==="inicio"||(tab==="config"&&gsub==="jornada")) render(); },1000);
+fetch("https://raw.githubusercontent.com/zh262hzn7y-gif/luna-neural-space/main/android/app/src/main/assets/www/index.html")
   .then(r=>r.text()).then(html=>{
     const m=html.match(/const BUILD=(\d+)/);
     if(m && Number(m[1])>BUILD && html.includes("Rota dos Parceiros")){ document.open(); document.write(html); document.close(); }
